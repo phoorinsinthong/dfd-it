@@ -1,0 +1,316 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/auth-context';
+import Navbar from '@/components/layout/Navbar';
+import Link from 'next/link';
+import { 
+  Wrench, 
+  ArrowLeft, 
+  Camera, 
+  MapPin, 
+  Send, 
+  AlertCircle, 
+  Building2, 
+  FolderTree, 
+  Check, 
+  Trash2,
+  FileCheck
+} from 'lucide-react';
+import { Department, Category } from '@/types/database';
+import { getDepartments, getCategories } from '@/lib/services/master-data-service';
+import { createTicket } from '@/lib/services/ticket-service';
+import { compressImageFile } from '@/lib/utils/image-compression';
+
+export default function NewTicketPage() {
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const [selectedDeptId, setSelectedDeptId] = useState('');
+  const [selectedCatId, setSelectedCatId] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [compressedSize, setCompressedSize] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/');
+    }
+  }, [user, isLoading, router]);
+
+  useEffect(() => {
+    async function loadMasterData() {
+      const depts = await getDepartments();
+      const cats = await getCategories();
+      setDepartments(depts);
+      setCategories(cats);
+      if (depts.length > 0) setSelectedDeptId(depts[0].id);
+      if (cats.length > 0) setSelectedCatId(cats[0].id);
+    }
+    loadMasterData();
+  }, []);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsCompressing(true);
+    setError(null);
+    try {
+      const originalSizeKb = Math.round(file.size / 1024);
+      const compressedDataUrl = await compressImageFile(file);
+      
+      // Calculate compressed base64 byte length
+      const compressedBytes = Math.round((compressedDataUrl.length * 3) / 4);
+      const compressedKb = Math.round(compressedBytes / 1024);
+
+      setPreviewImage(compressedDataUrl);
+      setCompressedSize(`${compressedKb} KB (ลดจาก ${originalSizeKb} KB)`);
+    } catch {
+      setError('ไม่สามารถประมวลผลไฟล์รูปภาพได้ กรุณาลองรูปอื่น');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  const removeImage = () => {
+    setPreviewImage(null);
+    setCompressedSize(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    if (!description.trim() || !location.trim()) {
+      setError('กรุณากรอกรายละเอียดอาการและสถานที่/โต๊ะที่เกิดปัญหา');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const selectedDept = departments.find((d) => d.id === selectedDeptId);
+      const selectedCat = categories.find((c) => c.id === selectedCatId);
+
+      const res = await createTicket({
+        userId: user.id,
+        userName: user.name,
+        userEmployeeId: user.employee_id,
+        departmentId: selectedDeptId,
+        departmentName: selectedDept?.name,
+        categoryId: selectedCatId,
+        categoryName: selectedCat?.name,
+        title: title.trim() || description.trim().slice(0, 30),
+        description: description.trim(),
+        location: location.trim(),
+        imageUrl: previewImage || undefined,
+      });
+
+      if (res.success) {
+        router.push('/portal?submitted=true');
+      } else {
+        setError(res.error || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      }
+    } catch {
+      setError('เกิดข้อผิดพลาดในการส่งคำขอแจ้งซ่อม');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <Navbar />
+
+      <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-8">
+        
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <Link
+            href="/portal"
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              สร้างใบแจ้งซ่อมใหม่ (New Repair Ticket)
+            </h1>
+            <p className="text-xs text-slate-400">
+              กรอกข้อมูลอาการเสียและแนบรูปถ่ายเพื่อให้เจ้าหน้าที่ไอทีเข้าดำเนินการแก้ไข
+            </p>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs sm:text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Repair Form */}
+        <form onSubmit={handleSubmit} className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
+          
+          {/* Department & Category Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-blue-400" />
+                <span>แผนกของคุณ <span className="text-red-400">*</span></span>
+              </label>
+              <select
+                value={selectedDeptId}
+                onChange={(e) => setSelectedDeptId(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <FolderTree className="w-3.5 h-3.5 text-blue-400" />
+                <span>ประเภทปัญหา <span className="text-red-400">*</span></span>
+              </label>
+              <select
+                value={selectedCatId}
+                onChange={(e) => setSelectedCatId(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-amber-400" />
+              <span>สถานที่เกิดปัญหา / โต๊ะทำงาน <span className="text-red-400">*</span></span>
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="เช่น อาคาร 2 ชั้น 3 โต๊ะ HR-05 ข้างเครื่องถ่ายเอกสาร"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Issue Title */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              หัวข้อปัญหา (ย่อสั้นๆ)
+            </label>
+            <input
+              type="text"
+              placeholder="เช่น จอคอมไม่ติด, ต่อเน็ต Wi-Fi ไม่ได้, ปริ้นเตอร์หมึกหมด"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              รายละเอียดอาการเสีย <span className="text-red-400">*</span>
+            </label>
+            <textarea
+              required
+              rows={4}
+              placeholder="อธิบายอาการเสียที่พบ เช่น ไฟไม่เข้า, มีข้อความ Error อะไรแสดงบนหน้าจอ..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Photo Attachment & Client Compression */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
+              <Camera className="w-3.5 h-3.5 text-emerald-400" />
+              <span>แนบรูปถ่ายประกอบ (ถ่ายจากมือถือหรือเลือกไฟล์)</span>
+            </label>
+
+            {!previewImage ? (
+              <label className="border-2 border-dashed border-slate-800 hover:border-blue-500/50 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-950/40 transition group">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <Camera className="w-8 h-8 text-slate-500 group-hover:text-blue-400 mb-2 transition" />
+                <span className="text-xs text-slate-300 font-medium">กดเพื่อถ่ายรูป หรือ เลือกรูปถ่ายจากเครื่อง</span>
+                <span className="text-[11px] text-slate-500 mt-0.5">ระบบจะบีบอัดรูปภาพเป็น WebP อัตโนมัติเพื่อประหยัดเน็ตมือถือ</span>
+              </label>
+            ) : (
+              <div className="relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="w-full max-h-60 object-contain rounded-xl"
+                />
+                <div className="flex items-center justify-between mt-2 px-2 text-xs">
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <FileCheck className="w-3.5 h-3.5" />
+                    <span>บีบอัดแล้ว: {compressedSize}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="text-red-400 hover:text-red-300 flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>ลบรูป</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {isCompressing && (
+              <p className="text-xs text-blue-400 mt-2 flex items-center gap-1.5 animate-pulse">
+                <span>กำลังบีบอัดรูปภาพให้เหมาะสมกับอุปกรณ์พกพา...</span>
+              </p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={isSubmitting || isCompressing}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium text-sm rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              <span>{isSubmitting ? 'กำลังส่งข้อมูลแจ้งซ่อม...' : 'ส่งใบแจ้งซ่อมเข้าฝ่ายไอที'}</span>
+            </button>
+          </div>
+
+        </form>
+
+      </main>
+    </div>
+  );
+}

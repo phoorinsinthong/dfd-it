@@ -1,21 +1,102 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
 import Navbar from '@/components/layout/Navbar';
-import { Wrench, Calendar, Clock, PlusCircle, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { 
+  Wrench, 
+  Calendar, 
+  Clock, 
+  PlusCircle, 
+  ArrowUpRight, 
+  CheckCircle2, 
+  AlertCircle, 
+  MapPin, 
+  XCircle,
+  Tag,
+  Check
+} from 'lucide-react';
 import Link from 'next/link';
+import { Ticket } from '@/types/database';
+import { getUserTickets, cancelTicket } from '@/lib/services/ticket-service';
 
 export default function UserPortalPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const loadTickets = useCallback(async () => {
+    if (user?.id) {
+      const list = await getUserTickets(user.id);
+      setTickets(list);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/');
+    } else if (user) {
+      loadTickets();
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, loadTickets]);
+
+  const handleCancelTicket = async (ticketId: string) => {
+    if (!user) return;
+    const confirmCancel = window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบแจ้งซ่อมนี้?');
+    if (!confirmCancel) return;
+
+    setCancellingId(ticketId);
+    try {
+      const res = await cancelTicket(ticketId, user.id);
+      if (res.success) {
+        setActionMessage('ยกเลิกใบแจ้งซ่อมเรียบร้อยแล้ว');
+        loadTickets();
+      } else {
+        alert(res.error || 'ไม่สามารถยกเลิกงานได้');
+      }
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            รอรับเรื่อง (Pending)
+          </span>
+        );
+      case 'in_progress':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+            กำลังดำเนินการ (In Progress)
+          </span>
+        );
+      case 'resolved':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Check className="w-3 h-3 text-emerald-400" />
+            เสร็จสิ้น (Resolved)
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">
+            <XCircle className="w-3 h-3" />
+            ยกเลิกแล้ว (Cancelled)
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
 
   if (isLoading || !user) {
     return (
@@ -45,6 +126,16 @@ export default function UserPortalPage() {
             </p>
           </div>
         </div>
+
+        {actionMessage && (
+          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-sm flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{actionMessage}</span>
+            </span>
+            <button onClick={() => setActionMessage(null)} className="text-slate-400 hover:text-white">✕</button>
+          </div>
+        )}
 
         {/* Quick Action Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
@@ -97,20 +188,102 @@ export default function UserPortalPage() {
 
         </div>
 
-        {/* Active Tickets List Section */}
+        {/* User Active Tickets List */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white text-base flex items-center gap-2">
               <Clock className="w-4 h-4 text-blue-400" />
-              <span>รายการแจ้งซ่อมล่าสุดของคุณ</span>
+              <span>รายการแจ้งซ่อมของคุณ ({tickets.length})</span>
             </h3>
+            
+            <Link
+              href="/portal/tickets/new"
+              className="text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>แจ้งเรื่องเพิ่ม</span>
+            </Link>
           </div>
 
-          <div className="text-center py-10 px-4 border border-dashed border-slate-800 rounded-xl bg-slate-950/40">
-            <CheckCircle2 className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-            <p className="text-slate-400 text-sm font-medium">ยังไม่มีรายการแจ้งซ่อมที่รอดำเนินการ</p>
-            <p className="text-slate-500 text-xs mt-1">หากพบปัญหาการใช้งานอุปกรณ์ กดปุ่ม &quot;สร้างใบแจ้งซ่อมใหม่&quot; ด้านบนได้ทันที</p>
-          </div>
+          {tickets.length === 0 ? (
+            <div className="text-center py-10 px-4 border border-dashed border-slate-800 rounded-xl bg-slate-950/40">
+              <CheckCircle2 className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+              <p className="text-slate-400 text-sm font-medium">ยังไม่มีรายการแจ้งซ่อมที่รอดำเนินการ</p>
+              <p className="text-slate-500 text-xs mt-1">หากพบปัญหาการใช้งานอุปกรณ์ กดปุ่ม &quot;สร้างใบแจ้งซ่อมใหม่&quot; ด้านบนได้ทันที</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tickets.map((t) => (
+                <div
+                  key={t.id}
+                  className="bg-slate-950/70 border border-slate-800 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition hover:border-slate-700"
+                >
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-slate-400">{t.id}</span>
+                      {getStatusBadge(t.status)}
+                      {t.category_name && (
+                        <span className="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded flex items-center gap-1">
+                          <Tag className="w-3 h-3" />
+                          <span>{t.category_name}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <h4 className="text-sm sm:text-base font-semibold text-white">
+                      {t.title}
+                    </h4>
+
+                    <p className="text-xs text-slate-400 line-clamp-2">
+                      {t.description}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{t.location}</span>
+                      </span>
+                      <span>•</span>
+                      <span>แจ้งเมื่อ: {new Date(t.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}</span>
+                      {t.assigned_to_name && (
+                        <>
+                          <span>•</span>
+                          <span className="text-blue-400">ช่างผู้ดูแล: {t.assigned_to_name}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {t.solution_note && (
+                      <div className="mt-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+                        <strong>บันทึกการแก้ไข:</strong> {t.solution_note}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions & Thumbnail */}
+                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                    {t.image_url && (
+                      <div className="w-14 h-14 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={t.image_url} alt="Attachment" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+
+                    {t.status === 'pending' && (
+                      <button
+                        type="button"
+                        disabled={cancellingId === t.id}
+                        onClick={() => handleCancelTicket(t.id)}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-500/10 hover:bg-red-500/20 transition disabled:opacity-50"
+                      >
+                        {cancellingId === t.id ? 'กำลังยกเลิก...' : 'ยกเลิกคำขอ'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </main>

@@ -30,3 +30,26 @@ export interface AuthSession {
   token: string;
   expires_at?: number;
 }
+
+export type TicketStatus = 'pending' | 'in_progress' | 'resolved' | 'cancelled';
+
+export interface Ticket {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  user_employee_id?: string;
+  department_id?: string;
+  department_name?: string;
+  category_id?: string;
+  category_name?: string;
+  title: string;
+  description: string;
+  location: string;
+  image_url?: string;
+  status: TicketStatus;
+  assigned_to?: string;
+  assigned_to_name?: string;
+  solution_note?: string;
+  created_at: string;
+  resolved_at?: string;
+}

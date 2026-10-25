@@ -5,12 +5,12 @@ A mobile-friendly repair request form where General Users can select their depar
 
 **Blocked by:** 01: Project Foundation & Dual Authentication Seam, 02: Master Data Management (Departments & Categories)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Database schema for `tickets` (`id`, `user_id`, `category_id`, `description`, `location`, `image_url`, `status`, `assigned_to`, `solution_note`, `created_at`, `resolved_at`) with initial status default `pending`
-- [ ] Supabase Storage bucket `ticket-attachments` configured with proper RLS upload permissions
-- [ ] Client-side image compression utility converting mobile camera captures to WebP format under 800KB before upload
-- [ ] User repair request form with Department, Category, Description, Location, and Image attachment fields
-- [ ] General User dashboard view displaying user's active tickets with status badges (`Pending`, `In Progress`, `Resolved`, `Cancelled`)
-- [ ] Cancel action available on user dashboard strictly when status is `Pending`
-- [ ] Integration test asserting valid ticket submission with image attachment and verifying user cancellation transitions status to `Cancelled`
+- [x] Database schema for `tickets` (`id`, `user_id`, `category_id`, `description`, `location`, `image_url`, `status`, `assigned_to`, `solution_note`, `created_at`, `resolved_at`) with initial status default `pending`
+- [x] Supabase Storage bucket `ticket-attachments` configured with proper RLS upload permissions
+- [x] Client-side image compression utility converting mobile camera captures to WebP format under 800KB before upload
+- [x] User repair request form with Department, Category, Description, Location, and Image attachment fields
+- [x] General User dashboard view displaying user's active tickets with status badges (`Pending`, `In Progress`, `Resolved`, `Cancelled`)
+- [x] Cancel action available on user dashboard strictly when status is `Pending`
+- [x] Integration test asserting valid ticket submission with image attachment and verifying user cancellation transitions status to `Cancelled`
