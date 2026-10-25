@@ -5,12 +5,12 @@ A comprehensive IT Staff Helpdesk Inbox and lifecycle management system paired w
 
 **Blocked by:** 03: Helpdesk Ticket Submission & Client-Side Image Compression
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] LINE Messaging API webhook/push service sending Flex Message cards (with title, department, urgency, and direct PWA action deep link) to the IT team LINE group on new ticket creation
-- [ ] Notification fallback handler (logging/alerting or Telegram/Email fallback) if LINE monthly push quota is reached
-- [ ] IT Staff Helpdesk Inbox view displaying all tickets with search and filter controls (by status, department, and date)
-- [ ] Ticket acceptance workflow: IT Staff clicks "Accept" to update status to `In Progress` and assign `assigned_to`
-- [ ] Enforced business rule: General User is blocked from cancelling a ticket once status is `In Progress` (HTTP 403 / state guard)
-- [ ] Resolution modal: IT Staff enters solution note and root cause, transitioning status to `Resolved` with `resolved_at` timestamp
-- [ ] Integration test verifying state transitions `Pending` -> `In Progress` -> `Resolved` and asserting user cancellation is rejected once `In Progress`
+- [x] LINE Messaging API webhook/push service sending Flex Message cards (with title, department, urgency, and direct PWA action deep link) to the IT team LINE group on new ticket creation
+- [x] Notification fallback handler (logging/alerting or Telegram/Email fallback) if LINE monthly push quota is reached
+- [x] IT Staff Helpdesk Inbox view displaying all tickets with search and filter controls (by status, department, and date)
+- [x] Ticket acceptance workflow: IT Staff clicks "Accept" to update status to `In Progress` and assign `assigned_to`
+- [x] Enforced business rule: General User is blocked from cancelling a ticket once status is `In Progress` (HTTP 403 / state guard)
+- [x] Resolution modal: IT Staff enters solution note and root cause, transitioning status to `Resolved` with `resolved_at` timestamp
+- [x] Integration test verifying state transitions `Pending` -> `In Progress` -> `Resolved` and asserting user cancellation is rejected once `In Progress`

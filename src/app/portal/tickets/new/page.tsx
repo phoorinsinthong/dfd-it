@@ -18,7 +18,7 @@ import {
   Trash2,
   FileCheck
 } from 'lucide-react';
-import { Department, Category } from '@/types/database';
+import { Department, Category, TicketUrgency } from '@/types/database';
 import { getDepartments, getCategories } from '@/lib/services/master-data-service';
 import { createTicket } from '@/lib/services/ticket-service';
 import { compressImageFile } from '@/lib/utils/image-compression';
@@ -37,6 +37,7 @@ export default function NewTicketPage() {
   const [location, setLocation] = useState('');
   
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [urgency, setUrgency] = useState<TicketUrgency>('medium');
   const [compressedSize, setCompressedSize] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,6 +116,7 @@ export default function NewTicketPage() {
         title: title.trim() || description.trim().slice(0, 30),
         description: description.trim(),
         location: location.trim(),
+        urgency,
         imageUrl: previewImage || undefined,
       });
 
@@ -165,7 +167,7 @@ export default function NewTicketPage() {
         <form onSubmit={handleSubmit} className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
           
           {/* Department & Category Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-blue-400" />
@@ -195,6 +197,23 @@ export default function NewTicketPage() {
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                <span>ความเร่งด่วน <span className="text-red-400">*</span></span>
+              </label>
+              <select
+                value={urgency}
+                onChange={(e) => setUrgency(e.target.value as TicketUrgency)}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="low">🟢 ปกติ (Low)</option>
+                <option value="medium">📌 ปานกลาง (Medium)</option>
+                <option value="high">⚠️ ด่วนสูง (High)</option>
+                <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
               </select>
             </div>
           </div>

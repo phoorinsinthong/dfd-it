@@ -32,6 +32,7 @@ export interface AuthSession {
 }
 
 export type TicketStatus = 'pending' | 'in_progress' | 'resolved' | 'cancelled';
+export type TicketUrgency = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface Ticket {
   id: string;
@@ -46,10 +47,12 @@ export interface Ticket {
   description: string;
   location: string;
   image_url?: string;
+  urgency?: TicketUrgency;
   status: TicketStatus;
   assigned_to?: string;
   assigned_to_name?: string;
   solution_note?: string;
+  root_cause?: string;
   created_at: string;
   resolved_at?: string;
 }
