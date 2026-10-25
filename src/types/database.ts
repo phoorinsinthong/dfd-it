@@ -89,3 +89,33 @@ export interface Booking {
   status: BookingStatus;
   created_at: string;
 }
+
+export type AssetStatus = 'available' | 'borrowed' | 'maintenance';
+
+export interface Asset {
+  id: string;
+  asset_code: string;
+  name: string;
+  category: string;
+  status: AssetStatus;
+  created_at?: string;
+}
+
+export interface BorrowLog {
+  id: string;
+  asset_id: string;
+  asset_code?: string;
+  asset_name?: string;
+  borrower_name: string;
+  borrower_dept_id?: string;
+  borrower_dept_name?: string;
+  borrow_date: string;
+  expected_return_date: string;
+  actual_return_date?: string;
+  staff_id?: string;
+  staff_name?: string;
+  condition_out?: string;
+  condition_in?: string;
+  notes?: string;
+  is_overdue?: boolean;
+}
