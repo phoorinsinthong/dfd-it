@@ -56,3 +56,36 @@ export interface Ticket {
   created_at: string;
   resolved_at?: string;
 }
+
+export type RoomType = 'onsite' | 'online';
+export type BookingStatus = 'confirmed' | 'cancelled';
+
+export interface Room {
+  id: string;
+  name: string;
+  type: RoomType;
+  capacity?: number;
+  location?: string;
+  static_url?: string;
+  passcode?: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface Booking {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  user_department?: string;
+  room_id: string;
+  room_name?: string;
+  room_type?: RoomType;
+  room_static_url?: string;
+  room_passcode?: string;
+  title: string;
+  start_time: string; // ISO 8601
+  end_time: string;   // ISO 8601
+  required_equipment: string[];
+  status: BookingStatus;
+  created_at: string;
+}
