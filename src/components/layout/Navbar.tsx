@@ -1,0 +1,117 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/lib/auth/auth-context';
+import { Wrench, LogOut, ShieldCheck, User, Calendar, Laptop, ClipboardList, Settings } from 'lucide-react';
+
+export default function Navbar({ activeSection }: { activeSection?: string }) {
+  const { user, logout } = useAuth();
+
+  const isAdmin = user?.role === 'admin';
+
+  return (
+    <header className="sticky top-0 z-30 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md text-slate-100 no-print">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        {/* Brand */}
+        <div className="flex items-center gap-3">
+          <Link href={isAdmin ? "/admin" : "/portal"} className="flex items-center gap-2.5 group">
+            <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-105 transition">
+              <Wrench className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="font-bold text-sm sm:text-base text-white tracking-tight block">
+                IT Support Hub
+              </span>
+              <span className="text-[10px] text-slate-400 block -mt-0.5">
+                {isAdmin ? 'ระบบจัดการฝ่ายไอที' : 'ระบบบริการผู้ใช้งาน'}
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Navigation Links for Admin */}
+        {isAdmin && (
+          <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
+            <Link
+              href="/admin"
+              className={`px-3 py-2 rounded-lg transition ${
+                activeSection === 'overview' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              ภาพรวม (Overview)
+            </Link>
+            <Link
+              href="/admin/tickets"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'tickets' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <Wrench className="w-3.5 h-3.5" />
+              งานแจ้งซ่อม
+            </Link>
+            <Link
+              href="/admin/bookings"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'bookings' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              จองห้องประชุม
+            </Link>
+            <Link
+              href="/admin/assets"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'assets' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <Laptop className="w-3.5 h-3.5" />
+              ยืม-คืนอุปกรณ์
+            </Link>
+            <Link
+              href="/admin/roadmaps"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'roadmaps' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <ClipboardList className="w-3.5 h-3.5" />
+              แผนงาน PM
+            </Link>
+            <Link
+              href="/admin/settings"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'settings' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <Settings className="w-3.5 h-3.5" />
+              ตั้งค่าระบบ
+            </Link>
+          </nav>
+        )}
+
+        {/* User Profile & Logout */}
+        <div className="flex items-center gap-3">
+          {user && (
+            <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 py-1.5 px-3 rounded-xl text-xs">
+              <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-emerald-400' : 'bg-blue-400'}`}></span>
+              <span className="text-slate-200 font-medium hidden sm:inline">{user.name}</span>
+              <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">
+                {isAdmin ? 'IT Staff' : 'User'}
+              </span>
+            </div>
+          )}
+
+          <button
+            onClick={logout}
+            title="ออกจากระบบ"
+            className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800 transition"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+
+      </div>
+    </header>
+  );
+}
