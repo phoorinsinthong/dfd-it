@@ -148,3 +148,47 @@ export interface Checklist {
   progress_percent?: number;
   created_at?: string;
 }
+
+export interface ReportSignature {
+  id: string;
+  month: number;
+  year: number;
+  staff_signature?: string; // base64 data url
+  staff_name?: string;
+  supervisor_signature?: string; // base64 data url
+  supervisor_name?: string;
+  signed_at?: string;
+}
+
+export interface MonthlyReportSummary {
+  month: number;
+  year: number;
+  ticketStats: {
+    total: number;
+    resolved: number;
+    pending: number;
+    inProgress: number;
+    cancelled: number;
+    resolutionRate: number; // percentage
+    byCategory: Record<string, number>;
+    byDepartment: Record<string, number>;
+  };
+  bookingStats: {
+    total: number;
+    onsite: number;
+    online: number;
+    byRoom: Record<string, number>;
+  };
+  assetStats: {
+    totalLoans: number;
+    returned: number;
+    active: number;
+    overdue: number;
+  };
+  pmStats: {
+    totalChecklists: number;
+    completedChecklists: number;
+    completionRate: number;
+  };
+  signature?: ReportSignature;
+}

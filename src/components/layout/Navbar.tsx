@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
-import { Wrench, LogOut, ShieldCheck, User, Calendar, Laptop, ClipboardList, Settings } from 'lucide-react';
+import { Wrench, LogOut, ShieldCheck, User, Calendar, Laptop, ClipboardList, Settings, FileText } from 'lucide-react';
 
 export default function Navbar({ activeSection }: { activeSection?: string }) {
   const { user, logout } = useAuth();
@@ -77,6 +77,15 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
             >
               <ClipboardList className="w-3.5 h-3.5" />
               แผนงาน PM
+            </Link>
+            <Link
+              href="/admin/reports"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'reports' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              รายงานสรุป
             </Link>
             <Link
               href="/admin/settings"
