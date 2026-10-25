@@ -7,6 +7,13 @@ export interface Department {
   created_at?: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
 export interface UserProfile {
   id: string;
   employee_id?: string;
