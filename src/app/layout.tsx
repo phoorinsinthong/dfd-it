@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/auth-context";
+import PwaProvider from "@/components/pwa/PwaProvider";
 
 export const metadata: Metadata = {
   title: "ระบบบริหารจัดการแผนกสนับสนุนทางเทคนิค | IT Support & Resource Management",
@@ -29,9 +30,11 @@ export default function RootLayout({
   return (
     <html lang="th" className="h-full">
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-blue-500 selection:text-white">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <PwaProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </PwaProvider>
       </body>
     </html>
   );

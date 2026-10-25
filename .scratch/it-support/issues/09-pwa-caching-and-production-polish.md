@@ -5,11 +5,11 @@ Final production hardening and Progressive Web App configuration. Configures web
 
 **Blocked by:** 08: Monthly Summary Report (A4 Landscape Print & Dual Signature)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] PWA manifest configuration (`manifest.json`) with app title, theme color, display mode `standalone`, and high-resolution icons
-- [ ] Service worker registration caching App Shell static assets (HTML, CSS, JS bundles, and icons) for instant launch
-- [ ] Apple touch icon and iOS meta tags configured for home screen bookmarking
-- [ ] Real-time online/offline detector component displaying a top banner when device loses network connectivity
-- [ ] End-to-end smoke test validating core workflows across user submission, room booking, asset checkout, and admin reporting
-- [ ] Production build optimization (`npm run build`) ensuring zero bundle errors and readiness for Vercel Free Tier deployment
+- [x] PWA manifest configuration (`manifest.json`) with app title, theme color, display mode `standalone`, and high-resolution icons
+- [x] Service worker registration caching App Shell static assets (HTML, CSS, JS bundles, and icons) for instant launch
+- [x] Apple touch icon and iOS meta tags configured for home screen bookmarking
+- [x] Real-time online/offline detector component displaying a top banner when device loses network connectivity
+- [x] End-to-end smoke test validating core workflows across user submission, room booking, asset checkout, and admin reporting
+- [x] Production build optimization (`npm run build`) ensuring zero bundle errors and readiness for Vercel Free Tier deployment
