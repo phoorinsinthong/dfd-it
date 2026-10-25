@@ -119,3 +119,32 @@ export interface BorrowLog {
   notes?: string;
   is_overdue?: boolean;
 }
+
+export interface ChecklistTemplate {
+  id: string;
+  title: string;
+  description?: string;
+  items: string[];
+  created_at?: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  checklist_id: string;
+  task_name: string;
+  is_completed: boolean;
+  completed_by?: string;
+  completed_at?: string;
+}
+
+export interface Checklist {
+  id: string;
+  title: string;
+  year: number;
+  target_month?: number; // 1 - 12
+  type: 'annual' | 'adhoc';
+  status: 'pending' | 'in_progress' | 'completed';
+  items: ChecklistItem[];
+  progress_percent?: number;
+  created_at?: string;
+}

@@ -5,12 +5,12 @@ A Preventive Maintenance Roadmap and Checklist management module for IT Staff. T
 
 **Blocked by:** 01: Project Foundation & Dual Authentication Seam
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Database schema for `checklist_templates` (`id`, `title`, `description`, `items`), `checklists` (`id`, `title`, `year`, `target_month`, `type`, `status`), and `checklist_items` (`id`, `checklist_id`, `task_name`, `is_completed`, `completed_by`, `completed_at`)
-- [ ] Template Builder interface allowing IT Staff to configure reusable item lists
-- [ ] One-click generator action: "Generate Annual Tasks from Template" creating monthly scheduled checklists for all 12 months of a given year
-- [ ] Roadmap timeline view displaying monthly cards with completion statistics (e.g. 8/10 tasks = 80% progress bar)
-- [ ] Interactive task completion checklist: toggle item completion, recording staff identifier and timestamp
-- [ ] Ad-hoc checklist creator for temporary events (e.g. Office Relocation, Batch PC Setup)
-- [ ] Integration test asserting annual task batch generation from template and accurate progress calculation
+- [x] Database schema for `checklist_templates` (`id`, `title`, `description`, `items`), `checklists` (`id`, `title`, `year`, `target_month`, `type`, `status`), and `checklist_items` (`id`, `checklist_id`, `task_name`, `is_completed`, `completed_by`, `completed_at`)
+- [x] Template Builder interface allowing IT Staff to configure reusable item lists
+- [x] One-click generator action: "Generate Annual Tasks from Template" creating monthly scheduled checklists for all 12 months of a given year
+- [x] Roadmap timeline view displaying monthly cards with completion statistics (e.g. 8/10 tasks = 80% progress bar)
+- [x] Interactive task completion checklist: toggle item completion, recording staff identifier and timestamp
+- [x] Ad-hoc checklist creator for temporary events (e.g. Office Relocation, Batch PC Setup)
+- [x] Integration test asserting annual task batch generation from template and accurate progress calculation
