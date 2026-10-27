@@ -7,7 +7,7 @@ import { authenticateGeneralUser, authenticateStaff } from './auth-service';
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
-  loginGeneralUser: (employeeId: string, phoneOrPin: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  loginGeneralUser: (name: string, departmentId?: string) => Promise<{ success: boolean; error?: string }>;
   loginStaff: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
@@ -36,10 +36,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const loginGeneralUser = async (employeeId: string, phoneOrPin: string, name?: string) => {
+  const loginGeneralUser = async (name: string, departmentId?: string) => {
     setIsLoading(true);
     try {
-      const res = await authenticateGeneralUser({ employeeId, phoneOrPin, name });
+      const res = await authenticateGeneralUser({ name, departmentId });
       if (res.success && res.user && res.token) {
         const profile: UserProfile = {
           id: res.user.id,
@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         setUser(profile);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+        localStorage.setItem('it_support_saved_name', res.user.name);
         document.cookie = `session_token=${res.token}; path=/; max-age=2592000; SameSite=Lax`;
         return { success: true };
       }

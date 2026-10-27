@@ -1,9 +1,9 @@
 import { UserRole } from '@/types/database';
 
 export interface GeneralUserLoginInput {
-  employeeId: string;
-  phoneOrPin: string;
   name?: string;
+  employeeId?: string;
+  phoneOrPin?: string;
   departmentId?: string;
 }
 
@@ -37,24 +37,18 @@ const tokenStore = new Map<string, {
   expiresAt: number;
 }>();
 
-// Universal Base64URL encoder (Works in Browser & Node.js)
+// Universal Base64URL encoder (Pure Web Standard - works in Browser & Node.js without polyfill issues)
 function encodeBase64Url(str: string): string {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(str, 'utf-8').toString('base64url');
-  }
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
-    String.fromCharCode(parseInt(p1, 16))
-  ))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  const base64 = btoa(
+    encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+      String.fromCharCode(parseInt(p1, 16))
+    )
+  );
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// Universal Base64URL decoder (Works in Browser & Node.js)
+// Universal Base64URL decoder (Pure Web Standard - works in Browser & Node.js without polyfill issues)
 function decodeBase64Url(base64url: string): string {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(base64url, 'base64url').toString('utf-8');
-  }
   let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
   while (base64.length % 4) {
     base64 += '=';
@@ -68,20 +62,22 @@ function decodeBase64Url(base64url: string): string {
 }
 
 export async function authenticateGeneralUser(input: GeneralUserLoginInput): Promise<AuthResult> {
-  if (!input.employeeId || input.employeeId.trim() === '') {
-    return { success: false, error: 'Employee ID is required' };
+  const nameTrimmed = input.name?.trim();
+  const empIdTrimmed = input.employeeId?.trim();
+
+  if (!nameTrimmed && !empIdTrimmed) {
+    return { success: false, error: 'Name or Employee ID is required' };
   }
 
-  if (!input.phoneOrPin || input.phoneOrPin.trim() === '') {
-    return { success: false, error: 'Phone number or PIN is required' };
-  }
-
-  const userId = `usr_${input.employeeId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-  const userName = input.name || `Employee ${input.employeeId}`;
+  // Derive stable user ID and display name
+  const userName = nameTrimmed || (empIdTrimmed ? `Employee ${empIdTrimmed}` : 'General User');
+  const userId = empIdTrimmed
+    ? `usr_${empIdTrimmed.toLowerCase().replace(/[^a-z0-9]/g, '')}`
+    : `usr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
 
   const token = `token_usr_${encodeBase64Url(JSON.stringify({
     id: userId,
-    employeeId: input.employeeId,
+    employeeId: empIdTrimmed,
     name: userName,
     role: 'user',
     exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
@@ -89,7 +85,7 @@ export async function authenticateGeneralUser(input: GeneralUserLoginInput): Pro
 
   tokenStore.set(token, {
     id: userId,
-    employeeId: input.employeeId,
+    employeeId: empIdTrimmed,
     name: userName,
     role: 'user',
     departmentId: input.departmentId,
@@ -100,7 +96,7 @@ export async function authenticateGeneralUser(input: GeneralUserLoginInput): Pro
     success: true,
     user: {
       id: userId,
-      employeeId: input.employeeId,
+      employeeId: empIdTrimmed,
       name: userName,
       role: 'user',
       departmentId: input.departmentId,

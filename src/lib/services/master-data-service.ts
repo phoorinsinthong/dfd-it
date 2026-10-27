@@ -71,6 +71,47 @@ export async function toggleDepartmentActive(id: string, is_active: boolean): Pr
   return { success: true };
 }
 
+export async function updateDepartment(
+  id: string,
+  rawName: string
+): Promise<{ success: boolean; data?: Department; error?: string }> {
+  const dept = departmentsStore.find((d) => d.id === id);
+  if (!dept) {
+    return { success: false, error: 'Department not found' };
+  }
+
+  const name = rawName?.trim();
+  if (!name) {
+    return { success: false, error: 'Department name is required' };
+  }
+
+  const exists = departmentsStore.some((d) => d.id !== id && d.name.toLowerCase() === name.toLowerCase());
+  if (exists) {
+    return { success: false, error: 'Department name already exists' };
+  }
+
+  dept.name = name;
+  return { success: true, data: { ...dept } };
+}
+
+export async function deleteDepartment(
+  id: string,
+  options?: { force?: boolean }
+): Promise<{ success: boolean; softDeleted?: boolean; error?: string }> {
+  const index = departmentsStore.findIndex((d) => d.id === id);
+  if (index === -1) {
+    return { success: false, error: 'Department not found' };
+  }
+
+  if (options?.force) {
+    departmentsStore.splice(index, 1);
+    return { success: true, softDeleted: false };
+  }
+
+  departmentsStore[index].is_active = false;
+  return { success: true, softDeleted: true };
+}
+
 // ==========================================
 // Categories API
 // ==========================================
@@ -113,4 +154,45 @@ export async function toggleCategoryActive(id: string, is_active: boolean): Prom
 
   cat.is_active = is_active;
   return { success: true };
+}
+
+export async function updateCategory(
+  id: string,
+  rawName: string
+): Promise<{ success: boolean; data?: Category; error?: string }> {
+  const cat = categoriesStore.find((c) => c.id === id);
+  if (!cat) {
+    return { success: false, error: 'Category not found' };
+  }
+
+  const name = rawName?.trim();
+  if (!name) {
+    return { success: false, error: 'Category name is required' };
+  }
+
+  const exists = categoriesStore.some((c) => c.id !== id && c.name.toLowerCase() === name.toLowerCase());
+  if (exists) {
+    return { success: false, error: 'Category name already exists' };
+  }
+
+  cat.name = name;
+  return { success: true, data: { ...cat } };
+}
+
+export async function deleteCategory(
+  id: string,
+  options?: { force?: boolean }
+): Promise<{ success: boolean; softDeleted?: boolean; error?: string }> {
+  const index = categoriesStore.findIndex((c) => c.id === id);
+  if (index === -1) {
+    return { success: false, error: 'Category not found' };
+  }
+
+  if (options?.force) {
+    categoriesStore.splice(index, 1);
+    return { success: true, softDeleted: false };
+  }
+
+  categoriesStore[index].is_active = false;
+  return { success: true, softDeleted: true };
 }

@@ -61,6 +61,23 @@ describe('Ticket 07: Preventive Maintenance Roadmap & Checklist Seam', () => {
       expect(checklists[0].items.length).toBe(template.items.length);
       expect(checklists[0].progress_percent).toBe(0);
     });
+
+    it('generates roadmap tasks for a custom range of months (e.g. ต.ค. - ธ.ค. / months 10-12)', async () => {
+      const templates = await getChecklistTemplates();
+      const q4Template = templates.find((t) => t.id === 'tpl-q4-preventive') || templates[0];
+
+      const res = await generateAnnualRoadmap(q4Template.id, 2026, {
+        startMonth: 10,
+        endMonth: 12,
+        periodLabel: 'ต.ค. - ธ.ค.',
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.createdCount).toBe(3); // Oct, Nov, Dec
+      expect(res.data?.map((c) => c.target_month)).toEqual([10, 11, 12]);
+      expect(res.data?.[0].period_label).toBe('ต.ค. - ธ.ค.');
+      expect(res.data?.[0].title).toContain('ต.ค. - ธ.ค.');
+    });
   });
 
   describe('Task Completion Accountability & Progress Calculation', () => {

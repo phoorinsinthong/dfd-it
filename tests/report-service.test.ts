@@ -74,6 +74,30 @@ describe('Ticket 08: Monthly Summary Report Seam', () => {
       expect(csv).toContain('อัตราการแก้ไขปัญหาสำเร็จ');
     });
 
+    it('retrieves monthly tickets and generates detailed CSV with UTF-8 BOM', async () => {
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+
+      await createTicket({
+        userId: 'u3',
+        userName: 'กานดา การเงิน',
+        departmentName: 'บัญชี',
+        title: 'ปริ้นเตอร์ไม่ออก',
+        description: 'กระดาษติด',
+        location: 'ชั้น 2',
+      });
+
+      const { getMonthlyTickets, generateDetailedTicketsCsv } = await import('@/lib/services/report-service');
+      const tickets = await getMonthlyTickets(currentMonth, currentYear);
+      expect(tickets.length).toBeGreaterThanOrEqual(1);
+
+      const detailedCsv = generateDetailedTicketsCsv(tickets, currentMonth, currentYear);
+      expect(detailedCsv.startsWith('\uFEFF')).toBe(true);
+      expect(detailedCsv).toContain('รายงานรายละเอียดรายการแจ้งซ่อมประจำเดือน');
+      expect(detailedCsv).toContain('ปริ้นเตอร์ไม่ออก');
+      expect(detailedCsv).toContain('กานดา การเงิน');
+    });
+
     it('saves dual digital signatures for staff and supervisor', async () => {
       const mockStaffSig = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
       const mockSupervisorSig = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';

@@ -124,6 +124,9 @@ export interface ChecklistTemplate {
   id: string;
   title: string;
   description?: string;
+  frequency?: 'monthly' | 'quarterly' | 'annually' | 'custom_range';
+  scheduled_months?: number[]; // e.g. [10, 11, 12]
+  period_label?: string; // e.g. "ต.ค. - ธ.ค."
   items: string[];
   created_at?: string;
 }
@@ -142,6 +145,9 @@ export interface Checklist {
   title: string;
   year: number;
   target_month?: number; // 1 - 12
+  target_month_end?: number; // e.g. 12
+  period_label?: string; // e.g. "ต.ค. - ธ.ค."
+  scheduled_months?: number[];
   type: 'annual' | 'adhoc';
   status: 'pending' | 'in_progress' | 'completed';
   items: ChecklistItem[];

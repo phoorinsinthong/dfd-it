@@ -6,10 +6,12 @@ import { useAuth } from '@/lib/auth/auth-context';
 import {
   generateMonthlyReport,
   generateReportCsv,
+  generateDetailedTicketsCsv,
+  getMonthlyTickets,
   saveReportSignature,
 } from '@/lib/services/report-service';
 import { THAI_MONTH_NAMES } from '@/lib/services/roadmap-service';
-import { MonthlyReportSummary } from '@/types/database';
+import { MonthlyReportSummary, Ticket } from '@/types/database';
 import {
   FileText,
   Printer,
@@ -23,6 +25,9 @@ import {
   ShieldAlert,
   X,
   RotateCcw,
+  Check,
+  XCircle,
+  Clock,
 } from 'lucide-react';
 
 export default function AdminReportsPage() {
@@ -31,6 +36,7 @@ export default function AdminReportsPage() {
   const [selectedMonth, setSelectedMonth] = useState(10); // October default
   const [selectedYear, setSelectedYear] = useState(2026);
   const [report, setReport] = useState<MonthlyReportSummary | null>(null);
+  const [monthlyTickets, setMonthlyTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Signature Modal state
@@ -43,8 +49,12 @@ export default function AdminReportsPage() {
 
   const loadReport = async () => {
     setLoading(true);
-    const data = await generateMonthlyReport(selectedMonth, selectedYear);
+    const [data, tickets] = await Promise.all([
+      generateMonthlyReport(selectedMonth, selectedYear),
+      getMonthlyTickets(selectedMonth, selectedYear),
+    ]);
     setReport(data);
+    setMonthlyTickets(tickets);
     setLoading(false);
   };
 
@@ -71,6 +81,19 @@ export default function AdminReportsPage() {
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `IT-Monthly-Report-${selectedYear}-${selectedMonth.toString().padStart(2, '0')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportDetailedCsv = () => {
+    if (!monthlyTickets) return;
+    const csvContent = generateDetailedTicketsCsv(monthlyTickets, selectedMonth, selectedYear);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `IT-Incidents-Detail-${selectedYear}-${selectedMonth.toString().padStart(2, '0')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -220,7 +243,14 @@ export default function AdminReportsPage() {
               className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />
-              ส่งออก CSV
+              สรุป KPI (.csv)
+            </button>
+            <button
+              onClick={handleExportDetailedCsv}
+              className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 text-xs font-semibold border border-blue-500/40 transition flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-400" />
+              รายการแจ้งซ่อมละเอียด (.csv)
             </button>
             <button
               onClick={handlePrint}
@@ -373,6 +403,115 @@ export default function AdminReportsPage() {
                             <td className="py-2 font-medium text-slate-800">{dept}</td>
                             <td className="py-2 text-right font-bold text-slate-900">{count}</td>
                             <td className="py-2 text-right text-slate-500">{pct}%</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Detailed Monthly Incidents Table */}
+            <div className="mb-8 border border-slate-200 rounded-2xl p-4 print:border-slate-300 print:break-inside-avoid">
+              <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                  <ClipboardList className="w-3.5 h-3.5 text-blue-600" />
+                  <span>รายละเอียดรายการแจ้งซ่อมประจำเดือน (Incident Detail List)</span>
+                  <span className="text-[11px] font-normal text-slate-500">
+                    — รวมทั้งหมด {monthlyTickets.length} รายการ
+                  </span>
+                </h3>
+                <span className="text-[11px] text-slate-400 no-print">
+                  เรียงตามเวลาที่เกิดขึ้นล่าสุด
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50 print:bg-transparent">
+                      <th className="py-2 px-2 w-10 text-center">#</th>
+                      <th className="py-2 px-2 w-28">วันที่-เวลา</th>
+                      <th className="py-2 px-2 w-24">รหัส Ticket</th>
+                      <th className="py-2 px-2">ผู้แจ้ง / แผนก</th>
+                      <th className="py-2 px-2">หัวข้อปัญหา & หมวดหมู่</th>
+                      <th className="py-2 px-2 w-24">สถานที่</th>
+                      <th className="py-2 px-2 w-20 text-center">ความเร่งด่วน</th>
+                      <th className="py-2 px-2 w-28 text-center">สถานะ</th>
+                      <th className="py-2 px-2">ช่างผู้ดูแล / วิธีแก้ไข</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {monthlyTickets.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="py-6 text-center text-slate-400">
+                          ไม่มีรายการแจ้งซ่อมในเดือน {monthName} {selectedYear}
+                        </td>
+                      </tr>
+                    ) : (
+                      monthlyTickets.map((t, idx) => {
+                        const dateFormatted = new Date(t.created_at).toLocaleString('th-TH', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        });
+
+                        return (
+                          <tr key={t.id} className="hover:bg-slate-50/80 transition print:text-[10px]">
+                            <td className="py-2 px-2 text-center text-slate-400 font-mono">{idx + 1}</td>
+                            <td className="py-2 px-2 text-slate-600 whitespace-nowrap">{dateFormatted}</td>
+                            <td className="py-2 px-2 font-mono font-bold text-blue-700">{t.id}</td>
+                            <td className="py-2 px-2">
+                              <div className="font-medium text-slate-900">{t.user_name}</div>
+                              <div className="text-[10px] text-slate-500">{t.department_name || '-'}</div>
+                            </td>
+                            <td className="py-2 px-2 max-w-[200px]">
+                              <div className="font-semibold text-slate-800 truncate" title={t.title}>{t.title}</div>
+                              <div className="text-[10px] text-slate-500">{t.category_name || 'ทั่วไป'}</div>
+                            </td>
+                            <td className="py-2 px-2 text-slate-700">{t.location}</td>
+                            <td className="py-2 px-2 text-center">
+                              <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                t.urgency === 'urgent' || t.urgency === 'high'
+                                  ? 'bg-red-100 text-red-700'
+                                  : t.urgency === 'medium'
+                                  ? 'bg-amber-100 text-amber-700'
+                                  : 'bg-slate-100 text-slate-600'
+                              }`}>
+                                {t.urgency || 'low'}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-center whitespace-nowrap">
+                              {t.status === 'resolved' ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                  <Check className="w-3 h-3" /> เสร็จสิ้น
+                                </span>
+                              ) : t.status === 'in_progress' ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                                  <Clock className="w-3 h-3" /> กำลังทำ
+                                </span>
+                              ) : t.status === 'cancelled' ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                                  <XCircle className="w-3 h-3" /> ยกเลิก
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                  รอรับเรื่อง
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-xs">
+                              {t.assigned_to_name && (
+                                <div className="text-[11px] font-medium text-slate-700">
+                                  ช่าง: {t.assigned_to_name}
+                                </div>
+                              )}
+                              <div className="text-[11px] text-slate-500 truncate max-w-[180px]" title={t.solution_note || t.root_cause || '-'}>
+                                {t.solution_note || t.root_cause || '-'}
+                              </div>
+                            </td>
                           </tr>
                         );
                       })

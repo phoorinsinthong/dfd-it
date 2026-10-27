@@ -41,6 +41,10 @@ export default function AdminRoadmapsPage() {
   // Modals
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [scheduleScope, setScheduleScope] = useState<'all_year' | 'custom_range'>('all_year');
+  const [customStartMonth, setCustomStartMonth] = useState(10); // Oct
+  const [customEndMonth, setCustomEndMonth] = useState(12); // Dec
+  const [customPeriodLabel, setCustomPeriodLabel] = useState('ต.ค. - ธ.ค.');
 
   const [isAdhocModalOpen, setIsAdhocModalOpen] = useState(false);
   const [adhocTitle, setAdhocTitle] = useState('');
@@ -84,18 +88,29 @@ export default function AdminRoadmapsPage() {
     }
   };
 
-  // Handle Generate Annual 12-Month Plan
+  // Handle Generate Annual / Custom Period Plan
   const handleGenerateAnnualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTemplateId) return;
 
     setSubmitting(true);
-    const res = await generateAnnualRoadmap(selectedTemplateId, selectedYear);
+    const options = scheduleScope === 'custom_range'
+      ? {
+          startMonth: customStartMonth,
+          endMonth: customEndMonth,
+          periodLabel: customPeriodLabel || `${THAI_MONTH_NAMES[customStartMonth - 1]} - ${THAI_MONTH_NAMES[customEndMonth - 1]}`,
+        }
+      : undefined;
+
+    const res = await generateAnnualRoadmap(selectedTemplateId, selectedYear, options);
     setSubmitting(false);
 
     if (res.success) {
       setIsGenerateModalOpen(false);
-      setStatusMessage(`สร้างแผนงานประจำปี ${selectedYear} ครบ 12 เดือนเรียบร้อยแล้ว (${res.createdCount} รายการ)`);
+      const desc = scheduleScope === 'custom_range'
+        ? `สร้างแผนงานประจำช่วง (${options?.periodLabel}) ปี ${selectedYear} เรียบร้อยแล้ว (${res.createdCount} รายการ)`
+        : `สร้างแผนงานประจำปี ${selectedYear} ครบ 12 เดือนเรียบร้อยแล้ว (${res.createdCount} รายการ)`;
+      setStatusMessage(desc);
       loadData();
     }
   };
@@ -328,10 +343,17 @@ export default function AdminRoadmapsPage() {
                   >
                     <div>
                       {/* Top status */}
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="font-mono text-xs font-bold text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">
-                          {chk.target_month ? `${THAI_MONTH_NAMES[chk.target_month - 1]} ${chk.year}` : `Ad-hoc ${chk.year}`}
-                        </span>
+                      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-mono text-xs font-bold text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">
+                            {chk.target_month ? `${THAI_MONTH_NAMES[chk.target_month - 1]} ${chk.year}` : `Ad-hoc ${chk.year}`}
+                          </span>
+                          {chk.period_label && (
+                            <span className="font-sans text-[10px] font-semibold text-indigo-300 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-700/50">
+                              {chk.period_label}
+                            </span>
+                          )}
+                        </div>
 
                         <span
                           className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -475,8 +497,101 @@ export default function AdminRoadmapsPage() {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  ช่วงเวลาที่จะดำเนินการ
+                </label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-800 rounded-xl border border-slate-700">
+                  <button
+                    type="button"
+                    onClick={() => setScheduleScope('all_year')}
+                    className={`py-2 px-3 rounded-lg text-xs font-medium transition ${
+                      scheduleScope === 'all_year'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    ทั้งปี (12 เดือน)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScheduleScope('custom_range')}
+                    className={`py-2 px-3 rounded-lg text-xs font-medium transition ${
+                      scheduleScope === 'custom_range'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    กำหนดช่วงเดือน (เช่น ต.ค. - ธ.ค.)
+                  </button>
+                </div>
+              </div>
+
+              {scheduleScope === 'custom_range' && (
+                <div className="space-y-3 p-3.5 bg-slate-800/60 border border-slate-700 rounded-xl">
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                        เดือนเริ่มต้น
+                      </label>
+                      <select
+                        value={customStartMonth}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setCustomStartMonth(val);
+                          setCustomPeriodLabel(`${THAI_MONTH_NAMES[val - 1]} - ${THAI_MONTH_NAMES[customEndMonth - 1]}`);
+                        }}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      >
+                        {THAI_MONTH_NAMES.map((m, idx) => (
+                          <option key={idx + 1} value={idx + 1}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                        เดือนสิ้นสุด
+                      </label>
+                      <select
+                        value={customEndMonth}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setCustomEndMonth(val);
+                          setCustomPeriodLabel(`${THAI_MONTH_NAMES[customStartMonth - 1]} - ${THAI_MONTH_NAMES[val - 1]}`);
+                        }}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      >
+                        {THAI_MONTH_NAMES.map((m, idx) => (
+                          <option key={idx + 1} value={idx + 1}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                      ป้ายกำกับช่วงเวลา (Period Tag)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="เช่น ต.ค. - ธ.ค., ไตรมาส 4"
+                      value={customPeriodLabel}
+                      onChange={(e) => setCustomPeriodLabel(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="p-3 bg-blue-950/30 border border-blue-800/40 rounded-xl text-xs text-blue-300">
-                ℹ️ ระบบจะทำการโคลนรายการงานทั้ง {templates.find((t) => t.id === selectedTemplateId)?.items.length || 0} ข้อ สำหรับทุกเดือน (ม.ค. - ธ.ค. {selectedYear}) เป็น 12 แผนงานทันที
+                ℹ️ {scheduleScope === 'custom_range'
+                  ? `ระบบจะโคลนรายการงานทั้ง ${templates.find((t) => t.id === selectedTemplateId)?.items.length || 0} ข้อ ลงในเดือน ${THAI_MONTH_NAMES[customStartMonth - 1]} ถึง ${THAI_MONTH_NAMES[customEndMonth - 1]} ปี ${selectedYear}`
+                  : `ระบบจะทำการโคลนรายการงานทั้ง ${templates.find((t) => t.id === selectedTemplateId)?.items.length || 0} ข้อ สำหรับทุกเดือน (ม.ค. - ธ.ค. ${selectedYear}) เป็น 12 แผนงานทันที`}
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-800">
@@ -492,7 +607,7 @@ export default function AdminRoadmapsPage() {
                   disabled={submitting}
                   className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold"
                 >
-                  {submitting ? 'กำลังสร้าง...' : 'สร้าง 12 เดือนทันที'}
+                  {submitting ? 'กำลังสร้าง...' : scheduleScope === 'custom_range' ? 'สร้างแผนประจำช่วงทันที' : 'สร้าง 12 เดือนทันที'}
                 </button>
               </div>
             </form>

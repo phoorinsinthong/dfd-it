@@ -51,11 +51,47 @@ describe('Master Data Service Seam (Departments & Categories)', () => {
       const activeOnly = await getDepartments();
       expect(activeOnly.some((d) => d.id === deptId)).toBe(false);
 
-      // Query with includeInactive=true includes it
       const all = await getDepartments({ includeInactive: true });
       const found = all.find((d) => d.id === deptId);
       expect(found).toBeDefined();
       expect(found?.is_active).toBe(false);
+    });
+
+    it('updates department name and prevents duplicate name collision', async () => {
+      const { updateDepartment } = await import('@/lib/services/master-data-service');
+      const added = await addDepartment('แผนกบัญชี 2');
+      const deptId = added.data!.id;
+
+      const updated = await updateDepartment(deptId, 'ฝ่ายบัญชีพิเศษ (Special Account)');
+      expect(updated.success).toBe(true);
+      expect(updated.data?.name).toBe('ฝ่ายบัญชีพิเศษ (Special Account)');
+
+      // Attempt collision with existing name
+      const collision = await updateDepartment(deptId, 'ฝ่ายสนับสนุนเทคนิค (IT Support)');
+      expect(collision.success).toBe(false);
+      expect(collision.error).toMatch(/already exists/i);
+    });
+
+    it('deletes department safely or with force', async () => {
+      const { deleteDepartment } = await import('@/lib/services/master-data-service');
+      const added = await addDepartment('แผนกลบ');
+      const deptId = added.data!.id;
+
+      // Soft delete
+      const delRes = await deleteDepartment(deptId);
+      expect(delRes.success).toBe(true);
+      expect(delRes.softDeleted).toBe(true);
+
+      const activeOnly = await getDepartments();
+      expect(activeOnly.some((d) => d.id === deptId)).toBe(false);
+
+      // Force delete
+      const forceRes = await deleteDepartment(deptId, { force: true });
+      expect(forceRes.success).toBe(true);
+      expect(forceRes.softDeleted).toBe(false);
+
+      const all = await getDepartments({ includeInactive: true });
+      expect(all.some((d) => d.id === deptId)).toBe(false);
     });
   });
 
@@ -88,6 +124,22 @@ describe('Master Data Service Seam (Departments & Categories)', () => {
 
       const all = await getCategories({ includeInactive: true });
       expect(all.some((c) => c.id === catId && !c.is_active)).toBe(true);
+    });
+
+    it('updates and deletes category successfully', async () => {
+      const { updateCategory, deleteCategory } = await import('@/lib/services/master-data-service');
+      const added = await addCategory('หมวดแก้');
+      const catId = added.data!.id;
+
+      const editRes = await updateCategory(catId, 'หมวดแก้ไขแล้ว');
+      expect(editRes.success).toBe(true);
+      expect(editRes.data?.name).toBe('หมวดแก้ไขแล้ว');
+
+      const delRes = await deleteCategory(catId, { force: true });
+      expect(delRes.success).toBe(true);
+
+      const all = await getCategories({ includeInactive: true });
+      expect(all.some((c) => c.id === catId)).toBe(false);
     });
   });
 });

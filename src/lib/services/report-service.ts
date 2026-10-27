@@ -212,3 +212,85 @@ export function generateReportCsv(report: MonthlyReportSummary): string {
 
   return bom + lines.join('\n');
 }
+
+export async function getMonthlyTickets(month: number, year: number): Promise<import('@/types/database').Ticket[]> {
+  const tickets = await getAllTickets();
+  return tickets.filter((t) => {
+    const d = new Date(t.created_at);
+    return d.getMonth() + 1 === month && d.getFullYear() === year;
+  });
+}
+
+export function generateDetailedTicketsCsv(
+  tickets: import('@/types/database').Ticket[],
+  month: number,
+  year: number
+): string {
+  const monthName = THAI_MONTH_NAMES[month - 1] || `Month ${month}`;
+  const bom = '\uFEFF';
+  const lines: string[] = [];
+
+  lines.push(`รายงานรายละเอียดรายการแจ้งซ่อมประจำเดือน (IT Support Incident Detail Report)`);
+  lines.push(`ประจำเดือน: ${monthName} ${year}`);
+  lines.push(`จำนวนงานทั้งหมด: ${tickets.length} รายการ`);
+  lines.push(`ออกรายงานเมื่อ: ${new Date().toLocaleDateString('th-TH')}`);
+  lines.push('');
+
+  const headers = [
+    'ลำดับ',
+    'รหัสใบแจ้งซ่อม',
+    'วันที่แจ้ง',
+    'ผู้แจ้ง',
+    'รหัสพนักงาน',
+    'แผนก',
+    'หมวดหมู่ปัญหา',
+    'หัวข้อปัญหา',
+    'รายละเอียดอาการ',
+    'สถานที่/ห้อง',
+    'ความเร่งด่วน',
+    'สถานะ',
+    'เจ้าหน้าที่ผู้รับผิดชอบ',
+    'วิธีแก้ไข/บันทึกผลงาน',
+  ];
+  lines.push(headers.join(','));
+
+  const statusLabelMap: Record<string, string> = {
+    pending: 'รอรับเรื่อง (Pending)',
+    in_progress: 'กำลังดำเนินการ (In Progress)',
+    resolved: 'เสร็จสิ้น (Resolved)',
+    cancelled: 'ยกเลิกแล้ว (Cancelled)',
+  };
+
+  const urgencyLabelMap: Record<string, string> = {
+    low: 'ต่ำ',
+    medium: 'ปานกลาง',
+    high: 'สูง',
+    critical: 'วิกฤต',
+  };
+
+  tickets.forEach((t, idx) => {
+    const dateFormatted = new Date(t.created_at).toLocaleString('th-TH');
+    const safeCol = (str?: string) => `"${(str || '-').replace(/"/g, '""')}"`;
+
+    lines.push(
+      [
+        idx + 1,
+        safeCol(t.id),
+        safeCol(dateFormatted),
+        safeCol(t.user_name),
+        safeCol(t.user_employee_id),
+        safeCol(t.department_name),
+        safeCol(t.category_name),
+        safeCol(t.title),
+        safeCol(t.description),
+        safeCol(t.location),
+        safeCol(t.urgency ? (urgencyLabelMap[t.urgency] || t.urgency) : 'ปกติ'),
+        safeCol(statusLabelMap[t.status] || t.status),
+        safeCol(t.assigned_to_name),
+        safeCol(t.solution_note || t.root_cause),
+      ].join(',')
+    );
+  });
+
+  return bom + lines.join('\n');
+}

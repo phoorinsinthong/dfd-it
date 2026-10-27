@@ -10,6 +10,7 @@ export const INITIAL_TEMPLATES: ChecklistTemplate[] = [
     id: 'tpl-server-ups',
     title: 'แผนบำรุงรักษา Server, Network & UPS ประจำเดือน',
     description: 'มาตรฐานการตรวจเช็คระบบแม่ข่าย เครือข่าย และระบบสำรองไฟของบริษัท',
+    frequency: 'monthly',
     items: [
       'ตรวจเช็คอุณหภูมิห้อง Server และสถานะเครื่องปรับอากาศ (ไม่เกิน 22°C)',
       'ตรวจสอบไฟสถานะและทำความสะอาดฝุ่น Server Rack & Core Switch',
@@ -23,11 +24,29 @@ export const INITIAL_TEMPLATES: ChecklistTemplate[] = [
     id: 'tpl-meeting-room-av',
     title: 'แผนตรวจเช็คอุปกรณ์ห้องประชุมและระบบ AV ประจำไตรมาส',
     description: 'ตรวจเช็คจอภาพ โปรเจคเตอร์ และระบบไมโครโฟนไร้สายทุกห้อง',
+    frequency: 'quarterly',
+    scheduled_months: [3, 6, 9, 12],
+    period_label: 'รายไตรมาส (มี.ค., มิ.ย., ก.ย., ธ.ค.)',
     items: [
       'ทดสอบสัญญาณภาพ HDMI / Type-C ทุกจุดเชื่อมต่อในห้องประชุม',
       'ทำความสะอาดตัวกรองฝุ่นและเลนส์โปรเจคเตอร์',
       'ตรวจเช็คระดับแบตเตอรี่ไมโครโฟนไร้สายและทำความสะอาดหัวไมค์',
       'ทดสอบความคมชัดของกล้องและไมค์ห้องประชุม Zoom/Teams Room',
+    ],
+    created_at: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'tpl-q4-preventive',
+    title: 'แผนบำรุงรักษาและตรวจนับครุภัณฑ์ประจำช่วงสิ้นปี (ต.ค. - ธ.ค.)',
+    description: 'ตรวจนับสภาพครุภัณฑ์ไอที ทำความสะอาดใหญ่ และจัดทำแผนทดแทนประจำไตรมาส 4',
+    frequency: 'custom_range',
+    scheduled_months: [10, 11, 12],
+    period_label: 'ต.ค. - ธ.ค.',
+    items: [
+      'ตรวจนับและติดแท็ก QR Code ครุภัณฑ์ไอทีทุกแผนก',
+      'ตรวจเช็คสภาพเครื่องสำรองไฟและแบตเตอรี่ฉุกเฉินประจำปี',
+      'ทำความสะอาดเป่าฝุ่น PC/Workstation และห้อง Server ประจำปี',
+      'สรุปรายการอุปกรณ์ที่ชำรุดและเตรียมแผนจัดซื้อทดแทนปีถัดไป',
     ],
     created_at: '2026-01-01T00:00:00.000Z',
   },
@@ -53,6 +72,9 @@ export async function getChecklistTemplateById(id: string): Promise<ChecklistTem
 export interface CreateChecklistTemplateInput {
   title: string;
   description?: string;
+  frequency?: 'monthly' | 'quarterly' | 'annually' | 'custom_range';
+  scheduledMonths?: number[];
+  periodLabel?: string;
   items: string[];
 }
 
@@ -67,6 +89,9 @@ export async function createChecklistTemplate(
     id: `tpl-${Date.now().toString().slice(-6)}`,
     title: input.title.trim(),
     description: input.description?.trim(),
+    frequency: input.frequency || 'monthly',
+    scheduled_months: input.scheduledMonths,
+    period_label: input.periodLabel,
     items: input.items.map((i) => i.trim()).filter(Boolean),
     created_at: new Date().toISOString(),
   };
@@ -75,20 +100,48 @@ export async function createChecklistTemplate(
   return { success: true, data: newTemplate };
 }
 
+export interface GenerateAnnualRoadmapOptions {
+  months?: number[];
+  startMonth?: number;
+  endMonth?: number;
+  periodLabel?: string;
+}
+
 export async function generateAnnualRoadmap(
   templateId: string,
-  year: number
+  year: number,
+  options?: GenerateAnnualRoadmapOptions
 ): Promise<{ success: boolean; createdCount: number; data?: Checklist[]; error?: string }> {
   const template = await getChecklistTemplateById(templateId);
   if (!template) {
     return { success: false, createdCount: 0, error: 'Template not found' };
   }
 
+  // Determine target months to schedule
+  let targetMonths: number[] = [];
+
+  if (options?.months && options.months.length > 0) {
+    targetMonths = options.months;
+  } else if (options?.startMonth && options?.endMonth) {
+    const start = Math.min(options.startMonth, options.endMonth);
+    const end = Math.max(options.startMonth, options.endMonth);
+    for (let m = start; m <= end; m++) {
+      targetMonths.push(m);
+    }
+  } else if (template.scheduled_months && template.scheduled_months.length > 0) {
+    targetMonths = template.scheduled_months;
+  } else if (template.frequency === 'quarterly') {
+    targetMonths = [3, 6, 9, 12];
+  } else {
+    targetMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  }
+
+  const periodLabel = options?.periodLabel || template.period_label;
   const createdChecklists: Checklist[] = [];
 
-  for (let month = 1; month <= 12; month++) {
-    const monthName = THAI_MONTH_NAMES[month - 1];
-    const checklistId = `chk-${year}-${month.toString().padStart(2, '0')}-${Date.now().toString().slice(-4)}`;
+  for (const month of targetMonths) {
+    const monthName = THAI_MONTH_NAMES[month - 1] || `เดือน ${month}`;
+    const checklistId = `chk-${year}-${month.toString().padStart(2, '0')}-${Date.now().toString().slice(-4)}-${Math.random().toString(36).slice(2, 5)}`;
 
     const items: ChecklistItem[] = template.items.map((taskName, idx) => ({
       id: `${checklistId}-item-${idx + 1}`,
@@ -97,11 +150,14 @@ export async function generateAnnualRoadmap(
       is_completed: false,
     }));
 
+    const titleSuffix = periodLabel ? ` (${periodLabel})` : '';
+
     const checklist: Checklist = {
       id: checklistId,
-      title: `[${monthName} ${year}] ${template.title}`,
+      title: `[${monthName} ${year}] ${template.title}${titleSuffix}`,
       year,
       target_month: month,
+      period_label: periodLabel,
       type: 'annual',
       status: 'pending',
       items,

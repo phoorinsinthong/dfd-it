@@ -8,7 +8,19 @@ import {
 
 describe('Dual Authentication & Role Guard Seam', () => {
   describe('General User Authentication', () => {
-    it('successfully authenticates a general user with valid Employee ID and PIN', async () => {
+    it('successfully authenticates a general user with Name only', async () => {
+      const result = await authenticateGeneralUser({
+        name: 'สมชาย มีสุข',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.user).toBeDefined();
+      expect(result.user?.name).toBe('สมชาย มีสุข');
+      expect(result.user?.role).toBe('user');
+      expect(result.token).toBeDefined();
+    });
+
+    it('successfully authenticates a general user with valid Employee ID and PIN (backward compatibility)', async () => {
       const result = await authenticateGeneralUser({
         employeeId: 'EMP001',
         phoneOrPin: '1234',
@@ -22,14 +34,14 @@ describe('Dual Authentication & Role Guard Seam', () => {
       expect(result.token).toBeDefined();
     });
 
-    it('rejects general user login with missing Employee ID', async () => {
+    it('rejects general user login with missing Name and Employee ID', async () => {
       const result = await authenticateGeneralUser({
+        name: '',
         employeeId: '',
-        phoneOrPin: '1234',
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toMatch(/Employee ID is required/i);
+      expect(result.error).toMatch(/Name or Employee ID is required/i);
     });
   });
 

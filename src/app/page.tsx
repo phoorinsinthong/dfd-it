@@ -10,8 +10,6 @@ export default function LoginPage() {
   const { user, isLoading, loginGeneralUser, loginStaff } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'user' | 'staff'>('user');
-  const [employeeId, setEmployeeId] = useState('');
-  const [phoneOrPin, setPhoneOrPin] = useState('');
   const [userName, setUserName] = useState('');
   
   const [email, setEmail] = useState('');
@@ -19,6 +17,18 @@ export default function LoginPage() {
   
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Auto-recall previously used name from device storage
+    try {
+      const savedName = localStorage.getItem('it_support_saved_name');
+      if (savedName) {
+        setUserName(savedName);
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -32,16 +42,21 @@ export default function LoginPage() {
 
   const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userName.trim()) {
+      setError('กรุณากรอกชื่อของคุณเพื่อเข้าใช้งาน');
+      return;
+    }
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await loginGeneralUser(employeeId, phoneOrPin, userName);
+      const res = await loginGeneralUser(userName.trim());
       if (res.success) {
         router.push('/portal');
       } else {
         setError(res.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
       }
-    } catch {
+    } catch (err) {
+      console.error('[PAGE ERROR handleUserSubmit]', err);
       setError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsSubmitting(false);
@@ -59,7 +74,8 @@ export default function LoginPage() {
       } else {
         setError(res.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
       }
-    } catch {
+    } catch (err) {
+      console.error('[PAGE ERROR handleStaffSubmit]', err);
       setError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsSubmitting(false);
@@ -67,8 +83,6 @@ export default function LoginPage() {
   };
 
   const fillDemoUser = () => {
-    setEmployeeId('EMP8801');
-    setPhoneOrPin('0812345678');
     setUserName('สมชาย มีสุข (ฝ่ายการตลาด)');
   };
 
@@ -80,14 +94,17 @@ export default function LoginPage() {
   const handleQuickLoginUser = async () => {
     setIsSubmitting(true);
     setError(null);
+    const targetName = userName.trim() || 'สมชาย มีสุข (ฝ่ายการตลาด)';
+    setUserName(targetName);
     try {
-      const res = await loginGeneralUser('EMP8801', '0812345678', 'สมชาย มีสุข (ฝ่ายการตลาด)');
+      const res = await loginGeneralUser(targetName);
       if (res.success) {
         router.push('/portal');
       } else {
         setError(res.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
       }
-    } catch {
+    } catch (err) {
+      console.error('[PAGE ERROR handleQuickLoginUser]', err);
       setError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsSubmitting(false);
@@ -104,7 +121,8 @@ export default function LoginPage() {
       } else {
         setError(res.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
       }
-    } catch {
+    } catch (err) {
+      console.error('[PAGE ERROR handleQuickLoginAdmin]', err);
       setError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsSubmitting(false);
@@ -178,46 +196,25 @@ export default function LoginPage() {
           {activeTab === 'user' && (
             <form onSubmit={handleUserSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  รหัสพนักงาน (Employee ID) <span className="text-red-400">*</span>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
+                  <span>ชื่อ-นามสกุล หรือชื่อของคุณ <span className="text-red-400">*</span></span>
+                  <span className="text-[11px] text-blue-400 font-normal">จำชื่ออัตโนมัติในเครื่อง</span>
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     required
-                    placeholder="เช่น EMP001 หรือ 65001"
-                    value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value)}
+                    autoFocus
+                    placeholder="เช่น สมชาย มีสุข (ฝ่ายการตลาด)"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   />
+                  <User className="w-4 h-4 text-slate-500 absolute right-3.5 top-3.5" />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  เบอร์โทรศัพท์มือถือ หรือ PIN 4 หลัก <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="กรอกเบอร์โทรหรือ PIN สำหรับยืนยันตัวตน"
-                  value={phoneOrPin}
-                  onChange={(e) => setPhoneOrPin(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  ชื่อ-นามสกุล (สำหรับติดต่อ)
-                </label>
-                <input
-                  type="text"
-                  placeholder="ระบุชื่อของคุณ (แสดงในใบแจ้งซ่อม/จองห้อง)"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                />
+                <p className="mt-1.5 text-[11px] text-slate-400">
+                  💡 ใส่ชื่อแล้วเข้าใช้งานได้ทันที ระบบจะจดจำชื่อนี้ไว้สำหรับสร้างใบแจ้งซ่อมและจองห้อง
+                </p>
               </div>
 
               <button
@@ -243,7 +240,7 @@ export default function LoginPage() {
                   onClick={fillDemoUser}
                   className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition text-center"
                 >
-                  กรอกฟอร์มทดสอบ
+                  เติมชื่อตัวอย่าง
                 </button>
               </div>
             </form>
@@ -319,7 +316,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-1">
               <div>
-                • <strong>พนักงานทั่วไป:</strong> รหัส <code className="text-blue-300 bg-slate-800 px-1 py-0.5 rounded font-mono">EMP001</code> / PIN: <code className="text-blue-300 bg-slate-800 px-1 py-0.5 rounded font-mono">1234</code>
+                • <strong>พนักงานทั่วไป:</strong> พิมพ์ชื่ออะไรก็ได้แล้วกดเข้าใช้งานได้ทันที (เช่น <code className="text-blue-300 bg-slate-800 px-1 py-0.5 rounded font-mono">สมชาย มีสุข</code>)
               </div>
               <div>
                 • <strong>เจ้าหน้าที่ไอที:</strong> Email: <code className="text-indigo-300 bg-slate-800 px-1 py-0.5 rounded font-mono">it-admin@company.local</code> / รหัสผ่าน: <code className="text-indigo-300 bg-slate-800 px-1 py-0.5 rounded font-mono">AdminPassword123!</code>
