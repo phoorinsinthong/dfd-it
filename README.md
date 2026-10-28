@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IT Support Hub (it-dfd-hub)
+## ระบบบริหารจัดการแผนกสนับสนุนทางเทคนิคและงานบริการไอที
+### สถาปัตยกรรม 100% Free Tier (Next.js 16 + Supabase + LINE Messaging API + Vercel)
 
-## Getting Started
+ระบบเว็บแอปพลิเคชันสำหรับบริหารจัดการงานสนับสนุนทางเทคนิคครบวงจร ออกแบบเพื่อหน่วยงานและองค์กร พร้อมรองรับการใช้งานเสมือนแอปพลิเคชันมือถือ (PWA) ภายใต้งบประมาณ 0 บาท
 
-First, run the development server:
+---
+
+## ฟังก์ชันการทำงานหลัก (Core Features)
+
+1. **ระบบแจ้งซ่อมและช่วยเหลือไอที (IT Helpdesk & Tickets)**:
+   - ผู้ใช้งานทั่วไปเข้าสู่ระบบง่ายด้วยการกรอกชื่อและเลือกแผนก (ไม่ต้องจำรหัสผ่าน)
+   - ฟอร์มแจ้งซ่อมระบุปัญหา แนบรูปภาพ และเลือกสถานที่ (กองงาน > แผนก > อาคาร > ชั้น > ห้อง)
+   - เชื่อมต่อแจ้งเตือนเข้ากลุ่ม LINE ของทีมช่างไอทีทันทีด้วย LINE Flex Message พร้อมปุ่มกดเข้าดูงาน
+   - ระบบเสียงแจ้งเตือนแบบเรียลไทม์เมื่อเปิดหน้าศูนย์รับเรื่องค้างไว้
+   - ช่างไอทีกดรับงาน ระบุแนวทางแก้ไข และปิดงานซ่อมได้ทันที
+
+2. **ระบบจองห้องประชุมและบัญชีออนไลน์ (Meeting Room & Video Conference Booking)**:
+   - ปฏิทินแสดงภาพรวมการจองห้องประชุมแบบรายวันและรายเดือน
+   - รองรับทั้งห้องประชุมสถานที่จริง (On-site) และบัญชีประชุมออนไลน์ (Zoom / Google Meet / MS Teams)
+   - ระบบป้องกันเวลาจองชนกันอัตโนมัติ (Conflict Detection) ทั้งใน Application Level และ Database Constraint
+
+3. **ระบบจัดการครุภัณฑ์และบริการยืม-คืน (Asset Management & Loan Service)**:
+   - แคตตาล็อกอุปกรณ์ไอที (โน้ตบุ๊ก, โปรเจกเตอร์, ตัวแปลงสัญญาณ, ไมโครโฟนไร้สาย ฯลฯ)
+   - บริการยืม-คืนอุปกรณ์ บันทึกสภาพก่อนส่งมอบและสภาพตอนส่งคืน
+   - ระบบ Safe Deletion: ป้องกันการลบอุปกรณ์ที่กำลังถูกยืม และทำ Soft Delete ปลดระวางอัตโนมัติหากมีประวัติการยืมในอดีต
+
+4. **แผนงานบำรุงรักษาเชิงป้องกัน (Preventive Maintenance Roadmap & Checklists)**:
+   - แม่แบบแผนงานมาตรฐาน (Templates) เช่น แผนตรวจเช็ค Server & UPS, แผนตรวจระบบภาพและเสียง, แผนตรวจนับประจำช่วงสิ้นปี (ต.ค. - ธ.ค.)
+   - สร้างแผนงานประจำปี 12 เดือนอัตโนมัติ พร้อมติดตามความคืบหน้ารายเดือน
+   - แก้ไขหัวข้องาน, เพิ่มงานย่อย หรือลบแผนงานได้อิสระ
+
+5. **ระบบออกรายงานสรุปประจำเดือน (Monthly Executive & Incident Reports)**:
+   - จัดรูปแบบอัตโนมัติสำหรับพิมพ์ลงกระดาษ A4 แนวนอน (Landscape)
+   - แยก 2 รูปแบบ: รายงานสรุปภาพรวมผู้บริหาร (Executive Summary) และ รายงานสรุปรายการแจ้งซ่อมประจำเดือน (Detailed Incidents List)
+   - ระบบลงนามและรับรองรายงาน 3 รูปแบบ:
+     1. **วาดลายเซ็น (Drawn Pad)**: ลงลายมือชื่อด้วยเมาส์ นิ้ว หรือ Stylus
+     2. **ประทับตรารับรองดิจิทัล (Digital Stamp)**: ประทับตรารับรองพร้อมวันเวลา
+     3. **เว้นว่างเพื่อเซ็นจริงด้วยปากกา (Physical Wet-Ink)**: บันทึกชื่อ-ตำแหน่ง พร้อมเว้นช่องว่างสำหรับเซ็นสดจริงด้วยปากกาบนกระดาษ
+   - รองรับการแก้ไขหรือลบลายเซ็นออกเพื่อลงนามใหม่ได้ตลอดเวลา
+
+6. **ระบบจัดการผู้ดูแลระบบและประวัติการกระทำ (Superadmin & Audit Trail)**:
+   - สิทธิ์ Superadmin สำหรับเพิ่ม, แก้ไขข้อมูล/ตำแหน่ง, และเปิด-ปิดสถานะการใช้งานของแอดมิน
+   - มีกลไกป้องกันการลบหรือระงับสิทธิ์ Superadmin คนสุดท้ายของระบบ
+   - บันทึกประวัติการกระทำ (Audit Log) ทุกการกระทำ (CREATE, UPDATE, DELETE, SIGN, CLEAR_SIGN, STATUS_CHANGE) ตรวจสอบย้อนหลังได้ทุกโมดูล
+
+7. **จัดการข้อมูลหลัก (Master Data Settings)**:
+   - โครงสร้างองค์กรลำดับชั้น: กองงาน (Divisions) > แผนก (Departments) พร้อมระบุข้อมูลอาคาร, ชั้น และห้อง
+   - เพิ่ม แก้ไข หรือลบ ข้อมูลห้องประชุม และประเภทงานซ่อม
+
+---
+
+## ข้อมูลบัญชีเริ่มต้น (Default Accounts)
+
+| บทบาท (Role) | อีเมล (Email) | รหัสผ่าน (Password) | สิทธิ์การใช้งาน |
+| :--- | :--- | :--- | :--- |
+| **Superadmin** | `superadmin@company.local` | `SuperAdmin@2026!` | เข้าถึงได้ทุกฟังก์ชัน + จัดการแอดมิน & ดู Audit Logs |
+| **IT Staff (Admin)** | `admin@company.local` | `Admin@2026!` | จัดการงานซ่อม, จองห้อง, ยืม-คืน, PM, รายงาน, ข้อมูลหลัก |
+| **IT Staff (Admin)** | `it-admin@company.local` | `AdminPassword123!` | จัดการงานซ่อม, จองห้อง, ยืม-คืน, PM, รายงาน, ข้อมูลหลัก |
+
+> **สำหรับผู้ใช้งานทั่วไป (General Users)**: เข้าใช้งานผ่านหน้าแรกโดยกรอกชื่อ-นามสกุล และเลือกแผนกได้ทันทีโดยไม่ต้องใช้รหัสผ่าน
+
+---
+
+## การติดตั้งและรันในเครื่อง (Local Development)
 
 ```bash
+# 1. ติดตั้ง Dependencies
+npm install
+
+# 2. เริ่มรัน Dev Server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 3. รันชุดทดสอบ (Automated Test Suite)
+npm test
+
+# 4. ตรวจสอบ Type Safety
+npx tsc --noEmit
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิดเบราว์เซอร์ไปที่ [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## การนำขึ้นใช้งานจริงบน Vercel + Supabase (Production Deployment)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ดูขั้นตอนแบบละเอียดได้ที่ไฟล์ [PRODUCTION_DEPLOY.md](./PRODUCTION_DEPLOY.md)
+- สร้างตารางด้วยสคริปต์ [supabase/migrations/001_initial_schema.sql](./supabase/migrations/001_initial_schema.sql)
+- นำตัวแปรจาก [.env.example](./.env.example) ไปใส่ใน Vercel Environment Variables
