@@ -46,6 +46,15 @@ export function getUrgencyBadgeInfo(urgency?: TicketUrgency): { text: string; co
 
 export function buildTicketFlexMessage(ticket: Ticket, baseUrl: string = 'https://it-support.local'): LineFlexMessagePayload {
   const urgencyInfo = getUrgencyBadgeInfo(ticket.urgency);
+  const deptStr = ticket.division_name
+    ? `${ticket.division_name} > ${ticket.department_name || ''}`
+    : (ticket.department_name || 'ไม่ระบุแผนก');
+
+  const locParts = [ticket.building, ticket.floor, ticket.room].filter(Boolean).join(' ');
+  const displayLocation = locParts && !ticket.location.includes(locParts)
+    ? `${locParts} - ${ticket.location}`
+    : ticket.location;
+
   const deepLink = `${baseUrl}/admin/tickets?id=${ticket.id}`;
 
   return {
@@ -92,13 +101,13 @@ export function buildTicketFlexMessage(ticket: Ticket, baseUrl: string = 'https:
             contents: [
               {
                 type: 'text',
-                text: `👤 ผู้แจ้ง: ${ticket.user_name || 'พนักงาน'} (${ticket.department_name || 'ไม่ระบุแผนก'})`,
+                text: `👤 ผู้แจ้ง: ${ticket.user_name || 'พนักงาน'} (${deptStr})`,
                 size: 'sm',
                 color: '#374151',
               },
               {
                 type: 'text',
-                text: `📍 สถานที่: ${ticket.location}`,
+                text: `📍 สถานที่: ${displayLocation}`,
                 size: 'sm',
                 color: '#374151',
               },

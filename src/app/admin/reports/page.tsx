@@ -465,7 +465,10 @@ export default function AdminReportsPage() {
                             <td className="py-2 px-2 font-mono font-bold text-blue-700">{t.id}</td>
                             <td className="py-2 px-2">
                               <div className="font-medium text-slate-900">{t.user_name}</div>
-                              <div className="text-[10px] text-slate-500">{t.department_name || '-'}</div>
+                              <div className="text-[10px] text-slate-500">
+                                {t.division_name ? `${t.division_name} > ` : ''}
+                                {t.department_name || '-'}
+                              </div>
                             </td>
                             <td className="py-2 px-2 max-w-[200px]">
                               <div className="font-semibold text-slate-800 truncate" title={t.title}>{t.title}</div>

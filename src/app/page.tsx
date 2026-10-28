@@ -82,52 +82,7 @@ export default function LoginPage() {
     }
   };
 
-  const fillDemoUser = () => {
-    setUserName('สมชาย มีสุข (ฝ่ายการตลาด)');
-  };
 
-  const fillDemoAdmin = () => {
-    setEmail('it-admin@company.local');
-    setPassword('AdminPassword123!');
-  };
-
-  const handleQuickLoginUser = async () => {
-    setIsSubmitting(true);
-    setError(null);
-    const targetName = userName.trim() || 'สมชาย มีสุข (ฝ่ายการตลาด)';
-    setUserName(targetName);
-    try {
-      const res = await loginGeneralUser(targetName);
-      if (res.success) {
-        router.push('/portal');
-      } else {
-        setError(res.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
-      }
-    } catch (err) {
-      console.error('[PAGE ERROR handleQuickLoginUser]', err);
-      setError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleQuickLoginAdmin = async () => {
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const res = await loginStaff('it-admin@company.local', 'AdminPassword123!');
-      if (res.success) {
-        router.push('/admin');
-      } else {
-        setError(res.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
-      }
-    } catch (err) {
-      console.error('[PAGE ERROR handleQuickLoginAdmin]', err);
-      setError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <main className="min-h-screen flex flex-col justify-center items-center px-4 py-8 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-slate-100">
@@ -225,24 +180,6 @@ export default function LoginPage() {
                 <span>{isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าใช้งานระบบแจ้งซ่อมและจองห้อง'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleQuickLoginUser}
-                  disabled={isSubmitting}
-                  className="flex-1 py-2 px-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold transition text-center"
-                >
-                  ⚡ เข้าสู่ระบบ 1 คลิกทันที
-                </button>
-                <button
-                  type="button"
-                  onClick={fillDemoUser}
-                  className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition text-center"
-                >
-                  เติมชื่อตัวอย่าง
-                </button>
-              </div>
             </form>
           )}
 
@@ -288,41 +225,8 @@ export default function LoginPage() {
                 <span>{isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบบริหารจัดการ IT'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleQuickLoginAdmin}
-                  disabled={isSubmitting}
-                  className="flex-1 py-2 px-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition text-center"
-                >
-                  ⚡ เข้าสู่ระบบ IT Staff 1 คลิกทันที
-                </button>
-                <button
-                  type="button"
-                  onClick={fillDemoAdmin}
-                  className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition text-center"
-                >
-                  กรอกฟอร์มทดสอบ
-                </button>
-              </div>
             </form>
           )}
-
-          {/* Test Credentials Helper Card */}
-          <div className="mt-6 pt-4 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800">
-            <div className="text-slate-300 font-semibold flex items-center gap-1.5">
-              <span>🔑 ข้อมูลบัญชีสำหรับทดสอบ:</span>
-            </div>
-            <div className="space-y-1">
-              <div>
-                • <strong>พนักงานทั่วไป:</strong> พิมพ์ชื่ออะไรก็ได้แล้วกดเข้าใช้งานได้ทันที (เช่น <code className="text-blue-300 bg-slate-800 px-1 py-0.5 rounded font-mono">สมชาย มีสุข</code>)
-              </div>
-              <div>
-                • <strong>เจ้าหน้าที่ไอที:</strong> Email: <code className="text-indigo-300 bg-slate-800 px-1 py-0.5 rounded font-mono">it-admin@company.local</code> / รหัสผ่าน: <code className="text-indigo-300 bg-slate-800 px-1 py-0.5 rounded font-mono">AdminPassword123!</code>
-              </div>
-            </div>
-          </div>
 
         </div>
 

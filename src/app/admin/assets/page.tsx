@@ -153,6 +153,8 @@ export default function AdminAssetsPage() {
     const res = await borrowAsset({
       assetId: selectedAssetForBorrow.id,
       borrowerName: borrowerName.trim(),
+      borrowerDivisionId: dept?.division_id,
+      borrowerDivisionName: dept?.division_name,
       borrowerDeptId: borrowerDeptId || undefined,
       borrowerDeptName: dept?.name,
       expectedReturnDate: new Date(expectedReturnDate).toISOString(),
@@ -713,7 +715,9 @@ export default function AdminAssetsPage() {
                   >
                     <option value="">เลือกแผนก</option>
                     {departments.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
+                      <option key={d.id} value={d.id}>
+                        {d.division_name ? `${d.division_name} - ` : ''}{d.name}
+                      </option>
                     ))}
                   </select>
                 </div>

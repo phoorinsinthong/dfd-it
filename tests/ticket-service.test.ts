@@ -109,5 +109,39 @@ describe('Helpdesk Ticket Service Seam', () => {
       const ticket = await getTicketById(created.data!.id);
       expect(ticket?.status).toBe('in_progress');
     });
+
+    it('creates ticket with division and location hierarchy, and filters by division', async () => {
+      const { filterTickets } = await import('@/lib/services/ticket-service');
+      const res = await createTicket({
+        userId: 'usr_fin01',
+        userName: 'วิภาดา การเงิน',
+        divisionId: 'div-1',
+        divisionName: 'กองการเงิน (Financial Division)',
+        departmentId: 'dept-1',
+        departmentName: 'ฝ่ายบัญชี (Accounting Section)',
+        building: 'อาคาร 1',
+        floor: 'ชั้น 3',
+        room: 'ห้อง 301',
+        locationNote: 'โต๊ะ 02',
+        title: 'ปริ้นใบเสร็จไม่ออก',
+        description: 'เครื่องพิมพ์ขึ้นไฟแดง',
+        location: 'อาคาร 1 ชั้น 3 ห้อง 301 (โต๊ะ 02)',
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.data?.division_id).toBe('div-1');
+      expect(res.data?.division_name).toBe('กองการเงิน (Financial Division)');
+      expect(res.data?.building).toBe('อาคาร 1');
+      expect(res.data?.floor).toBe('ชั้น 3');
+      expect(res.data?.room).toBe('ห้อง 301');
+      expect(res.data?.location_note).toBe('โต๊ะ 02');
+
+      const finTickets = await filterTickets({ divisionId: 'div-1' });
+      expect(finTickets.length).toBeGreaterThanOrEqual(1);
+      expect(finTickets.some((t) => t.id === res.data?.id)).toBe(true);
+
+      const otherTickets = await filterTickets({ divisionId: 'div-non-existent' });
+      expect(otherTickets.length).toBe(0);
+    });
   });
 });

@@ -1,15 +1,107 @@
-import { Department, Category } from '@/types/database';
+import { Division, Department, Category } from '@/types/database';
 
-const DEFAULT_DEPARTMENTS: Department[] = [
-  { id: 'dept-1', name: 'ฝ่ายสนับสนุนเทคนิค (IT Support)', is_active: true },
-  { id: 'dept-2', name: 'ฝ่ายทรัพยากรบุคคล (HR)', is_active: true },
-  { id: 'dept-3', name: 'ฝ่ายบัญชีและการเงิน (Accounting & Finance)', is_active: true },
-  { id: 'dept-4', name: 'ฝ่ายการตลาดและประชาสัมพันธ์ (Marketing & PR)', is_active: true },
-  { id: 'dept-5', name: 'ฝ่ายปฏิบัติการ (Operations)', is_active: true },
-  { id: 'dept-6', name: 'ฝ่ายบริหาร (Executive)', is_active: true },
+export const DEFAULT_DIVISIONS: Division[] = [
+  { id: 'div-1', name: 'กองการเงิน (Financial Division)', is_active: true },
+  { id: 'div-2', name: 'สำนักบริหารกลาง (Central Administration Bureau)', is_active: true },
+  { id: 'div-3', name: 'กองการเจ้าหน้าที่ (Human Resources Division)', is_active: true },
+  { id: 'div-4', name: 'ศูนย์เทคโนโลยีสารสนเทศ (IT & Digital Center)', is_active: true },
+  { id: 'div-5', name: 'กองยุทธศาสตร์และแผนงาน (Strategy & Planning Division)', is_active: true },
 ];
 
-const DEFAULT_CATEGORIES: Category[] = [
+export const DEFAULT_DEPARTMENTS: Department[] = [
+  {
+    id: 'dept-1',
+    name: 'ฝ่ายบัญชี (Accounting Section)',
+    division_id: 'div-1',
+    division_name: 'กองการเงิน (Financial Division)',
+    building: 'อาคาร 1',
+    floor: 'ชั้น 3',
+    room: 'ห้อง 301',
+    is_active: true,
+  },
+  {
+    id: 'dept-2',
+    name: 'ฝ่ายการเงินและพัสดุ (Finance & Procurement)',
+    division_id: 'div-1',
+    division_name: 'กองการเงิน (Financial Division)',
+    building: 'อาคาร 1',
+    floor: 'ชั้น 3',
+    room: 'ห้อง 302',
+    is_active: true,
+  },
+  {
+    id: 'dept-3',
+    name: 'ฝ่ายสารบรรณและธุรการ (General Administration)',
+    division_id: 'div-2',
+    division_name: 'สำนักบริหารกลาง (Central Administration Bureau)',
+    building: 'อาคาร 1',
+    floor: 'ชั้น 1',
+    room: 'ห้อง 101',
+    is_active: true,
+  },
+  {
+    id: 'dept-4',
+    name: 'ฝ่ายยานพาหนะและอาคารสถานที่ (Facilities & Vehicles)',
+    division_id: 'div-2',
+    division_name: 'สำนักบริหารกลาง (Central Administration Bureau)',
+    building: 'อาคาร 1',
+    floor: 'ชั้น 1',
+    room: 'ห้อง 105',
+    is_active: true,
+  },
+  {
+    id: 'dept-5',
+    name: 'ฝ่ายสรรหาและบรรจุแต่งตั้ง (Talent Acquisition)',
+    division_id: 'div-3',
+    division_name: 'กองการเจ้าหน้าที่ (Human Resources Division)',
+    building: 'อาคาร 2',
+    floor: 'ชั้น 2',
+    room: 'ห้อง 201',
+    is_active: true,
+  },
+  {
+    id: 'dept-6',
+    name: 'ฝ่ายพัฒนาบุคลากร (HR Development)',
+    division_id: 'div-3',
+    division_name: 'กองการเจ้าหน้าที่ (Human Resources Division)',
+    building: 'อาคาร 2',
+    floor: 'ชั้น 2',
+    room: 'ห้อง 202',
+    is_active: true,
+  },
+  {
+    id: 'dept-7',
+    name: 'ฝ่ายสนับสนุนเทคนิคและบริการ (IT Support & Service)',
+    division_id: 'div-4',
+    division_name: 'ศูนย์เทคโนโลยีสารสนเทศ (IT & Digital Center)',
+    building: 'อาคาร 1',
+    floor: 'ชั้น 2',
+    room: 'ห้อง 205 (ห้องปฏิบัติการ IT)',
+    is_active: true,
+  },
+  {
+    id: 'dept-8',
+    name: 'ฝ่ายพัฒนาระบบสารสนเทศ (Software Development)',
+    division_id: 'div-4',
+    division_name: 'ศูนย์เทคโนโลยีสารสนเทศ (IT & Digital Center)',
+    building: 'อาคาร 1',
+    floor: 'ชั้น 2',
+    room: 'ห้อง 206',
+    is_active: true,
+  },
+  {
+    id: 'dept-9',
+    name: 'ฝ่ายแผนงานและงบประมาณ (Planning & Budgeting)',
+    division_id: 'div-5',
+    division_name: 'กองยุทธศาสตร์และแผนงาน (Strategy & Planning Division)',
+    building: 'อาคาร 2',
+    floor: 'ชั้น 4',
+    room: 'ห้อง 401',
+    is_active: true,
+  },
+];
+
+export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-1', name: 'Hardware (คอมพิวเตอร์/จอ/อุปกรณ์ต่อพ่วง)', is_active: true },
   { id: 'cat-2', name: 'Software (โปรแกรม/Windows/Office)', is_active: true },
   { id: 'cat-3', name: 'Network (อินเทอร์เน็ต/Wi-Fi/LAN)', is_active: true },
@@ -19,30 +111,166 @@ const DEFAULT_CATEGORIES: Category[] = [
 ];
 
 // Active in-memory state
+let divisionsStore: Division[] = JSON.parse(JSON.stringify(DEFAULT_DIVISIONS));
 let departmentsStore: Department[] = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS));
 let categoriesStore: Category[] = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
 
 export function resetMasterDataStore() {
+  divisionsStore = JSON.parse(JSON.stringify(DEFAULT_DIVISIONS));
   departmentsStore = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS));
   categoriesStore = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+}
+
+// ==========================================
+// Divisions API
+// ==========================================
+
+export async function getDivisions(options?: { includeInactive?: boolean }): Promise<Division[]> {
+  const includeInactive = options?.includeInactive ?? false;
+  if (includeInactive) {
+    return [...divisionsStore];
+  }
+  return divisionsStore.filter((d) => d.is_active);
+}
+
+export async function addDivision(rawName: string): Promise<{ success: boolean; data?: Division; error?: string }> {
+  const name = rawName?.trim();
+  if (!name) {
+    return { success: false, error: 'Division name is required' };
+  }
+
+  const exists = divisionsStore.some((d) => d.name.toLowerCase() === name.toLowerCase());
+  if (exists) {
+    return { success: false, error: 'Division name already exists' };
+  }
+
+  const newDiv: Division = {
+    id: `div-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    name,
+    is_active: true,
+    created_at: new Date().toISOString(),
+  };
+
+  divisionsStore.push(newDiv);
+  return { success: true, data: newDiv };
+}
+
+export async function updateDivision(
+  id: string,
+  rawName: string
+): Promise<{ success: boolean; data?: Division; error?: string }> {
+  const div = divisionsStore.find((d) => d.id === id);
+  if (!div) {
+    return { success: false, error: 'Division not found' };
+  }
+
+  const name = rawName?.trim();
+  if (!name) {
+    return { success: false, error: 'Division name is required' };
+  }
+
+  const exists = divisionsStore.some((d) => d.id !== id && d.name.toLowerCase() === name.toLowerCase());
+  if (exists) {
+    return { success: false, error: 'Division name already exists' };
+  }
+
+  div.name = name;
+
+  // Also update division_name in associated departments
+  departmentsStore.forEach((dept) => {
+    if (dept.division_id === id) {
+      dept.division_name = name;
+    }
+  });
+
+  return { success: true, data: { ...div } };
+}
+
+export async function deleteDivision(
+  id: string,
+  options?: { force?: boolean }
+): Promise<{ success: boolean; softDeleted?: boolean; error?: string }> {
+  const index = divisionsStore.findIndex((d) => d.id === id);
+  if (index === -1) {
+    return { success: false, error: 'Division not found' };
+  }
+
+  if (options?.force) {
+    divisionsStore.splice(index, 1);
+    // Unlink departments
+    departmentsStore.forEach((dept) => {
+      if (dept.division_id === id) {
+        dept.division_id = undefined;
+        dept.division_name = undefined;
+      }
+    });
+    return { success: true, softDeleted: false };
+  }
+
+  divisionsStore[index].is_active = false;
+  return { success: true, softDeleted: true };
+}
+
+export async function toggleDivisionActive(id: string, is_active: boolean): Promise<{ success: boolean; error?: string }> {
+  const div = divisionsStore.find((d) => d.id === id);
+  if (!div) {
+    return { success: false, error: 'Division not found' };
+  }
+
+  div.is_active = is_active;
+  return { success: true };
 }
 
 // ==========================================
 // Departments API
 // ==========================================
 
-export async function getDepartments(options?: { includeInactive?: boolean }): Promise<Department[]> {
-  const includeInactive = options?.includeInactive ?? false;
-  if (includeInactive) {
-    return [...departmentsStore];
-  }
-  return departmentsStore.filter((d) => d.is_active);
+export interface AddDepartmentInput {
+  name: string;
+  divisionId?: string;
+  building?: string;
+  floor?: string;
+  room?: string;
 }
 
-export async function addDepartment(rawName: string): Promise<{ success: boolean; data?: Department; error?: string }> {
+export interface UpdateDepartmentInput {
+  name?: string;
+  divisionId?: string;
+  building?: string;
+  floor?: string;
+  room?: string;
+  is_active?: boolean;
+}
+
+export async function getDepartments(options?: { divisionId?: string; includeInactive?: boolean }): Promise<Department[]> {
+  const includeInactive = options?.includeInactive ?? false;
+  let result = includeInactive ? [...departmentsStore] : departmentsStore.filter((d) => d.is_active);
+
+  if (options?.divisionId) {
+    result = result.filter((d) => d.division_id === options.divisionId);
+  }
+
+  return result;
+}
+
+export async function addDepartment(
+  input: string | AddDepartmentInput
+): Promise<{ success: boolean; data?: Department; error?: string }> {
+  const rawName = typeof input === 'string' ? input : input.name;
   const name = rawName?.trim();
   if (!name) {
     return { success: false, error: 'Department name is required' };
+  }
+
+  const divisionId = typeof input === 'object' ? input.divisionId : undefined;
+  const building = typeof input === 'object' ? input.building?.trim() : undefined;
+  const floor = typeof input === 'object' ? input.floor?.trim() : undefined;
+  const room = typeof input === 'object' ? input.room?.trim() : undefined;
+
+  let divisionName: string | undefined;
+  if (divisionId) {
+    const parentDiv = divisionsStore.find((d) => d.id === divisionId);
+    if (parentDiv) divisionName = parentDiv.name;
   }
 
   const exists = departmentsStore.some((d) => d.name.toLowerCase() === name.toLowerCase());
@@ -53,6 +281,11 @@ export async function addDepartment(rawName: string): Promise<{ success: boolean
   const newDept: Department = {
     id: `dept-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     name,
+    division_id: divisionId,
+    division_name: divisionName,
+    building,
+    floor,
+    room,
     is_active: true,
     created_at: new Date().toISOString(),
   };
@@ -73,24 +306,38 @@ export async function toggleDepartmentActive(id: string, is_active: boolean): Pr
 
 export async function updateDepartment(
   id: string,
-  rawName: string
+  input: string | UpdateDepartmentInput
 ): Promise<{ success: boolean; data?: Department; error?: string }> {
   const dept = departmentsStore.find((d) => d.id === id);
   if (!dept) {
     return { success: false, error: 'Department not found' };
   }
 
-  const name = rawName?.trim();
-  if (!name) {
-    return { success: false, error: 'Department name is required' };
+  const rawName = typeof input === 'string' ? input : input.name;
+  if (rawName !== undefined) {
+    const name = rawName.trim();
+    if (!name) {
+      return { success: false, error: 'Department name is required' };
+    }
+    const exists = departmentsStore.some((d) => d.id !== id && d.name.toLowerCase() === name.toLowerCase());
+    if (exists) {
+      return { success: false, error: 'Department name already exists' };
+    }
+    dept.name = name;
   }
 
-  const exists = departmentsStore.some((d) => d.id !== id && d.name.toLowerCase() === name.toLowerCase());
-  if (exists) {
-    return { success: false, error: 'Department name already exists' };
+  if (typeof input === 'object') {
+    if (input.divisionId !== undefined) {
+      dept.division_id = input.divisionId || undefined;
+      const parentDiv = divisionsStore.find((d) => d.id === input.divisionId);
+      dept.division_name = parentDiv ? parentDiv.name : undefined;
+    }
+    if (input.building !== undefined) dept.building = input.building.trim() || undefined;
+    if (input.floor !== undefined) dept.floor = input.floor.trim() || undefined;
+    if (input.room !== undefined) dept.room = input.room.trim() || undefined;
+    if (input.is_active !== undefined) dept.is_active = input.is_active;
   }
 
-  dept.name = name;
   return { success: true, data: { ...dept } };
 }
 

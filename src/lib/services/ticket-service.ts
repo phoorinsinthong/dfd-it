@@ -5,8 +5,14 @@ export interface CreateTicketInput {
   userId: string;
   userName?: string;
   userEmployeeId?: string;
+  divisionId?: string;
+  divisionName?: string;
   departmentId?: string;
   departmentName?: string;
+  building?: string;
+  floor?: string;
+  room?: string;
+  locationNote?: string;
   categoryId?: string;
   categoryName?: string;
   title: string;
@@ -27,6 +33,7 @@ export interface UpdateTicketStatusInput {
 
 export interface FilterTicketsInput {
   status?: TicketStatus | 'all';
+  divisionId?: string;
   departmentId?: string;
   categoryId?: string;
   searchQuery?: string;
@@ -51,8 +58,14 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
     user_id: input.userId,
     user_name: input.userName || 'Employee',
     user_employee_id: input.userEmployeeId,
+    division_id: input.divisionId,
+    division_name: input.divisionName,
     department_id: input.departmentId,
     department_name: input.departmentName,
+    building: input.building,
+    floor: input.floor,
+    room: input.room,
+    location_note: input.locationNote,
     category_id: input.categoryId,
     category_name: input.categoryName,
     title,
@@ -149,6 +162,9 @@ export async function filterTickets(filters: FilterTicketsInput): Promise<Ticket
     if (filters.status && filters.status !== 'all' && t.status !== filters.status) {
       return false;
     }
+    if (filters.divisionId && t.division_id !== filters.divisionId) {
+      return false;
+    }
     if (filters.departmentId && t.department_id !== filters.departmentId) {
       return false;
     }
@@ -162,7 +178,9 @@ export async function filterTickets(filters: FilterTicketsInput): Promise<Ticket
       const matchId = t.id.toLowerCase().includes(q);
       const matchUser = (t.user_name || '').toLowerCase().includes(q);
       const matchDept = (t.department_name || '').toLowerCase().includes(q);
-      if (!matchTitle && !matchDesc && !matchId && !matchUser && !matchDept) {
+      const matchDiv = (t.division_name || '').toLowerCase().includes(q);
+      const matchLoc = (t.location || '').toLowerCase().includes(q);
+      if (!matchTitle && !matchDesc && !matchId && !matchUser && !matchDept && !matchDiv && !matchLoc) {
         return false;
       }
     }

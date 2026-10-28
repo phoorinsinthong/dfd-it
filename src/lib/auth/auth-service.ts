@@ -4,7 +4,10 @@ export interface GeneralUserLoginInput {
   name?: string;
   employeeId?: string;
   phoneOrPin?: string;
+  divisionId?: string;
+  divisionName?: string;
   departmentId?: string;
+  departmentName?: string;
 }
 
 export interface StaffLoginInput {
@@ -20,7 +23,10 @@ export interface AuthResult {
     email?: string;
     name: string;
     role: UserRole;
+    divisionId?: string;
+    divisionName?: string;
     departmentId?: string;
+    departmentName?: string;
   };
   token?: string;
   error?: string;
@@ -33,7 +39,10 @@ const tokenStore = new Map<string, {
   email?: string;
   name: string;
   role: UserRole;
+  divisionId?: string;
+  divisionName?: string;
   departmentId?: string;
+  departmentName?: string;
   expiresAt: number;
 }>();
 
@@ -80,6 +89,10 @@ export async function authenticateGeneralUser(input: GeneralUserLoginInput): Pro
     employeeId: empIdTrimmed,
     name: userName,
     role: 'user',
+    divisionId: input.divisionId,
+    divisionName: input.divisionName,
+    departmentId: input.departmentId,
+    departmentName: input.departmentName,
     exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
   }))}`;
 
@@ -88,7 +101,10 @@ export async function authenticateGeneralUser(input: GeneralUserLoginInput): Pro
     employeeId: empIdTrimmed,
     name: userName,
     role: 'user',
+    divisionId: input.divisionId,
+    divisionName: input.divisionName,
     departmentId: input.departmentId,
+    departmentName: input.departmentName,
     expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
   });
 
@@ -99,7 +115,10 @@ export async function authenticateGeneralUser(input: GeneralUserLoginInput): Pro
       employeeId: empIdTrimmed,
       name: userName,
       role: 'user',
+      divisionId: input.divisionId,
+      divisionName: input.divisionName,
       departmentId: input.departmentId,
+      departmentName: input.departmentName,
     },
     token,
   };
@@ -119,11 +138,15 @@ export async function authenticateStaff(input: StaffLoginInput): Promise<AuthRes
     'support@company.local': 'SupportPass2026!',
   };
 
+  const envAdminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const envAdminPassword = process.env.ADMIN_PASSWORD;
+  if (envAdminEmail && envAdminPassword) {
+    STAFF_CREDENTIALS[envAdminEmail.toLowerCase()] = envAdminPassword;
+  }
+
   const emailLower = input.email.toLowerCase();
   const expectedPassword = STAFF_CREDENTIALS[emailLower];
-  const isValidStaff =
-    (expectedPassword !== undefined && input.password === expectedPassword) ||
-    (emailLower.includes('admin') && (input.password === 'AdminPassword123!' || input.password === 'admin-password-1234' || input.password === 'admin1234'));
+  const isValidStaff = expectedPassword !== undefined && input.password === expectedPassword;
 
   if (!isValidStaff) {
     return { success: false, error: 'Invalid credentials or unauthorized staff account' };

@@ -6,27 +6,40 @@
 -- 1. Enable btree_gist extension for PostgreSQL exclusion constraint
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
--- 2. Departments table
-CREATE TABLE IF NOT EXISTS public.departments (
+-- 2. Divisions table (กองงาน / สำนัก)
+CREATE TABLE IF NOT EXISTS public.divisions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 3. Users table (General Users & IT Staff)
+-- 3. Departments table (แผนก / ฝ่าย พร้อมที่อยู่ประจำ)
+CREATE TABLE IF NOT EXISTS public.departments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  division_id UUID REFERENCES public.divisions(id) ON DELETE SET NULL,
+  building TEXT,
+  floor TEXT,
+  room TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+-- 4. Users table (General Users & IT Staff)
 CREATE TABLE IF NOT EXISTS public.users (
   id TEXT PRIMARY KEY,
   employee_id TEXT UNIQUE,
   email TEXT UNIQUE,
   name TEXT NOT NULL,
   phone TEXT,
+  division_id UUID REFERENCES public.divisions(id) ON DELETE SET NULL,
   department_id UUID REFERENCES public.departments(id) ON DELETE SET NULL,
   role TEXT NOT NULL CHECK (role IN ('user', 'admin')) DEFAULT 'user',
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 4. Problem Categories table (Master Data)
+-- 5. Problem Categories table (Master Data)
 CREATE TABLE IF NOT EXISTS public.categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
@@ -34,17 +47,26 @@ CREATE TABLE IF NOT EXISTS public.categories (
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 5. Helpdesk Tickets table
+-- 6. Helpdesk Tickets table
 CREATE TABLE IF NOT EXISTS public.tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  division_id UUID REFERENCES public.divisions(id) ON DELETE SET NULL,
+  department_id UUID REFERENCES public.departments(id) ON DELETE SET NULL,
+  building TEXT,
+  floor TEXT,
+  room TEXT,
+  location_note TEXT,
   category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
+  title TEXT,
   description TEXT NOT NULL,
   location TEXT NOT NULL,
   image_url TEXT,
+  urgency TEXT NOT NULL CHECK (urgency IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'low',
   status TEXT NOT NULL CHECK (status IN ('pending', 'in_progress', 'resolved', 'cancelled')) DEFAULT 'pending',
   assigned_to TEXT REFERENCES public.users(id) ON DELETE SET NULL,
   solution_note TEXT,
+  root_cause TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   resolved_at TIMESTAMPTZ
 );

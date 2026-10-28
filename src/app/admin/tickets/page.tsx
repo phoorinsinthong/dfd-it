@@ -333,11 +333,14 @@ function AdminTicketsContent() {
                       <span>{ticket.user_name || 'ผู้ใช้งาน'} ({ticket.user_employee_id || '-'})</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Building className="w-3.5 h-3.5 text-slate-500" />
-                      <span>{ticket.department_name || 'ไม่ระบุแผนก'}</span>
+                      <Building className="w-3.5 h-3.5 text-blue-400" />
+                      <span>
+                        {ticket.division_name ? `${ticket.division_name} > ` : ''}
+                        <strong className="text-slate-300">{ticket.department_name || 'ไม่ระบุแผนก'}</strong>
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                      <MapPin className="w-3.5 h-3.5 text-amber-400" />
                       <span>{ticket.location}</span>
                     </div>
                   </div>

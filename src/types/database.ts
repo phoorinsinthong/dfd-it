@@ -1,8 +1,20 @@
 export type UserRole = 'user' | 'admin';
 
+export interface Division {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
 export interface Department {
   id: string;
   name: string;
+  division_id?: string;
+  division_name?: string;
+  building?: string;
+  floor?: string;
+  room?: string;
   is_active: boolean;
   created_at?: string;
 }
@@ -20,7 +32,10 @@ export interface UserProfile {
   email?: string;
   name: string;
   phone?: string;
+  division_id?: string;
+  division_name?: string;
   department_id?: string;
+  department_name?: string;
   role: UserRole;
   created_at?: string;
 }
@@ -39,8 +54,14 @@ export interface Ticket {
   user_id: string;
   user_name?: string;
   user_employee_id?: string;
+  division_id?: string;
+  division_name?: string;
   department_id?: string;
   department_name?: string;
+  building?: string;
+  floor?: string;
+  room?: string;
+  location_note?: string;
   category_id?: string;
   category_name?: string;
   title: string;
@@ -107,6 +128,8 @@ export interface BorrowLog {
   asset_code?: string;
   asset_name?: string;
   borrower_name: string;
+  borrower_division_id?: string;
+  borrower_division_name?: string;
   borrower_dept_id?: string;
   borrower_dept_name?: string;
   borrow_date: string;

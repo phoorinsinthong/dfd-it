@@ -116,6 +116,8 @@ export async function createAsset(
 export interface BorrowAssetInput {
   assetId: string;
   borrowerName: string;
+  borrowerDivisionId?: string;
+  borrowerDivisionName?: string;
   borrowerDeptId?: string;
   borrowerDeptName?: string;
   expectedReturnDate: string; // ISO
@@ -150,6 +152,8 @@ export async function borrowAsset(
     asset_code: asset.asset_code,
     asset_name: asset.name,
     borrower_name: input.borrowerName.trim(),
+    borrower_division_id: input.borrowerDivisionId,
+    borrower_division_name: input.borrowerDivisionName,
     borrower_dept_id: input.borrowerDeptId,
     borrower_dept_name: input.borrowerDeptName,
     borrow_date: new Date().toISOString(),
