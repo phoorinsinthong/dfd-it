@@ -115,15 +115,28 @@ export default function AdminUsersAndLogsPage() {
         <div className="max-w-md w-full bg-slate-900 border border-purple-500/30 rounded-3xl p-8 text-center shadow-2xl">
           <ShieldAlert className="w-14 h-14 text-purple-400 mx-auto mb-4" />
           <h1 className="text-xl font-bold text-white mb-2">เฉพาะ Super Administrator</h1>
-          <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+          <p className="text-slate-400 text-sm mb-4 leading-relaxed">
             หน้านี้สงวนไว้สำหรับผู้ดูแลระบบระดับสูงสุด (Superadmin) เพื่อจัดการสิทธิ์เจ้าหน้าที่และตรวจสอบประวัติการใช้งาน
           </p>
-          <Link
-            href="/admin"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
-          >
-            กลับสู่แดชบอร์ดหลัก
-          </Link>
+          <div className="text-xs text-purple-300 bg-purple-950/40 border border-purple-500/20 p-3 rounded-xl mb-6 text-left">
+            <div>💡 <strong>บัญชี Superadmin ตั้งต้น:</strong></div>
+            <div className="font-mono text-[11px] text-purple-200 mt-1">อีเมล: superadmin@company.local</div>
+            <div className="font-mono text-[11px] text-purple-200">รหัสผ่าน: SuperAdmin@2026!</div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition"
+            >
+              สลับเข้าสู่ระบบด้วย Superadmin
+            </Link>
+            <Link
+              href="/admin"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition"
+            >
+              กลับสู่แดชบอร์ดหลัก
+            </Link>
+          </div>
         </div>
       </div>
     );

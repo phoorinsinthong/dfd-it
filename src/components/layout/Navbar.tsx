@@ -136,8 +136,82 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
             <LogOut className="w-4 h-4" />
           </button>
         </div>
-
       </div>
+
+      {/* Mobile Navigation bar for Admin */}
+      {isAdmin && (
+        <div className="md:hidden flex items-center gap-1.5 px-4 py-2 bg-slate-950/90 border-t border-slate-800/80 overflow-x-auto text-xs no-scrollbar">
+          <Link
+            href="/admin"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition ${
+              activeSection === 'overview' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            ภาพรวม
+          </Link>
+          <Link
+            href="/admin/tickets"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'tickets' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Wrench className="w-3 h-3" /> แจ้งซ่อม
+          </Link>
+          <Link
+            href="/admin/bookings"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'bookings' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Calendar className="w-3 h-3" /> จองห้อง
+          </Link>
+          <Link
+            href="/admin/assets"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'assets' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Laptop className="w-3 h-3" /> ยืม-คืน
+          </Link>
+          <Link
+            href="/admin/roadmaps"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'roadmaps' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <ClipboardList className="w-3 h-3" /> แผนงาน PM
+          </Link>
+          <Link
+            href="/admin/reports"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'reports' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <FileText className="w-3 h-3" /> รายงาน
+          </Link>
+          <Link
+            href="/admin/settings"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'settings' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Settings className="w-3 h-3" /> ตั้งค่า
+          </Link>
+          {isSuperAdmin && (
+            <Link
+              href="/admin/users"
+              className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 font-semibold ${
+                activeSection === 'users'
+                  ? 'bg-purple-900/60 text-purple-200 border border-purple-500/50'
+                  : 'bg-purple-950/50 text-purple-300 border border-purple-500/30'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+              แอดมิน & Logs
+            </Link>
+          )}
+        </div>
+      )}
     </header>
   );
 }

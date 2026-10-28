@@ -26,6 +26,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.id && parsed.role) {
+          // Auto-heal superadmin role if previously cached as admin
+          if (parsed.email === 'superadmin@company.local' && parsed.role !== 'superadmin') {
+            parsed.role = 'superadmin';
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          }
           setUser(parsed);
         }
       }
@@ -68,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: res.user.id,
           email: res.user.email,
           name: res.user.name,
-          role: 'admin',
+          role: (res.user.role as any) || 'admin',
         };
         setUser(profile);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));

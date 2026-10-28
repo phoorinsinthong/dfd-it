@@ -17,7 +17,8 @@ import {
   Clock,
   CheckCircle,
   FileText,
-  Settings
+  Settings,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -96,6 +97,15 @@ export default function AdminDashboardPage() {
               <Settings className="w-4 h-4 text-slate-400" />
               <span>ตั้งค่าระบบ</span>
             </Link>
+            {user.role === 'superadmin' && (
+              <Link
+                href="/admin/users"
+                className="px-4 py-2 bg-purple-900/50 hover:bg-purple-900/70 text-purple-200 border border-purple-500/40 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-purple-950/40"
+              >
+                <ShieldCheck className="w-4 h-4 text-purple-400" />
+                <span>แอดมิน & Logs</span>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -183,6 +193,35 @@ export default function AdminDashboardPage() {
           </Link>
 
         </div>
+
+        {/* Superadmin Quick Access Banner */}
+        {user.role === 'superadmin' && (
+          <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-slate-900 border border-purple-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl shadow-purple-950/20">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-purple-300 bg-purple-900/80 px-2 py-0.5 rounded border border-purple-500/30">
+                    สิทธิ์เฉพาะ Superadmin
+                  </span>
+                  <h2 className="text-base font-bold text-white">จัดการผู้ดูแลระบบ & ประวัติการกระทำ (Audit Trail)</h2>
+                </div>
+                <p className="text-xs text-slate-400">
+                  เพิ่ม/แก้ไข/ลบเจ้าหน้าที่ไอที พร้อมตรวจสอบประวัติการทำงาน ทุกโมดูลในระบบ
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin/users"
+              className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-2 shrink-0 shadow-lg shadow-purple-600/30 transition"
+            >
+              <span>เปิดหน้าจัดการแอดมิน & Logs</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
 
         {/* Action Shortcuts & System Status */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

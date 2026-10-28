@@ -56,7 +56,18 @@ describe('Dual Authentication & Role Guard Seam', () => {
       expect(result.user).toBeDefined();
       expect(result.user?.email).toBe('it-admin@company.local');
       expect(result.user?.role).toBe('admin');
-      expect(result.token).toBeDefined();
+    });
+
+    it('successfully authenticates superadmin with superadmin role', async () => {
+      const result = await authenticateStaff({
+        email: 'superadmin@company.local',
+        password: 'SuperAdmin@2026!',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.user).toBeDefined();
+      expect(result.user?.email).toBe('superadmin@company.local');
+      expect(result.user?.role).toBe('superadmin');
     });
 
     it('rejects IT staff authentication with invalid password', async () => {

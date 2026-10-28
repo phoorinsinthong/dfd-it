@@ -217,6 +217,32 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/* Quick Preset Buttons for Convenience */}
+              <div className="pt-1 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('superadmin@company.local');
+                    setPassword('SuperAdmin@2026!');
+                  }}
+                  className="flex-1 py-1.5 px-2 rounded-lg bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 text-[11px] font-medium flex items-center justify-center gap-1 transition"
+                >
+                  <ShieldCheck className="w-3 h-3 text-purple-400" />
+                  กรอก Superadmin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('admin@company.local');
+                    setPassword('Admin@2026!');
+                  }}
+                  className="flex-1 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 text-slate-300 text-[11px] font-medium flex items-center justify-center gap-1 transition"
+                >
+                  <Wrench className="w-3 h-3 text-blue-400" />
+                  กรอก IT Admin
+                </button>
+              </div>
+
               <button
                 type="submit"
                 disabled={isSubmitting}
