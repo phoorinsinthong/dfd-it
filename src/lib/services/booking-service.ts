@@ -1,4 +1,5 @@
 import { Room, Booking, BookingStatus, RoomType } from '@/types/database';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export const INITIAL_ROOMS: Room[] = [
   {
@@ -87,6 +88,37 @@ export function resetBookingStore() {
 }
 
 export async function getRooms(options?: { includeInactive?: boolean }): Promise<Room[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('rooms').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        roomsStore = data.map((r: {
+          id: string;
+          name: string;
+          type: RoomType;
+          capacity?: number | null;
+          location?: string | null;
+          static_url?: string | null;
+          passcode?: string | null;
+          is_active?: boolean | null;
+          created_at?: string;
+        }) => ({
+          id: r.id,
+          name: r.name,
+          type: r.type || 'onsite',
+          capacity: r.capacity || undefined,
+          location: r.location || undefined,
+          static_url: r.static_url || undefined,
+          passcode: r.passcode || undefined,
+          is_active: r.is_active ?? true,
+          created_at: r.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Supabase getRooms warning:', e);
+    }
+  }
+
   if (options?.includeInactive) {
     return [...roomsStore];
   }
@@ -95,7 +127,30 @@ export async function getRooms(options?: { includeInactive?: boolean }): Promise
 
 export async function getRoomById(roomId: string): Promise<Room | null> {
   const room = roomsStore.find((r) => r.id === roomId);
-  return room ? { ...room } : null;
+  if (room) return { ...room };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('rooms').select('*').eq('id', roomId).maybeSingle();
+      if (!error && data) {
+        return {
+          id: data.id,
+          name: data.name,
+          type: data.type || 'onsite',
+          capacity: data.capacity || undefined,
+          location: data.location || undefined,
+          static_url: data.static_url || undefined,
+          passcode: data.passcode || undefined,
+          is_active: data.is_active ?? true,
+          created_at: data.created_at,
+        };
+      }
+    } catch (e) {
+      console.warn('Supabase getRoomById warning:', e);
+    }
+  }
+
+  return null;
 }
 
 export async function createRoom(
@@ -124,6 +179,26 @@ export async function createRoom(
     is_active: true,
     created_at: new Date().toISOString(),
   };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('rooms').insert({
+        name: newRoom.name,
+        type: newRoom.type,
+        capacity: newRoom.capacity,
+        location: newRoom.location,
+        static_url: newRoom.static_url,
+        passcode: newRoom.passcode,
+        is_active: true,
+      }).select().single();
+      if (!error && data) {
+        newRoom.id = data.id;
+        newRoom.created_at = data.created_at;
+      }
+    } catch (e) {
+      console.warn('Supabase createRoom warning:', e);
+    }
+  }
 
   roomsStore.push(newRoom);
   return { success: true, data: newRoom };
@@ -155,6 +230,22 @@ export async function updateRoom(
   if (input.passcode !== undefined) room.passcode = input.passcode.trim();
   if (input.isActive !== undefined) room.is_active = input.isActive;
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('rooms').update({
+        name: room.name,
+        type: room.type,
+        capacity: room.capacity,
+        location: room.location,
+        static_url: room.static_url,
+        passcode: room.passcode,
+        is_active: room.is_active,
+      }).eq('id', input.roomId);
+    } catch (e) {
+      console.warn('Supabase updateRoom warning:', e);
+    }
+  }
+
   return { success: true, data: { ...room } };
 }
 
@@ -174,6 +265,13 @@ export async function deleteRoom(
   if (hasBookings && !options?.force) {
     // Soft delete to protect booking records
     roomsStore[roomIdx].is_active = false;
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('rooms').update({ is_active: false }).eq('id', roomId);
+      } catch (e) {
+        console.warn('Supabase deleteRoom soft warning:', e);
+      }
+    }
     return {
       success: true,
       softDeleted: true,
@@ -183,6 +281,14 @@ export async function deleteRoom(
 
   // Hard delete
   roomsStore.splice(roomIdx, 1);
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('rooms').delete().eq('id', roomId);
+    } catch (e) {
+      console.warn('Supabase deleteRoom hard warning:', e);
+    }
+  }
+
   return { success: true, softDeleted: false };
 }
 
@@ -212,8 +318,22 @@ export async function createBooking(
     return { success: false, error: 'End time must be after start time' };
   }
 
-  // PostgreSQL Exclusion Constraint Simulation:
-  // EXCLUDE USING gist (room_id WITH =, tstzrange(start_time, end_time) WITH &&)
+  // Fetch recent bookings from Supabase if configured to ensure no collision
+  if (isSupabaseConfigured()) {
+    try {
+      const { data } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('room_id', input.roomId)
+        .neq('status', 'cancelled');
+      if (data) {
+        bookingsStore = data as Booking[];
+      }
+    } catch (e) {
+      console.warn('Supabase check booking overlap warning:', e);
+    }
+  }
+
   // Two ranges [startA, endA) and [startB, endB) overlap iff startA < endB && endA > startB
   const hasConflict = bookingsStore.some((b) => {
     if (b.room_id !== input.roomId || b.status === 'cancelled') {
@@ -250,6 +370,32 @@ export async function createBooking(
     created_at: new Date().toISOString(),
   };
 
+  if (isSupabaseConfigured()) {
+    try {
+      const { data: dbBooking, error } = await supabase.from('bookings').insert({
+        id: newBooking.id,
+        user_id: newBooking.user_id,
+        user_name: newBooking.user_name,
+        user_department: newBooking.user_department,
+        room_id: newBooking.room_id,
+        room_name: newBooking.room_name,
+        room_type: newBooking.room_type,
+        room_static_url: newBooking.room_static_url,
+        room_passcode: newBooking.room_passcode,
+        title: newBooking.title,
+        start_time: newBooking.start_time,
+        end_time: newBooking.end_time,
+        required_equipment: newBooking.required_equipment,
+        status: newBooking.status,
+      }).select().single();
+      if (!error && dbBooking) {
+        newBooking.id = dbBooking.id;
+      }
+    } catch (e) {
+      console.warn('Supabase createBooking warning:', e);
+    }
+  }
+
   bookingsStore.unshift(newBooking);
 
   return {
@@ -263,6 +409,7 @@ export async function getBookingsByDateRange(
   endIso: string,
   roomId?: string
 ): Promise<Booking[]> {
+  await getAllBookings();
   const start = new Date(startIso).getTime();
   const end = new Date(endIso).getTime();
 
@@ -277,10 +424,24 @@ export async function getBookingsByDateRange(
 }
 
 export async function getUserBookings(userId: string): Promise<Booking[]> {
+  await getAllBookings();
   return bookingsStore.filter((b) => b.user_id === userId);
 }
 
 export async function getAllBookings(): Promise<Booking[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('start_time', { ascending: true });
+      if (!error && data) {
+        bookingsStore = data as Booking[];
+      }
+    } catch (e) {
+      console.warn('Supabase getAllBookings warning:', e);
+    }
+  }
   return [...bookingsStore];
 }
 
@@ -299,5 +460,14 @@ export async function cancelBooking(
   }
 
   booking.status = 'cancelled';
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    } catch (e) {
+      console.warn('Supabase cancelBooking warning:', e);
+    }
+  }
+
   return { success: true };
 }

@@ -1,5 +1,6 @@
 import { Ticket, TicketStatus, TicketUrgency } from '@/types/database';
 import { sendLineTicketNotification } from './line-notification-service';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export interface CreateTicketInput {
   userId: string;
@@ -79,6 +80,52 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 
   ticketsStore.unshift(newTicket);
 
+  if (isSupabaseConfigured()) {
+    try {
+      // Upsert user if needed so foreign key doesn't block ticket creation
+      await supabase.from('users').upsert({
+        id: input.userId,
+        name: input.userName || 'Employee',
+        employee_id: input.userEmployeeId,
+        division_id: input.divisionId,
+        department_id: input.departmentId,
+        role: 'user',
+      }, { onConflict: 'id' });
+
+      const { data: dbTicket, error } = await supabase.from('tickets').insert({
+        id: newTicket.id,
+        user_id: newTicket.user_id,
+        user_name: newTicket.user_name,
+        user_employee_id: newTicket.user_employee_id,
+        division_id: newTicket.division_id,
+        division_name: newTicket.division_name,
+        department_id: newTicket.department_id,
+        department_name: newTicket.department_name,
+        building: newTicket.building,
+        floor: newTicket.floor,
+        room: newTicket.room,
+        location_note: newTicket.location_note,
+        category_id: newTicket.category_id,
+        category_name: newTicket.category_name,
+        title: newTicket.title,
+        description: newTicket.description,
+        location: newTicket.location,
+        image_url: newTicket.image_url,
+        urgency: newTicket.urgency,
+        status: newTicket.status,
+        created_at: newTicket.created_at,
+      }).select().single();
+
+      if (error) {
+        console.warn('Supabase createTicket warning:', error);
+      } else if (dbTicket) {
+        newTicket.id = dbTicket.id;
+      }
+    } catch (e) {
+      console.warn('Supabase createTicket exception:', e);
+    }
+  }
+
   // Trigger LINE Group notification
   try {
     await sendLineTicketNotification(newTicket);
@@ -90,16 +137,61 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 }
 
 export async function getUserTickets(userId: string): Promise<Ticket[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        return data as Ticket[];
+      }
+    } catch (e) {
+      console.warn('Supabase getUserTickets warning:', e);
+    }
+  }
   return ticketsStore.filter((t) => t.user_id === userId);
 }
 
 export async function getAllTickets(): Promise<Ticket[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        ticketsStore = data as Ticket[];
+        return [...ticketsStore];
+      }
+    } catch (e) {
+      console.warn('Supabase getAllTickets warning:', e);
+    }
+  }
   return [...ticketsStore];
 }
 
 export async function getTicketById(ticketId: string): Promise<Ticket | null> {
   const found = ticketsStore.find((t) => t.id === ticketId);
-  return found ? { ...found } : null;
+  if (found) return { ...found };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('id', ticketId)
+        .maybeSingle();
+      if (!error && data) {
+        return data as Ticket;
+      }
+    } catch (e) {
+      console.warn('Supabase getTicketById warning:', e);
+    }
+  }
+
+  return null;
 }
 
 export async function cancelTicket(ticketId: string, userId: string): Promise<{ success: boolean; error?: string }> {
@@ -117,6 +209,15 @@ export async function cancelTicket(ticketId: string, userId: string): Promise<{ 
   }
 
   ticket.status = 'cancelled';
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('tickets').update({ status: 'cancelled' }).eq('id', ticketId);
+    } catch (e) {
+      console.warn('Supabase cancelTicket warning:', e);
+    }
+  }
+
   return { success: true };
 }
 
@@ -133,6 +234,18 @@ export async function acceptTicket(input: {
   ticket.status = 'in_progress';
   ticket.assigned_to = input.staffId;
   ticket.assigned_to_name = input.staffName;
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('tickets').update({
+        status: 'in_progress',
+        assigned_to: input.staffId,
+        assigned_to_name: input.staffName,
+      }).eq('id', input.ticketId);
+    } catch (e) {
+      console.warn('Supabase acceptTicket warning:', e);
+    }
+  }
 
   return { success: true, data: { ...ticket } };
 }
@@ -154,11 +267,25 @@ export async function resolveTicket(input: {
   }
   ticket.resolved_at = new Date().toISOString();
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('tickets').update({
+        status: 'resolved',
+        solution_note: input.solutionNote,
+        root_cause: input.rootCause,
+        resolved_at: ticket.resolved_at,
+      }).eq('id', input.ticketId);
+    } catch (e) {
+      console.warn('Supabase resolveTicket warning:', e);
+    }
+  }
+
   return { success: true, data: { ...ticket } };
 }
 
 export async function filterTickets(filters: FilterTicketsInput): Promise<Ticket[]> {
-  return ticketsStore.filter((t) => {
+  const all = await getAllTickets();
+  return all.filter((t) => {
     if (filters.status && filters.status !== 'all' && t.status !== filters.status) {
       return false;
     }
@@ -207,6 +334,21 @@ export async function updateTicketStatus(input: UpdateTicketStatusInput): Promis
   }
   if (input.status === 'resolved') {
     ticket.resolved_at = new Date().toISOString();
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('tickets').update({
+        status: input.status,
+        assigned_to: input.staffId || ticket.assigned_to,
+        assigned_to_name: input.staffName || ticket.assigned_to_name,
+        solution_note: input.solutionNote || ticket.solution_note,
+        root_cause: input.rootCause || ticket.root_cause,
+        resolved_at: ticket.resolved_at,
+      }).eq('id', input.ticketId);
+    } catch (e) {
+      console.warn('Supabase updateTicketStatus warning:', e);
+    }
   }
 
   return { success: true, data: { ...ticket } };

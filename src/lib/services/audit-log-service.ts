@@ -1,4 +1,5 @@
 import { AuditLog, AuditAction, AuditModule } from '@/types/database';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 let auditLogsStore: AuditLog[] = [];
 
@@ -34,6 +35,27 @@ export async function recordAuditLog(input: RecordAuditLogInput): Promise<AuditL
   };
 
   auditLogsStore.unshift(newLog);
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('audit_logs').insert({
+        id: newLog.id,
+        timestamp: newLog.timestamp,
+        actor_id: newLog.actor_id,
+        actor_name: newLog.actor_name,
+        actor_email: newLog.actor_email,
+        actor_role: newLog.actor_role,
+        action: newLog.action,
+        module: newLog.module,
+        target_id: newLog.target_id,
+        target_name: newLog.target_name,
+        details: newLog.details,
+      });
+    } catch (e) {
+      console.warn('Supabase recordAuditLog warning:', e);
+    }
+  }
+
   return { ...newLog };
 }
 
@@ -46,6 +68,20 @@ export interface GetAuditLogsFilter {
 }
 
 export async function getAuditLogs(filter?: GetAuditLogsFilter): Promise<AuditLog[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .order('timestamp', { ascending: false });
+      if (!error && data && data.length > 0) {
+        auditLogsStore = data as AuditLog[];
+      }
+    } catch (e) {
+      console.warn('Supabase getAuditLogs warning:', e);
+    }
+  }
+
   let logs = [...auditLogsStore];
 
   if (filter?.module && filter.module !== 'all') {

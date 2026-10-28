@@ -1,4 +1,5 @@
 import { ChecklistTemplate, ChecklistItem, Checklist } from '@/types/database';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export const THAI_MONTH_NAMES = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -61,12 +62,42 @@ export function resetRoadmapStore() {
 }
 
 export async function getChecklistTemplates(): Promise<ChecklistTemplate[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('checklist_templates')
+        .select('*')
+        .order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        templatesStore = data as ChecklistTemplate[];
+      }
+    } catch (e) {
+      console.warn('Supabase getChecklistTemplates warning:', e);
+    }
+  }
   return [...templatesStore];
 }
 
 export async function getChecklistTemplateById(id: string): Promise<ChecklistTemplate | null> {
   const found = templatesStore.find((t) => t.id === id);
-  return found ? { ...found } : null;
+  if (found) return { ...found };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('checklist_templates')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (!error && data) {
+        return data as ChecklistTemplate;
+      }
+    } catch (e) {
+      console.warn('Supabase getChecklistTemplateById warning:', e);
+    }
+  }
+
+  return null;
 }
 
 export interface CreateChecklistTemplateInput {
@@ -101,6 +132,25 @@ export async function createChecklistTemplate(
     items: input.items.map((i) => i.trim()).filter(Boolean),
     created_at: new Date().toISOString(),
   };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('checklist_templates').insert({
+        title: newTemplate.title,
+        description: newTemplate.description,
+        frequency: newTemplate.frequency,
+        scheduled_months: newTemplate.scheduled_months,
+        period_label: newTemplate.period_label,
+        items: newTemplate.items,
+      }).select().single();
+      if (!error && data) {
+        newTemplate.id = data.id;
+        newTemplate.created_at = data.created_at;
+      }
+    } catch (e) {
+      console.warn('Supabase createChecklistTemplate warning:', e);
+    }
+  }
 
   templatesStore.push(newTemplate);
 
@@ -155,6 +205,21 @@ export async function updateChecklistTemplate(
     target.items = input.items.map((i) => i.trim()).filter(Boolean);
   }
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('checklist_templates').update({
+        title: target.title,
+        description: target.description,
+        frequency: target.frequency,
+        scheduled_months: target.scheduled_months,
+        period_label: target.period_label,
+        items: target.items,
+      }).eq('id', input.id);
+    } catch (e) {
+      console.warn('Supabase updateChecklistTemplate warning:', e);
+    }
+  }
+
   if (input.actor) {
     const { recordAuditLog } = await import('./audit-log-service');
     await recordAuditLog({
@@ -184,6 +249,14 @@ export async function deleteChecklistTemplate(
 
   const target = templatesStore[targetIdx];
   templatesStore.splice(targetIdx, 1);
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('checklist_templates').delete().eq('id', templateId);
+    } catch (e) {
+      console.warn('Supabase deleteChecklistTemplate warning:', e);
+    }
+  }
 
   if (actor) {
     const { recordAuditLog } = await import('./audit-log-service');
@@ -220,7 +293,6 @@ export async function generateAnnualRoadmap(
     return { success: false, createdCount: 0, error: 'Template not found' };
   }
 
-  // Determine target months to schedule
   let targetMonths: number[] = [];
 
   if (options?.months && options.months.length > 0) {
@@ -268,6 +340,24 @@ export async function generateAnnualRoadmap(
       created_at: new Date().toISOString(),
     };
 
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('checklists').insert({
+          id: checklist.id,
+          title: checklist.title,
+          year: checklist.year,
+          target_month: checklist.target_month,
+          period_label: checklist.period_label,
+          type: checklist.type,
+          status: checklist.status,
+          items: checklist.items,
+          progress_percent: checklist.progress_percent,
+        });
+      } catch (e) {
+        console.warn('Supabase generateAnnualRoadmap item warning:', e);
+      }
+    }
+
     checklistsStore.push(checklist);
     createdChecklists.push(checklist);
   }
@@ -313,11 +403,43 @@ export async function createAdhocChecklist(
     created_at: new Date().toISOString(),
   };
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('checklists').insert({
+        id: newChecklist.id,
+        title: newChecklist.title,
+        year: newChecklist.year,
+        target_month: newChecklist.target_month,
+        type: newChecklist.type,
+        status: newChecklist.status,
+        items: newChecklist.items,
+        progress_percent: newChecklist.progress_percent,
+      });
+    } catch (e) {
+      console.warn('Supabase createAdhocChecklist warning:', e);
+    }
+  }
+
   checklistsStore.unshift(newChecklist);
   return { success: true, data: newChecklist };
 }
 
 export async function getChecklists(year?: number): Promise<Checklist[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      let query = supabase.from('checklists').select('*').order('created_at', { ascending: true });
+      if (year) {
+        query = query.eq('year', year);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        checklistsStore = data as Checklist[];
+      }
+    } catch (e) {
+      console.warn('Supabase getChecklists warning:', e);
+    }
+  }
+
   const filtered = year ? checklistsStore.filter((c) => c.year === year) : [...checklistsStore];
 
   return filtered.map((c) => {
@@ -355,6 +477,17 @@ export async function toggleChecklistItem(
         item.completed_by = undefined;
         item.completed_at = undefined;
       }
+
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase.from('checklists').update({
+            items: checklist.items,
+          }).eq('id', checklist.id);
+        } catch (e) {
+          console.warn('Supabase toggleChecklistItem warning:', e);
+        }
+      }
+
       return { success: true, item: { ...item } };
     }
   }
@@ -391,7 +524,6 @@ export async function updateMonthlyChecklist(
 
   if (input.items && input.items.length > 0) {
     const cleanItems = input.items.map((i) => i.trim()).filter(Boolean);
-    // Preserve existing items completion state if task_name matches
     target.items = cleanItems.map((taskName, idx) => {
       const existing = target.items.find((i) => i.task_name === taskName);
       if (existing) {
@@ -406,7 +538,6 @@ export async function updateMonthlyChecklist(
     });
   }
 
-  // Recalculate progress
   const total = target.items.length;
   const completed = target.items.filter((i) => i.is_completed).length;
   target.progress_percent = total === 0 ? 0 : Math.round((completed / total) * 100);
@@ -416,6 +547,21 @@ export async function updateMonthlyChecklist(
     target.status = 'in_progress';
   } else {
     target.status = 'pending';
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('checklists').update({
+        title: target.title,
+        target_month: target.target_month,
+        period_label: target.period_label,
+        items: target.items,
+        status: target.status,
+        progress_percent: target.progress_percent,
+      }).eq('id', input.checklistId);
+    } catch (e) {
+      console.warn('Supabase updateMonthlyChecklist warning:', e);
+    }
   }
 
   if (input.actor) {
@@ -448,6 +594,14 @@ export async function deleteMonthlyChecklist(
   const target = checklistsStore[targetIdx];
   checklistsStore.splice(targetIdx, 1);
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('checklists').delete().eq('id', checklistId);
+    } catch (e) {
+      console.warn('Supabase deleteMonthlyChecklist warning:', e);
+    }
+  }
+
   if (actor) {
     const { recordAuditLog } = await import('./audit-log-service');
     await recordAuditLog({
@@ -465,4 +619,3 @@ export async function deleteMonthlyChecklist(
 
   return { success: true };
 }
-

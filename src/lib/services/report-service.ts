@@ -3,6 +3,7 @@ import { getAllTickets } from './ticket-service';
 import { getAllBookings } from './booking-service';
 import { getAllBorrowLogs } from './asset-service';
 import { getChecklists, THAI_MONTH_NAMES } from './roadmap-service';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 let signaturesStore: ReportSignature[] = [];
 
@@ -58,8 +59,8 @@ export async function generateMonthlyReport(
 
   const byRoom: Record<string, number> = {};
   monthBookings.forEach((b) => {
-    const rName = b.room_name || 'ห้องประชุม';
-    byRoom[rName] = (byRoom[rName] || 0) + 1;
+    const roomName = b.room_name || 'ห้องประชุม';
+    byRoom[roomName] = (byRoom[roomName] || 0) + 1;
   });
 
   // 3. Filter Asset Loans in target month/year
@@ -71,20 +72,57 @@ export async function generateMonthlyReport(
   const totalLoans = monthLoans.length;
   const returnedLoans = monthLoans.filter((l) => Boolean(l.actual_return_date)).length;
   const activeLoans = monthLoans.filter((l) => !l.actual_return_date && !l.is_overdue).length;
-  const overdueLoans = monthLoans.filter((l) => l.is_overdue).length;
+  const overdueLoans = monthLoans.filter((l) => !l.actual_return_date && l.is_overdue).length;
 
-  // 4. Filter PM Checklists for target month
-  const monthChecklists = checklists.filter(
-    (c) => c.year === year && (c.target_month === month || (!c.target_month && c.type === 'adhoc'))
-  );
+  // 4. Filter PM Checklists for target month/year
+  const monthChecklists = checklists.filter((c) => {
+    if (c.year !== year) return false;
+    if (c.target_month && c.target_month === month) return true;
+    if (c.scheduled_months && c.scheduled_months.includes(month)) return true;
+    return false;
+  });
 
   const totalChecklists = monthChecklists.length;
   const completedChecklists = monthChecklists.filter((c) => c.status === 'completed').length;
-  const completionRate =
-    totalChecklists === 0 ? 100 : Math.round((completedChecklists / totalChecklists) * 100);
+  const pmCompletionRate = totalChecklists === 0 ? 100 : Math.round((completedChecklists / totalChecklists) * 100);
 
-  // 5. Check if signature exists
-  const existingSig = signaturesStore.find((s) => s.month === month && s.year === year);
+  // 5. Signature for target month
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('month', month)
+        .eq('year', year)
+        .maybeSingle();
+      if (!error && data) {
+        const idx = signaturesStore.findIndex((s) => s.month === month && s.year === year);
+        const sig: ReportSignature = {
+          id: data.id,
+          month: data.month,
+          year: data.year,
+          staff_signature: data.staff_signature || undefined,
+          staff_name: data.staff_name || undefined,
+          staff_title: data.staff_title || undefined,
+          staff_signature_type: data.staff_signature_type || undefined,
+          supervisor_signature: data.supervisor_signature || undefined,
+          supervisor_name: data.supervisor_name || undefined,
+          supervisor_title: data.supervisor_title || undefined,
+          supervisor_signature_type: data.supervisor_signature_type || undefined,
+          signed_at: data.signed_at || data.created_at,
+        };
+        if (idx !== -1) {
+          signaturesStore[idx] = sig;
+        } else {
+          signaturesStore.push(sig);
+        }
+      }
+    } catch (e) {
+      console.warn('Supabase get report signature warning:', e);
+    }
+  }
+
+  const signature = signaturesStore.find((s) => s.month === month && s.year === year);
 
   return {
     month,
@@ -114,9 +152,9 @@ export async function generateMonthlyReport(
     pmStats: {
       totalChecklists,
       completedChecklists,
-      completionRate,
+      completionRate: pmCompletionRate,
     },
-    signature: existingSig,
+    signature,
   };
 }
 
@@ -187,6 +225,26 @@ export async function saveReportSignature(
     signaturesStore.push(updatedSig);
   }
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('reports').upsert({
+        month: updatedSig.month,
+        year: updatedSig.year,
+        staff_signature: updatedSig.staff_signature,
+        staff_name: updatedSig.staff_name,
+        staff_title: updatedSig.staff_title,
+        staff_signature_type: updatedSig.staff_signature_type,
+        supervisor_signature: updatedSig.supervisor_signature,
+        supervisor_name: updatedSig.supervisor_name,
+        supervisor_title: updatedSig.supervisor_title,
+        supervisor_signature_type: updatedSig.supervisor_signature_type,
+        signed_at: updatedSig.signed_at,
+      }, { onConflict: 'month,year' });
+    } catch (e) {
+      console.warn('Supabase saveReportSignature warning:', e);
+    }
+  }
+
   // Audit Log
   if (input.actor) {
     const { recordAuditLog } = await import('./audit-log-service');
@@ -238,6 +296,23 @@ export async function clearReportSignature(
     existing.supervisor_name = undefined;
     existing.supervisor_title = undefined;
     existing.supervisor_signature_type = undefined;
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('reports').update({
+        staff_signature: existing.staff_signature || null,
+        staff_name: existing.staff_name || null,
+        staff_title: existing.staff_title || null,
+        staff_signature_type: existing.staff_signature_type || null,
+        supervisor_signature: existing.supervisor_signature || null,
+        supervisor_name: existing.supervisor_name || null,
+        supervisor_title: existing.supervisor_title || null,
+        supervisor_signature_type: existing.supervisor_signature_type || null,
+      }).eq('month', input.month).eq('year', input.year);
+    } catch (e) {
+      console.warn('Supabase clearReportSignature warning:', e);
+    }
   }
 
   // Audit Log
@@ -299,101 +374,71 @@ export function generateReportCsv(report: MonthlyReportSummary): string {
   lines.push('');
 
   // Section 4: Meeting Rooms
-  lines.push('--- สถิติการใช้งานห้องประชุม (Meeting Room Usage) ---');
-  lines.push('ห้องประชุม/บัญชี,จำนวนครั้ง');
+  lines.push('--- สถิติการใช้งานห้องประชุมและบัญชีออนไลน์ (Booking by Room) ---');
+  lines.push('ห้องประชุม / บัญชีออนไลน์,จำนวนครั้งที่ใช้งาน');
   Object.entries(report.bookingStats.byRoom).forEach(([room, count]) => {
     lines.push(`"${room}",${count}`);
   });
+  lines.push('');
+
+  // Section 5: Signatures
+  lines.push('--- การลงนามรับรองรายงาน (Signatures) ---');
+  lines.push(`เจ้าหน้าที่ไอทีผู้จัดทำ,${report.signature?.staff_name || 'ยังไม่ลงนาม'},ตำแหน่ง,${report.signature?.staff_title || '-'}`);
+  lines.push(`ผู้ตรวจรับรองรายงาน,${report.signature?.supervisor_name || 'ยังไม่ลงนาม'},ตำแหน่ง,${report.signature?.supervisor_title || '-'}`);
+  lines.push(`วัน-เวลาที่ลงนาม,${report.signature?.signed_at ? new Date(report.signature.signed_at).toLocaleString('th-TH') : '-'}`);
 
   return bom + lines.join('\n');
 }
 
-export async function getMonthlyTickets(month: number, year: number): Promise<import('@/types/database').Ticket[]> {
-  const tickets = await getAllTickets();
-  return tickets.filter((t) => {
+export async function getMonthlyTickets(month: number, year: number) {
+  const all = await getAllTickets();
+  return all.filter((t) => {
     const d = new Date(t.created_at);
     return d.getMonth() + 1 === month && d.getFullYear() === year;
   });
 }
 
-export function generateDetailedTicketsCsv(
-  tickets: import('@/types/database').Ticket[],
-  month: number,
-  year: number
-): string {
+export function generateDetailedTicketsCsv(tickets: import('@/types/database').Ticket[], month: number, year: number): string {
   const monthName = THAI_MONTH_NAMES[month - 1] || `Month ${month}`;
   const bom = '\uFEFF';
   const lines: string[] = [];
 
-  lines.push(`รายงานรายละเอียดรายการแจ้งซ่อมประจำเดือน (IT Support Incident Detail Report)`);
-  lines.push(`ประจำเดือน: ${monthName} ${year}`);
-  lines.push(`จำนวนงานทั้งหมด: ${tickets.length} รายการ`);
-  lines.push(`ออกรายงานเมื่อ: ${new Date().toLocaleDateString('th-TH')}`);
+  lines.push(`รายงานรายละเอียดรายการแจ้งซ่อมประจำเดือน ${monthName} ${year}`);
+  lines.push(`วันที่ออกรายงาน: ${new Date().toLocaleDateString('th-TH')}`);
   lines.push('');
+  lines.push('ลำดับ,รหัสตั๋ว,วันที่แจ้ง,ผู้แจ้ง,รหัสพนักงาน,กองงาน,แผนก,อาคาร/ชั้น/ห้อง,จุดระบุตำแหน่ง,หมวดหมู่ปัญหา,หัวข้อปัญหา,รายละเอียดอาการ,ความเร่งด่วน,สถานะ,ผู้รับผิดชอบ,วิธีแก้ไขปัญหา');
 
-  const headers = [
-    'ลำดับ',
-    'รหัสใบแจ้งซ่อม',
-    'วันที่แจ้ง',
-    'ผู้แจ้ง',
-    'รหัสพนักงาน',
-    'กองงาน',
-    'แผนก',
-    'อาคาร',
-    'ชั้น',
-    'ห้อง',
-    'สถานที่/จุดระบุ',
-    'หมวดหมู่ปัญหา',
-    'หัวข้อปัญหา',
-    'รายละเอียดอาการ',
-    'ความเร่งด่วน',
-    'สถานะ',
-    'เจ้าหน้าที่ผู้รับผิดชอบ',
-    'วิธีแก้ไข/บันทึกผลงาน',
-  ];
-  lines.push(headers.join(','));
+  const filtered = tickets.filter((t) => {
+    const d = new Date(t.created_at);
+    return d.getMonth() + 1 === month && d.getFullYear() === year;
+  });
 
-  const statusLabelMap: Record<string, string> = {
-    pending: 'รอรับเรื่อง (Pending)',
-    in_progress: 'กำลังดำเนินการ (In Progress)',
-    resolved: 'เสร็จสิ้น (Resolved)',
-    cancelled: 'ยกเลิกแล้ว (Cancelled)',
-  };
+  filtered.forEach((t, index) => {
+    const locParts = [t.building, t.floor, t.room].filter(Boolean).join(' ');
+    const urgencyMap: Record<string, string> = { low: 'ปกติ', medium: 'ปานกลาง', high: 'สูง', urgent: 'เร่งด่วนที่สุด' };
+    const statusMap: Record<string, string> = { pending: 'รอดำเนินการ', in_progress: 'กำลังดำเนินการ', resolved: 'แก้ไขเสร็จสิ้น', cancelled: 'ยกเลิก' };
 
-  const urgencyLabelMap: Record<string, string> = {
-    low: 'ต่ำ',
-    medium: 'ปานกลาง',
-    high: 'สูง',
-    urgent: 'ด่วนที่สุด',
-  };
-
-  tickets.forEach((t, idx) => {
-    const dateFormatted = new Date(t.created_at).toLocaleString('th-TH');
-    const safeCol = (str?: string) => `"${(str || '-').replace(/"/g, '""')}"`;
-
-    lines.push(
-      [
-        idx + 1,
-        safeCol(t.id),
-        safeCol(dateFormatted),
-        safeCol(t.user_name),
-        safeCol(t.user_employee_id),
-        safeCol(t.division_name),
-        safeCol(t.department_name),
-        safeCol(t.building),
-        safeCol(t.floor),
-        safeCol(t.room),
-        safeCol(t.location),
-        safeCol(t.category_name),
-        safeCol(t.title),
-        safeCol(t.description),
-        safeCol(t.urgency ? (urgencyLabelMap[t.urgency] || t.urgency) : 'ปกติ'),
-        safeCol(statusLabelMap[t.status] || t.status),
-        safeCol(t.assigned_to_name),
-        safeCol(t.solution_note || t.root_cause),
-      ].join(',')
-    );
+    lines.push([
+      index + 1,
+      `"${t.id}"`,
+      `"${new Date(t.created_at).toLocaleString('th-TH')}"`,
+      `"${t.user_name || '-'}"`,
+      `"${t.user_employee_id || '-'}"`,
+      `"${t.division_name || '-'}"`,
+      `"${t.department_name || '-'}"`,
+      `"${locParts || t.location || '-'}"`,
+      `"${t.location_note || '-'}"`,
+      `"${t.category_name || '-'}"`,
+      `"${(t.title || '').replace(/"/g, '""')}"`,
+      `"${(t.description || '').replace(/"/g, '""')}"`,
+      `"${urgencyMap[t.urgency || 'low'] || t.urgency}"`,
+      `"${statusMap[t.status] || t.status}"`,
+      `"${t.assigned_to_name || '-'}"`,
+      `"${(t.solution_note || '-').replace(/"/g, '""')}"`
+    ].join(','));
   });
 
   return bom + lines.join('\n');
 }
+
+export const generateIncidentDetailCsv = generateDetailedTicketsCsv;

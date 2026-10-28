@@ -1,4 +1,5 @@
 import { Asset, AssetStatus, BorrowLog } from '@/types/database';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export const INITIAL_ASSETS: Asset[] = [
   {
@@ -58,6 +59,17 @@ export interface GetAssetsFilter {
 }
 
 export async function getAssets(filter?: GetAssetsFilter): Promise<Asset[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('assets').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        assetsStore = data as Asset[];
+      }
+    } catch (e) {
+      console.warn('Supabase getAssets warning:', e);
+    }
+  }
+
   return assetsStore.filter((a) => {
     if (filter?.status && filter.status !== 'all' && a.status !== filter.status) {
       return false;
@@ -78,7 +90,20 @@ export async function getAssets(filter?: GetAssetsFilter): Promise<Asset[]> {
 
 export async function getAssetById(id: string): Promise<Asset | null> {
   const asset = assetsStore.find((a) => a.id === id);
-  return asset ? { ...asset } : null;
+  if (asset) return { ...asset };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('assets').select('*').eq('id', id).maybeSingle();
+      if (!error && data) {
+        return data as Asset;
+      }
+    } catch (e) {
+      console.warn('Supabase getAssetById warning:', e);
+    }
+  }
+
+  return null;
 }
 
 export interface CreateAssetInput {
@@ -114,6 +139,23 @@ export async function createAsset(
     status: 'available',
     created_at: new Date().toISOString(),
   };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('assets').insert({
+        asset_code: newAsset.asset_code,
+        name: newAsset.name,
+        category: newAsset.category,
+        status: newAsset.status,
+      }).select().single();
+      if (!error && data) {
+        newAsset.id = data.id;
+        newAsset.created_at = data.created_at;
+      }
+    } catch (e) {
+      console.warn('Supabase createAsset warning:', e);
+    }
+  }
 
   assetsStore.push(newAsset);
 
@@ -172,6 +214,19 @@ export async function updateAsset(
   if (input.category) asset.category = input.category.trim();
   if (input.status) asset.status = input.status;
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('assets').update({
+        asset_code: asset.asset_code,
+        name: asset.name,
+        category: asset.category,
+        status: asset.status,
+      }).eq('id', input.assetId);
+    } catch (e) {
+      console.warn('Supabase updateAsset warning:', e);
+    }
+  }
+
   if (input.actor) {
     const { recordAuditLog } = await import('./audit-log-service');
     await recordAuditLog({
@@ -216,6 +271,13 @@ export async function deleteAsset(
   if (hasHistory && !options?.force) {
     // Soft decommission: mark as maintenance or inactive
     asset.status = 'maintenance';
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('assets').update({ status: 'maintenance' }).eq('id', assetId);
+      } catch (e) {
+        console.warn('Supabase soft deleteAsset warning:', e);
+      }
+    }
     if (actor) {
       const { recordAuditLog } = await import('./audit-log-service');
       await recordAuditLog({
@@ -239,6 +301,14 @@ export async function deleteAsset(
   }
 
   assetsStore.splice(assetIdx, 1);
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('assets').delete().eq('id', assetId);
+    } catch (e) {
+      console.warn('Supabase deleteAsset warning:', e);
+    }
+  }
 
   if (actor) {
     const { recordAuditLog } = await import('./audit-log-service');
@@ -309,6 +379,34 @@ export async function borrowAsset(
     notes: input.notes?.trim(),
   };
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('assets').update({ status: 'borrowed' }).eq('id', asset.id);
+      const { data: dbLog, error } = await supabase.from('borrow_logs').insert({
+        id: newLog.id,
+        asset_id: newLog.asset_id,
+        asset_code: newLog.asset_code,
+        asset_name: newLog.asset_name,
+        borrower_name: newLog.borrower_name,
+        borrower_division_id: newLog.borrower_division_id,
+        borrower_division_name: newLog.borrower_division_name,
+        borrower_dept_id: newLog.borrower_dept_id,
+        borrower_dept_name: newLog.borrower_dept_name,
+        borrow_date: newLog.borrow_date,
+        expected_return_date: newLog.expected_return_date,
+        staff_id: newLog.staff_id,
+        staff_name: newLog.staff_name,
+        condition_out: newLog.condition_out,
+        notes: newLog.notes,
+      }).select().single();
+      if (!error && dbLog) {
+        newLog.id = dbLog.id;
+      }
+    } catch (e) {
+      console.warn('Supabase borrowAsset warning:', e);
+    }
+  }
+
   borrowLogsStore.unshift(newLog);
   return { success: true, data: newLog };
 }
@@ -341,10 +439,26 @@ export async function returnAsset(
     asset.status = 'available';
   }
 
+  if (isSupabaseConfigured()) {
+    try {
+      if (asset) {
+        await supabase.from('assets').update({ status: 'available' }).eq('id', asset.id);
+      }
+      await supabase.from('borrow_logs').update({
+        actual_return_date: log.actual_return_date,
+        condition_in: log.condition_in,
+        notes: log.notes,
+      }).eq('id', input.logId);
+    } catch (e) {
+      console.warn('Supabase returnAsset warning:', e);
+    }
+  }
+
   return { success: true, data: { ...log } };
 }
 
 export async function getActiveLoans(): Promise<BorrowLog[]> {
+  await getAllBorrowLogs();
   const now = Date.now();
   return borrowLogsStore
     .filter((l) => !l.actual_return_date)
@@ -355,6 +469,7 @@ export async function getActiveLoans(): Promise<BorrowLog[]> {
 }
 
 export async function getOverdueLoans(): Promise<BorrowLog[]> {
+  await getAllBorrowLogs();
   const now = Date.now();
   return borrowLogsStore
     .filter((l) => !l.actual_return_date && new Date(l.expected_return_date).getTime() < now)
@@ -365,6 +480,17 @@ export async function getOverdueLoans(): Promise<BorrowLog[]> {
 }
 
 export async function getAllBorrowLogs(): Promise<BorrowLog[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('borrow_logs').select('*').order('borrow_date', { ascending: false });
+      if (!error && data) {
+        borrowLogsStore = data as BorrowLog[];
+      }
+    } catch (e) {
+      console.warn('Supabase getAllBorrowLogs warning:', e);
+    }
+  }
+
   const now = Date.now();
   return borrowLogsStore.map((l) => ({
     ...l,

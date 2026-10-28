@@ -1,4 +1,5 @@
 import { Division, Department, Category } from '@/types/database';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export const DEFAULT_DIVISIONS: Division[] = [
   { id: 'div-1', name: 'กองการเงิน (Financial Division)', is_active: true },
@@ -61,12 +62,12 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
   },
   {
     id: 'dept-6',
-    name: 'ฝ่ายพัฒนาบุคลากร (HR Development)',
+    name: 'ฝ่ายพัฒนาบุคลากรและสวัสดิการ (Talent Development)',
     division_id: 'div-3',
     division_name: 'กองการเจ้าหน้าที่ (Human Resources Division)',
     building: 'อาคาร 2',
     floor: 'ชั้น 2',
-    room: 'ห้อง 202',
+    room: 'ห้อง 203',
     is_active: true,
   },
   {
@@ -76,7 +77,7 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
     division_name: 'ศูนย์เทคโนโลยีสารสนเทศ (IT & Digital Center)',
     building: 'อาคาร 1',
     floor: 'ชั้น 2',
-    room: 'ห้อง 205 (ห้องปฏิบัติการ IT)',
+    room: 'ห้อง 204',
     is_active: true,
   },
   {
@@ -126,6 +127,22 @@ export function resetMasterDataStore() {
 // ==========================================
 
 export async function getDivisions(options?: { includeInactive?: boolean }): Promise<Division[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('divisions').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        divisionsStore = data.map((d: { id: string; name: string; is_active: boolean | null; created_at?: string }) => ({
+          id: d.id,
+          name: d.name,
+          is_active: d.is_active ?? true,
+          created_at: d.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Supabase getDivisions warning:', e);
+    }
+  }
+
   const includeInactive = options?.includeInactive ?? false;
   if (includeInactive) {
     return [...divisionsStore];
@@ -150,6 +167,18 @@ export async function addDivision(rawName: string): Promise<{ success: boolean; 
     is_active: true,
     created_at: new Date().toISOString(),
   };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('divisions').insert({ name, is_active: true }).select().single();
+      if (!error && data) {
+        newDiv.id = data.id;
+        newDiv.created_at = data.created_at;
+      }
+    } catch (e) {
+      console.warn('Supabase addDivision warning:', e);
+    }
+  }
 
   divisionsStore.push(newDiv);
   return { success: true, data: newDiv };
@@ -176,6 +205,14 @@ export async function updateDivision(
 
   div.name = name;
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('divisions').update({ name }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase updateDivision warning:', e);
+    }
+  }
+
   // Also update division_name in associated departments
   departmentsStore.forEach((dept) => {
     if (dept.division_id === id) {
@@ -193,6 +230,18 @@ export async function deleteDivision(
   const index = divisionsStore.findIndex((d) => d.id === id);
   if (index === -1) {
     return { success: false, error: 'Division not found' };
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      if (options?.force) {
+        await supabase.from('divisions').delete().eq('id', id);
+      } else {
+        await supabase.from('divisions').update({ is_active: false }).eq('id', id);
+      }
+    } catch (e) {
+      console.warn('Supabase deleteDivision warning:', e);
+    }
   }
 
   if (options?.force) {
@@ -218,6 +267,15 @@ export async function toggleDivisionActive(id: string, is_active: boolean): Prom
   }
 
   div.is_active = is_active;
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('divisions').update({ is_active }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase toggleDivisionActive warning:', e);
+    }
+  }
+
   return { success: true };
 }
 
@@ -243,6 +301,37 @@ export interface UpdateDepartmentInput {
 }
 
 export async function getDepartments(options?: { divisionId?: string; includeInactive?: boolean }): Promise<Department[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('departments').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        departmentsStore = data.map((d: {
+          id: string;
+          name: string;
+          division_id?: string | null;
+          division_name?: string | null;
+          building?: string | null;
+          floor?: string | null;
+          room?: string | null;
+          is_active?: boolean | null;
+          created_at?: string;
+        }) => ({
+          id: d.id,
+          name: d.name,
+          division_id: d.division_id || undefined,
+          division_name: d.division_name || undefined,
+          building: d.building || undefined,
+          floor: d.floor || undefined,
+          room: d.room || undefined,
+          is_active: d.is_active ?? true,
+          created_at: d.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Supabase getDepartments warning:', e);
+    }
+  }
+
   const includeInactive = options?.includeInactive ?? false;
   let result = includeInactive ? [...departmentsStore] : departmentsStore.filter((d) => d.is_active);
 
@@ -290,6 +379,26 @@ export async function addDepartment(
     created_at: new Date().toISOString(),
   };
 
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('departments').insert({
+        name,
+        division_id: divisionId,
+        division_name: divisionName,
+        building,
+        floor,
+        room,
+        is_active: true,
+      }).select().single();
+      if (!error && data) {
+        newDept.id = data.id;
+        newDept.created_at = data.created_at;
+      }
+    } catch (e) {
+      console.warn('Supabase addDepartment warning:', e);
+    }
+  }
+
   departmentsStore.push(newDept);
   return { success: true, data: newDept };
 }
@@ -301,6 +410,15 @@ export async function toggleDepartmentActive(id: string, is_active: boolean): Pr
   }
 
   dept.is_active = is_active;
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('departments').update({ is_active }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase toggleDepartmentActive warning:', e);
+    }
+  }
+
   return { success: true };
 }
 
@@ -338,6 +456,22 @@ export async function updateDepartment(
     if (input.is_active !== undefined) dept.is_active = input.is_active;
   }
 
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('departments').update({
+        name: dept.name,
+        division_id: dept.division_id,
+        division_name: dept.division_name,
+        building: dept.building,
+        floor: dept.floor,
+        room: dept.room,
+        is_active: dept.is_active,
+      }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase updateDepartment warning:', e);
+    }
+  }
+
   return { success: true, data: { ...dept } };
 }
 
@@ -348,6 +482,18 @@ export async function deleteDepartment(
   const index = departmentsStore.findIndex((d) => d.id === id);
   if (index === -1) {
     return { success: false, error: 'Department not found' };
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      if (options?.force) {
+        await supabase.from('departments').delete().eq('id', id);
+      } else {
+        await supabase.from('departments').update({ is_active: false }).eq('id', id);
+      }
+    } catch (e) {
+      console.warn('Supabase deleteDepartment warning:', e);
+    }
   }
 
   if (options?.force) {
@@ -364,6 +510,22 @@ export async function deleteDepartment(
 // ==========================================
 
 export async function getCategories(options?: { includeInactive?: boolean }): Promise<Category[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('categories').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        categoriesStore = data.map((c: { id: string; name: string; is_active: boolean | null; created_at?: string }) => ({
+          id: c.id,
+          name: c.name,
+          is_active: c.is_active ?? true,
+          created_at: c.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Supabase getCategories warning:', e);
+    }
+  }
+
   const includeInactive = options?.includeInactive ?? false;
   if (includeInactive) {
     return [...categoriesStore];
@@ -389,6 +551,18 @@ export async function addCategory(rawName: string): Promise<{ success: boolean; 
     created_at: new Date().toISOString(),
   };
 
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.from('categories').insert({ name, is_active: true }).select().single();
+      if (!error && data) {
+        newCat.id = data.id;
+        newCat.created_at = data.created_at;
+      }
+    } catch (e) {
+      console.warn('Supabase addCategory warning:', e);
+    }
+  }
+
   categoriesStore.push(newCat);
   return { success: true, data: newCat };
 }
@@ -400,6 +574,15 @@ export async function toggleCategoryActive(id: string, is_active: boolean): Prom
   }
 
   cat.is_active = is_active;
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('categories').update({ is_active }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase toggleCategoryActive warning:', e);
+    }
+  }
+
   return { success: true };
 }
 
@@ -423,6 +606,15 @@ export async function updateCategory(
   }
 
   cat.name = name;
+
+  if (isSupabaseConfigured()) {
+    try {
+      await supabase.from('categories').update({ name }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase updateCategory warning:', e);
+    }
+  }
+
   return { success: true, data: { ...cat } };
 }
 
@@ -433,6 +625,18 @@ export async function deleteCategory(
   const index = categoriesStore.findIndex((c) => c.id === id);
   if (index === -1) {
     return { success: false, error: 'Category not found' };
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      if (options?.force) {
+        await supabase.from('categories').delete().eq('id', id);
+      } else {
+        await supabase.from('categories').update({ is_active: false }).eq('id', id);
+      }
+    } catch (e) {
+      console.warn('Supabase deleteCategory warning:', e);
+    }
   }
 
   if (options?.force) {
