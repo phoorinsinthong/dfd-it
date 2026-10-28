@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
 import { Wrench, LogOut, ShieldCheck, User, Calendar, Laptop, ClipboardList, Settings, FileText } from 'lucide-react';
+import AdminNotificationListener from '@/components/admin/AdminNotificationListener';
 
 export default function Navbar({ activeSection }: { activeSection?: string }) {
   const { user, logout } = useAuth();
@@ -99,8 +100,10 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
           </nav>
         )}
 
-        {/* User Profile & Logout */}
-        <div className="flex items-center gap-3">
+        {/* User Profile, Sound Alert & Logout */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {isAdmin && <AdminNotificationListener />}
+
           {user && (
             <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 py-1.5 px-3 rounded-xl text-xs">
               <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-emerald-400' : 'bg-blue-400'}`}></span>

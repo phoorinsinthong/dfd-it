@@ -8,9 +8,11 @@ import {
   createBooking,
   getUserBookings,
   getBookingsByDateRange,
+  getAllBookings,
   cancelBooking,
 } from '@/lib/services/booking-service';
 import { Room, Booking, RoomType } from '@/types/database';
+import RoomOverviewCalendar from '@/components/bookings/RoomOverviewCalendar';
 import {
   Calendar,
   Clock,
@@ -27,6 +29,7 @@ import {
   Mic,
   MonitorCheck,
   CalendarDays,
+  Grid3X3,
 } from 'lucide-react';
 
 const EQUIPMENT_OPTIONS = [
@@ -41,6 +44,8 @@ export default function PortalBookingsPage() {
   const { user } = useAuth();
 
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [showOverviewCalendar, setShowOverviewCalendar] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [roomTypeFilter, setRoomTypeFilter] = useState<'all' | RoomType>('all');
   
@@ -63,8 +68,12 @@ export default function PortalBookingsPage() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const loadData = async () => {
-    const fetchedRooms = await getRooms();
+    const [fetchedRooms, fetchedAllBookings] = await Promise.all([
+      getRooms(),
+      getAllBookings(),
+    ]);
     setRooms(fetchedRooms);
+    setAllBookings(fetchedAllBookings);
     if (fetchedRooms.length > 0 && !selectedRoomId) {
       setSelectedRoomId(fetchedRooms[0].id);
     }
@@ -184,14 +193,45 @@ export default function PortalBookingsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => handleOpenBookingModal()}
-            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            จองห้องประชุมใหม่
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button
+              onClick={() => setShowOverviewCalendar(!showOverviewCalendar)}
+              className={`px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 ${
+                showOverviewCalendar
+                  ? 'bg-blue-950/60 border-blue-500 text-blue-300'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+              }`}
+            >
+              <Grid3X3 className="w-4 h-4 text-blue-400" />
+              {showOverviewCalendar ? 'ซ่อนปฏิทินภาพรวม' : 'ดูปฏิทินภาพรวม'}
+            </button>
+
+            <button
+              onClick={() => handleOpenBookingModal()}
+              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              จองห้องประชุมใหม่
+            </button>
+          </div>
         </div>
+
+        {/* Overview Calendar (Toggled) */}
+        {showOverviewCalendar && (
+          <RoomOverviewCalendar
+            rooms={rooms}
+            bookings={allBookings}
+            selectedDate={selectedDate}
+            onSelectDate={(newDate) => setSelectedDate(newDate)}
+            onSlotClick={(roomId, hour, dateStr) => {
+              setSelectedRoomId(roomId);
+              setSelectedDate(dateStr);
+              setStartTime(`${hour.toString().padStart(2, '0')}:00`);
+              setEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`);
+              handleOpenBookingModal(roomId);
+            }}
+          />
+        )}
 
         {/* Date Selector & Room Filter Controls */}
         <div className="bg-slate-900/80 border border-slate-800 p-4 sm:p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">

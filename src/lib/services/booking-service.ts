@@ -1,4 +1,4 @@
-import { Room, Booking, BookingStatus } from '@/types/database';
+import { Room, Booking, BookingStatus, RoomType } from '@/types/database';
 
 export const INITIAL_ROOMS: Room[] = [
   {
@@ -47,6 +47,26 @@ export const INITIAL_ROOMS: Room[] = [
   },
 ];
 
+export interface CreateRoomInput {
+  name: string;
+  type: RoomType;
+  capacity?: number;
+  location?: string;
+  staticUrl?: string;
+  passcode?: string;
+}
+
+export interface UpdateRoomInput {
+  roomId: string;
+  name?: string;
+  type?: RoomType;
+  capacity?: number;
+  location?: string;
+  staticUrl?: string;
+  passcode?: string;
+  isActive?: boolean;
+}
+
 export interface CreateBookingInput {
   userId: string;
   userName?: string;
@@ -66,13 +86,111 @@ export function resetBookingStore() {
   bookingsStore = [];
 }
 
-export async function getRooms(): Promise<Room[]> {
+export async function getRooms(options?: { includeInactive?: boolean }): Promise<Room[]> {
+  if (options?.includeInactive) {
+    return [...roomsStore];
+  }
   return roomsStore.filter((r) => r.is_active);
 }
 
 export async function getRoomById(roomId: string): Promise<Room | null> {
   const room = roomsStore.find((r) => r.id === roomId);
   return room ? { ...room } : null;
+}
+
+export async function createRoom(
+  input: CreateRoomInput
+): Promise<{ success: boolean; data?: Room; error?: string }> {
+  if (!input.name?.trim()) {
+    return { success: false, error: 'กรุณาระบุชื่อห้องประชุมหรือชื่อบัญชี' };
+  }
+
+  const trimmedName = input.name.trim();
+  const nameExists = roomsStore.some(
+    (r) => r.name.toLowerCase() === trimmedName.toLowerCase()
+  );
+  if (nameExists) {
+    return { success: false, error: 'มีห้องประชุมหรือบัญชีออนไลน์ชื่อนี้อยู่ในระบบแล้ว' };
+  }
+
+  const newRoom: Room = {
+    id: `room-${Date.now()}`,
+    name: trimmedName,
+    type: input.type,
+    capacity: input.capacity || (input.type === 'online' ? 250 : 10),
+    location: input.location?.trim() || (input.type === 'online' ? 'Online Cloud Video' : 'ไม่ระบุสถานที่'),
+    static_url: input.staticUrl?.trim(),
+    passcode: input.passcode?.trim(),
+    is_active: true,
+    created_at: new Date().toISOString(),
+  };
+
+  roomsStore.push(newRoom);
+  return { success: true, data: newRoom };
+}
+
+export async function updateRoom(
+  input: UpdateRoomInput
+): Promise<{ success: boolean; data?: Room; error?: string }> {
+  const room = roomsStore.find((r) => r.id === input.roomId);
+  if (!room) {
+    return { success: false, error: 'ไม่พบห้องประชุมที่ต้องการแก้ไข' };
+  }
+
+  if (input.name && input.name.trim() !== room.name) {
+    const trimmed = input.name.trim();
+    const collision = roomsStore.some(
+      (r) => r.id !== input.roomId && r.name.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (collision) {
+      return { success: false, error: 'ชื่อห้องประชุมหรือบัญชีออนไลน์นี้ซ้ำกับรายการอื่น' };
+    }
+    room.name = trimmed;
+  }
+
+  if (input.type) room.type = input.type;
+  if (input.capacity !== undefined) room.capacity = input.capacity;
+  if (input.location !== undefined) room.location = input.location.trim();
+  if (input.staticUrl !== undefined) room.static_url = input.staticUrl.trim();
+  if (input.passcode !== undefined) room.passcode = input.passcode.trim();
+  if (input.isActive !== undefined) room.is_active = input.isActive;
+
+  return { success: true, data: { ...room } };
+}
+
+export async function deleteRoom(
+  roomId: string,
+  options?: { force?: boolean }
+): Promise<{ success: boolean; softDeleted?: boolean; message?: string; error?: string }> {
+  const roomIdx = roomsStore.findIndex((r) => r.id === roomId);
+  if (roomIdx === -1) {
+    return { success: false, error: 'ไม่พบห้องประชุมที่ต้องการลบ' };
+  }
+
+  const hasBookings = bookingsStore.some(
+    (b) => b.room_id === roomId && b.status !== 'cancelled'
+  );
+
+  if (hasBookings && !options?.force) {
+    // Soft delete to protect booking records
+    roomsStore[roomIdx].is_active = false;
+    return {
+      success: true,
+      softDeleted: true,
+      message: 'ห้องนี้มีประวัติการจองในระบบ จึงทำการปิดการใช้งาน (Soft Delete) แทนการลบถาวร',
+    };
+  }
+
+  // Hard delete
+  roomsStore.splice(roomIdx, 1);
+  return { success: true, softDeleted: false };
+}
+
+export async function toggleRoomActive(
+  roomId: string,
+  isActive: boolean
+): Promise<{ success: boolean; data?: Room; error?: string }> {
+  return updateRoom({ roomId, isActive });
 }
 
 export async function createBooking(

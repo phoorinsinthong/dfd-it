@@ -190,4 +190,108 @@ describe('Ticket 05: Meeting Room & Online Account Booking Service', () => {
       expect(rebook.data?.status).toBe('confirmed');
     });
   });
+
+  describe('Room Management CRUD & Safe Deletion', () => {
+    it('creates new onsite meeting room and online account successfully', async () => {
+      const { createRoom } = await import('@/lib/services/booking-service');
+
+      const newOnsite = await createRoom({
+        name: 'ห้องประชุมสัมมนา ชั้น 5',
+        type: 'onsite',
+        capacity: 50,
+        location: 'อาคาร C ชั้น 5',
+      });
+      expect(newOnsite.success).toBe(true);
+      expect(newOnsite.data?.name).toBe('ห้องประชุมสัมมนา ชั้น 5');
+      expect(newOnsite.data?.is_active).toBe(true);
+
+      const newOnline = await createRoom({
+        name: 'Google Meet VIP Pool 1',
+        type: 'online',
+        capacity: 100,
+        staticUrl: 'https://meet.google.com/abc-defg-hij',
+        passcode: 'MEET123',
+      });
+      expect(newOnline.success).toBe(true);
+      expect(newOnline.data?.static_url).toBe('https://meet.google.com/abc-defg-hij');
+      expect(newOnline.data?.passcode).toBe('MEET123');
+    });
+
+    it('rejects duplicate room names or empty names', async () => {
+      const { createRoom } = await import('@/lib/services/booking-service');
+
+      const emptyRes = await createRoom({
+        name: '   ',
+        type: 'onsite',
+      });
+      expect(emptyRes.success).toBe(false);
+
+      const dupRes = await createRoom({
+        name: 'ห้องประชุมใหญ่ ชั้น 4 (Executive Boardroom)', // already in INITIAL_ROOMS
+        type: 'onsite',
+      });
+      expect(dupRes.success).toBe(false);
+      expect(dupRes.error).toMatch(/มีห้องประชุมหรือบัญชีออนไลน์ชื่อนี้/);
+    });
+
+    it('updates room details and toggles active state', async () => {
+      const { updateRoom, toggleRoomActive, getRooms } = await import('@/lib/services/booking-service');
+      const rooms = await getRooms();
+      const target = rooms[0];
+
+      const updateRes = await updateRoom({
+        roomId: target.id,
+        name: target.name + ' [Renovated]',
+        capacity: 40,
+      });
+      expect(updateRes.success).toBe(true);
+      expect(updateRes.data?.name).toContain('[Renovated]');
+      expect(updateRes.data?.capacity).toBe(40);
+
+      // Toggle inactive
+      await toggleRoomActive(target.id, false);
+      const activeRooms = await getRooms();
+      expect(activeRooms.some((r) => r.id === target.id)).toBe(false);
+
+      const allRooms = await getRooms({ includeInactive: true });
+      expect(allRooms.some((r) => r.id === target.id)).toBe(true);
+    });
+
+    it('performs soft-delete if room has bookings, and hard-delete if no bookings', async () => {
+      const { createRoom, deleteRoom, getRooms } = await import('@/lib/services/booking-service');
+      const rooms = await getRooms();
+      const roomWithBooking = rooms[0];
+
+      // Add a booking to roomWithBooking
+      await createBooking({
+        userId: 'usr_1',
+        userName: 'Tester',
+        roomId: roomWithBooking.id,
+        title: 'Meeting 1',
+        startTime: '2026-11-10T10:00:00.000Z',
+        endTime: '2026-11-10T11:00:00.000Z',
+      });
+
+      // Delete room that has booking -> soft delete
+      const del1 = await deleteRoom(roomWithBooking.id);
+      expect(del1.success).toBe(true);
+      expect(del1.softDeleted).toBe(true);
+      expect(del1.message).toContain('Soft Delete');
+
+      // Create a brand new room without any bookings
+      const tempRoom = await createRoom({
+        name: 'ห้องชั่วคราว',
+        type: 'onsite',
+      });
+      expect(tempRoom.success).toBe(true);
+
+      // Delete room without bookings -> hard delete
+      const del2 = await deleteRoom(tempRoom.data!.id);
+      expect(del2.success).toBe(true);
+      expect(del2.softDeleted).toBe(false);
+
+      const allRooms = await getRooms({ includeInactive: true });
+      expect(allRooms.some((r) => r.id === tempRoom.data!.id)).toBe(false);
+    });
+  });
 });

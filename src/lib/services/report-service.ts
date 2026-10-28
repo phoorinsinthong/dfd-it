@@ -125,8 +125,12 @@ export interface SaveReportSignatureInput {
   year: number;
   staffSignature?: string;
   staffName?: string;
+  staffTitle?: string;
+  staffSignatureType?: 'drawn' | 'typed';
   supervisorSignature?: string;
   supervisorName?: string;
+  supervisorTitle?: string;
+  supervisorSignatureType?: 'drawn' | 'typed';
 }
 
 export async function saveReportSignature(
@@ -137,10 +141,14 @@ export async function saveReportSignature(
   const updatedSig: ReportSignature = existing
     ? {
         ...existing,
-        staff_signature: input.staffSignature || existing.staff_signature,
-        staff_name: input.staffName || existing.staff_name,
-        supervisor_signature: input.supervisorSignature || existing.supervisor_signature,
-        supervisor_name: input.supervisorName || existing.supervisor_name,
+        staff_signature: input.staffSignature !== undefined ? input.staffSignature : existing.staff_signature,
+        staff_name: input.staffName !== undefined ? input.staffName : existing.staff_name,
+        staff_title: input.staffTitle !== undefined ? input.staffTitle : existing.staff_title,
+        staff_signature_type: input.staffSignatureType !== undefined ? input.staffSignatureType : existing.staff_signature_type,
+        supervisor_signature: input.supervisorSignature !== undefined ? input.supervisorSignature : existing.supervisor_signature,
+        supervisor_name: input.supervisorName !== undefined ? input.supervisorName : existing.supervisor_name,
+        supervisor_title: input.supervisorTitle !== undefined ? input.supervisorTitle : existing.supervisor_title,
+        supervisor_signature_type: input.supervisorSignatureType !== undefined ? input.supervisorSignatureType : existing.supervisor_signature_type,
         signed_at: new Date().toISOString(),
       }
     : {
@@ -149,8 +157,12 @@ export async function saveReportSignature(
         year: input.year,
         staff_signature: input.staffSignature,
         staff_name: input.staffName,
+        staff_title: input.staffTitle,
+        staff_signature_type: input.staffSignatureType || 'drawn',
         supervisor_signature: input.supervisorSignature,
         supervisor_name: input.supervisorName,
+        supervisor_title: input.supervisorTitle,
+        supervisor_signature_type: input.supervisorSignatureType || 'drawn',
         signed_at: new Date().toISOString(),
       };
 

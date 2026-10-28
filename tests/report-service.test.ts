@@ -98,7 +98,7 @@ describe('Ticket 08: Monthly Summary Report Seam', () => {
       expect(detailedCsv).toContain('กานดา การเงิน');
     });
 
-    it('saves dual digital signatures for staff and supervisor', async () => {
+    it('saves dual digital signatures with customizable name, title, and signature type', async () => {
       const mockStaffSig = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
       const mockSupervisorSig = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
@@ -107,13 +107,23 @@ describe('Ticket 08: Monthly Summary Report Seam', () => {
         year: 2026,
         staffSignature: mockStaffSig,
         staffName: 'วิชัย ช่างไอที',
+        staffTitle: 'นักวิชาการคอมพิวเตอร์ชำนาญการ',
+        staffSignatureType: 'drawn',
         supervisorSignature: mockSupervisorSig,
         supervisorName: 'ดร.สมชาย ผู้จัดการฝ่ายไอที',
+        supervisorTitle: 'ผู้อำนวยการกลุ่มงานเทคโนโลยีสารสนเทศ',
+        supervisorSignatureType: 'typed',
       });
 
       expect(res.success).toBe(true);
       expect(res.data?.staff_signature).toBe(mockStaffSig);
+      expect(res.data?.staff_name).toBe('วิชัย ช่างไอที');
+      expect(res.data?.staff_title).toBe('นักวิชาการคอมพิวเตอร์ชำนาญการ');
+      expect(res.data?.staff_signature_type).toBe('drawn');
       expect(res.data?.supervisor_signature).toBe(mockSupervisorSig);
+      expect(res.data?.supervisor_name).toBe('ดร.สมชาย ผู้จัดการฝ่ายไอที');
+      expect(res.data?.supervisor_title).toBe('ผู้อำนวยการกลุ่มงานเทคโนโลยีสารสนเทศ');
+      expect(res.data?.supervisor_signature_type).toBe('typed');
       expect(res.data?.signed_at).toBeDefined();
     });
   });

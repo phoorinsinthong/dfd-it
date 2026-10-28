@@ -81,6 +81,24 @@ function AdminTicketsContent() {
     loadData();
   }, [statusFilter, deptFilter, urgencyFilter, searchQuery]);
 
+  // Listen to live new ticket updates from AdminNotificationListener
+  useEffect(() => {
+    const handleTicketsUpdated = () => {
+      loadData();
+    };
+
+    const handleFocus = () => {
+      document.title = 'ศูนย์รับเรื่องแจ้งซ่อม | IT Support Hub';
+    };
+
+    window.addEventListener('tickets-updated', handleTicketsUpdated);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('tickets-updated', handleTicketsUpdated);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [statusFilter, deptFilter, urgencyFilter, searchQuery]);
+
   // Handle Accept Ticket
   const handleAccept = async (ticket: Ticket) => {
     if (!user) return;

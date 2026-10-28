@@ -192,5 +192,64 @@ describe('Ticket 09: End-to-End System Smoke Test', () => {
     // Generate CSV
     const csv = generateReportCsv(report);
     expect(csv).toContain('IT Support Monthly Executive Summary');
+
+    // 8. Room Management CRUD & Conflict Safety
+    const { createRoom, updateRoom, deleteRoom, toggleRoomActive } = await import('@/lib/services/booking-service');
+    const newRoom = await createRoom({
+      name: 'ห้องประชุมชั้น 6 VIP',
+      type: 'onsite',
+      capacity: 18,
+      location: 'อาคาร C ชั้น 6',
+    });
+    expect(newRoom.success).toBe(true);
+
+    const updateRoomRes = await updateRoom({
+      roomId: newRoom.data!.id,
+      name: 'ห้องประชุมชั้น 6 VIP (ปรับปรุงใหม่)',
+      capacity: 22,
+    });
+    expect(updateRoomRes.success).toBe(true);
+    expect(updateRoomRes.data?.capacity).toBe(22);
+
+    // Book on the new room
+    const testBook = await createBooking({
+      userId: userAuth.user!.id,
+      userName: userAuth.user!.name,
+      roomId: newRoom.data!.id,
+      title: 'ประชุม VIP Board',
+      startTime: '2026-11-20T09:00:00.000Z',
+      endTime: '2026-11-20T10:00:00.000Z',
+    });
+    expect(testBook.success).toBe(true);
+
+    // Delete room with booking -> Safe soft-delete
+    const delRes = await deleteRoom(newRoom.data!.id);
+    expect(delRes.success).toBe(true);
+    expect(delRes.softDeleted).toBe(true);
+
+    // 9. Signatures with Custom Position / Title & Certified Stamp
+    const detailedReportSig = await saveReportSignature({
+      month: reportMonth,
+      year: reportYear,
+      staffName: 'นายประสิทธิ์ ช่างไอที',
+      staffTitle: 'นักวิชาการคอมพิวเตอร์ปฏิบัติการ',
+      staffSignatureType: 'typed',
+      supervisorName: 'ดร.สมศักดิ์ มั่นคง',
+      supervisorTitle: 'ผู้อำนวยการกลุ่มงานเทคโนโลยีสารสนเทศ',
+      supervisorSignatureType: 'typed',
+    });
+    expect(detailedReportSig.success).toBe(true);
+    expect(detailedReportSig.data?.staff_title).toBe('นักวิชาการคอมพิวเตอร์ปฏิบัติการ');
+    expect(detailedReportSig.data?.staff_signature_type).toBe('typed');
+    expect(detailedReportSig.data?.supervisor_title).toBe('ผู้อำนวยการกลุ่มงานเทคโนโลยีสารสนเทศ');
+
+    // 10. In-Web Audio Alert Service settings
+    const { isSoundEnabled, setSoundEnabled } = await import('@/lib/services/audio-alert-service');
+    expect(typeof isSoundEnabled()).toBe('boolean');
+    setSoundEnabled(true);
+    expect(isSoundEnabled()).toBe(true);
+    setSoundEnabled(false);
+    expect(isSoundEnabled()).toBe(false);
+    setSoundEnabled(true);
   });
 });

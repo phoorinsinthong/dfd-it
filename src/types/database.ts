@@ -182,10 +182,14 @@ export interface ReportSignature {
   id: string;
   month: number;
   year: number;
-  staff_signature?: string; // base64 data url
+  staff_signature?: string; // base64 data url or certified stamp
   staff_name?: string;
-  supervisor_signature?: string; // base64 data url
+  staff_title?: string;
+  staff_signature_type?: 'drawn' | 'typed';
+  supervisor_signature?: string; // base64 data url or certified stamp
   supervisor_name?: string;
+  supervisor_title?: string;
+  supervisor_signature_type?: 'drawn' | 'typed';
   signed_at?: string;
 }
 
