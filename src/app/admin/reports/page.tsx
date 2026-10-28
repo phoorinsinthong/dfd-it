@@ -268,10 +268,7 @@ export default function AdminReportsPage() {
 
         <div className="my-2 flex-1 flex items-center justify-center">
           {report?.signature?.staff_signature_type === 'physical' ? (
-            <div className="w-56 text-slate-600 font-mono text-[11px] py-3 text-center">
-              ........................................................
-              <span className="block text-[10px] text-slate-500 mt-1">(เว้นว่างสำหรับลงลายมือชื่อจริงด้วยปากกา)</span>
-            </div>
+            <div className="h-16 w-56" />
           ) : report?.signature?.staff_signature_type === 'typed' ? (
             <div className="border border-blue-600 bg-blue-50/80 text-blue-900 px-3 py-1.5 rounded-xl text-center space-y-0.5 print:border-blue-700">
               <div className="text-[10px] font-black tracking-wider uppercase text-blue-700 flex items-center justify-center gap-1">
@@ -290,10 +287,7 @@ export default function AdminReportsPage() {
               className="max-h-16 w-auto object-contain"
             />
           ) : (
-            <div className="w-48 text-slate-400 font-mono text-[11px] py-3">
-              ........................................................
-              <span className="block text-[10px] text-slate-400 mt-1">(ลงลายมือชื่อด้วยปากกา)</span>
-            </div>
+            <div className="h-16 w-56" />
           )}
         </div>
 
@@ -338,10 +332,7 @@ export default function AdminReportsPage() {
 
         <div className="my-2 flex-1 flex items-center justify-center">
           {report?.signature?.supervisor_signature_type === 'physical' ? (
-            <div className="w-56 text-slate-600 font-mono text-[11px] py-3 text-center">
-              ........................................................
-              <span className="block text-[10px] text-slate-500 mt-1">(เว้นว่างสำหรับลงลายมือชื่อจริงด้วยปากกา)</span>
-            </div>
+            <div className="h-16 w-56" />
           ) : report?.signature?.supervisor_signature_type === 'typed' ? (
             <div className="border border-emerald-600 bg-emerald-50/80 text-emerald-900 px-3 py-1.5 rounded-xl text-center space-y-0.5 print:border-emerald-700">
               <div className="text-[10px] font-black tracking-wider uppercase text-emerald-700 flex items-center justify-center gap-1">
@@ -360,10 +351,7 @@ export default function AdminReportsPage() {
               className="max-h-16 w-auto object-contain"
             />
           ) : (
-            <div className="w-48 text-slate-400 font-mono text-[11px] py-3">
-              ........................................................
-              <span className="block text-[10px] text-slate-400 mt-1">(ลงลายมือชื่อด้วยปากกา)</span>
-            </div>
+            <div className="h-16 w-56" />
           )}
         </div>
 
@@ -942,7 +930,7 @@ export default function AdminReportsPage() {
                   </div>
                   <div className="text-xs font-bold text-amber-300">เว้นว่างเพื่อพิมพ์ออกมาเซ็นจริงด้วยปากกา (Physical Wet-Ink)</div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    ระบบจะบันทึกชื่อ <strong>{signerName || '...'}</strong> และตำแหน่ง <strong>{signerTitle || '...'}</strong> พร้อมแสดงเส้นประสำหรับพิมพ์รายงานออกทางกระดาษ เพื่อให้ผู้มีอำนาจลงลายมือชื่อจริงด้วยปากกา
+                    ระบบจะบันทึกชื่อ <strong>{signerName || '...'}</strong> และตำแหน่ง <strong>{signerTitle || '...'}</strong> พร้อมเว้นพื้นที่ว่างด้านบนไว้สำหรับพิมพ์รายงานออกทางกระดาษ เพื่อให้ผู้มีอำนาจลงลายมือชื่อจริงด้วยปากกา
                   </p>
                 </div>
               )}
