@@ -21,7 +21,7 @@
 1. ไปที่ [Supabase.com](https://supabase.com) แล้วสร้างบัญชีผู้ใช้ใหม่ (หรือล็อกอินด้วย GitHub)
 2. คลิก **"New Project"**
    - **Name**: `it-support-system`
-   - **Database Password**: ตั้งรหัสผ่านที่ปลอดภัยและจดบันทึกไว้
+   - **Database Password**: Gggg2646264 ตั้งรหัสผ่านที่ปลอดภัยและจดบันทึกไว้
    - **Region**: เลือก `Singapore (ap-southeast-1)` เพื่อความเร็วสูงสุดในไทย
    - เลือก **Free Tier Plan ($0/month)**
 3. เมื่อสร้างฐานข้อมูลเสร็จแล้ว ไปที่เมนู **SQL Editor** ด้านซ้าย

@@ -1,4 +1,4 @@
-# IT Support Hub (it-dfd-hub)
+# IT Support Hub (dfd-it)
 ## ระบบบริหารจัดการแผนกสนับสนุนทางเทคนิคและงานบริการไอที
 ### สถาปัตยกรรม 100% Free Tier (Next.js 16 + Supabase + LINE Messaging API + Vercel)
 
