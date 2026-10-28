@@ -180,12 +180,20 @@ ALTER TABLE public.checklist_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read of active departments, categories, and rooms
+DROP POLICY IF EXISTS "Public read active departments" ON public.departments;
 CREATE POLICY "Public read active departments" ON public.departments FOR SELECT USING (is_active = true);
+
+DROP POLICY IF EXISTS "Public read active categories" ON public.categories;
 CREATE POLICY "Public read active categories" ON public.categories FOR SELECT USING (is_active = true);
+
+DROP POLICY IF EXISTS "Public read active rooms" ON public.rooms;
 CREATE POLICY "Public read active rooms" ON public.rooms FOR SELECT USING (is_active = true);
 
 -- User ticket policies
+DROP POLICY IF EXISTS "Users can create tickets" ON public.tickets;
 CREATE POLICY "Users can create tickets" ON public.tickets FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Users can view their tickets or admin view all" ON public.tickets;
 CREATE POLICY "Users can view their tickets or admin view all" ON public.tickets FOR SELECT USING (true);
 
 -- Seed initial Master Data
