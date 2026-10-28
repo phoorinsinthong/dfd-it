@@ -6,6 +6,8 @@ import { useAuth } from '@/lib/auth/auth-context';
 import {
   getAssets,
   createAsset,
+  updateAsset,
+  deleteAsset,
   borrowAsset,
   returnAsset,
   getActiveLoans,
@@ -30,6 +32,8 @@ import {
   ShieldAlert,
   Calendar,
   Layers,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 
 export default function AdminAssetsPage() {
@@ -54,6 +58,16 @@ export default function AdminAssetsPage() {
   const [newAssetName, setNewAssetName] = useState('');
   const [newAssetCategory, setNewAssetCategory] = useState('Laptop');
 
+  // Edit Asset Modal
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [editAssetCode, setEditAssetCode] = useState('');
+  const [editAssetName, setEditAssetName] = useState('');
+  const [editAssetCategory, setEditAssetCategory] = useState('Laptop');
+  const [editAssetStatus, setEditAssetStatus] = useState<AssetStatus>('available');
+
+  // Delete Asset Modal
+  const [deletingAsset, setDeletingAsset] = useState<Asset | null>(null);
+
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [selectedAssetForBorrow, setSelectedAssetForBorrow] = useState<Asset | null>(null);
   const [borrowerName, setBorrowerName] = useState('');
@@ -69,6 +83,7 @@ export default function AdminAssetsPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -104,6 +119,14 @@ export default function AdminAssetsPage() {
     setExpectedReturnDate(tomorrow.toISOString().slice(0, 16));
   }, []);
 
+  // Actor for audit logging
+  const currentActor = user ? {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  } : undefined;
+
   // Handle Create Asset
   const handleCreateAssetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,10 +134,12 @@ export default function AdminAssetsPage() {
 
     setSubmitting(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
     const res = await createAsset({
       assetCode: newAssetCode.trim(),
       name: newAssetName.trim(),
       category: newAssetCategory,
+      actor: currentActor,
     });
 
     setSubmitting(false);
@@ -122,9 +147,71 @@ export default function AdminAssetsPage() {
       setIsNewAssetModalOpen(false);
       setNewAssetCode('');
       setNewAssetName('');
+      setSuccessMsg(`เพิ่มครุภัณฑ์ "${res.data?.asset_code}" เรียบร้อยแล้ว`);
       loadData();
     } else {
       setErrorMsg(res.error || 'เกิดข้อผิดพลาดในการเพิ่มครุภัณฑ์');
+    }
+  };
+
+  // Open Edit Modal
+  const handleOpenEditModal = (asset: Asset) => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setEditingAsset(asset);
+    setEditAssetCode(asset.asset_code);
+    setEditAssetName(asset.name);
+    setEditAssetCategory(asset.category);
+    setEditAssetStatus(asset.status);
+  };
+
+  // Handle Save Edit Asset
+  const handleSaveEditAsset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAsset) return;
+
+    setSubmitting(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const res = await updateAsset({
+      assetId: editingAsset.id,
+      assetCode: editAssetCode.trim(),
+      name: editAssetName.trim(),
+      category: editAssetCategory.trim(),
+      status: editAssetStatus,
+      actor: currentActor,
+    });
+
+    setSubmitting(false);
+    if (res.success) {
+      setSuccessMsg(`แก้ไขข้อมูลครุภัณฑ์ "${res.data?.asset_code}" เรียบร้อยแล้ว`);
+      setEditingAsset(null);
+      loadData();
+    } else {
+      setErrorMsg(res.error || 'เกิดข้อผิดพลาดในการแก้ไขข้อมูลครุภัณฑ์');
+    }
+  };
+
+  // Handle Delete Asset
+  const handleDeleteAsset = async () => {
+    if (!deletingAsset) return;
+
+    setSubmitting(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const res = await deleteAsset(deletingAsset.id, currentActor);
+    setSubmitting(false);
+
+    if (res.success) {
+      setSuccessMsg(
+        res.message || (res.softDeleted ? 'เปลี่ยนสถานะเป็นส่งซ่อมเนื่องจากมีประวัติการยืม' : 'ลบครุภัณฑ์เรียบร้อยแล้ว')
+      );
+      setDeletingAsset(null);
+      loadData();
+    } else {
+      setErrorMsg(res.error || 'ไม่สามารถลบครุภัณฑ์ได้');
     }
   };
 
@@ -206,7 +293,7 @@ export default function AdminAssetsPage() {
     }
   };
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
         <Navbar activeSection="assets" />
@@ -254,6 +341,7 @@ export default function AdminAssetsPage() {
             <button
               onClick={() => {
                 setErrorMsg(null);
+                setSuccessMsg(null);
                 setIsNewAssetModalOpen(true);
               }}
               className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold border border-slate-700 transition flex items-center gap-1.5"
@@ -263,6 +351,27 @@ export default function AdminAssetsPage() {
             </button>
           </div>
         </div>
+
+        {/* Status Alerts */}
+        {errorMsg && (
+          <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-sm flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+            <button onClick={() => setErrorMsg(null)} className="text-slate-400 hover:text-white">✕</button>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-sm flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+            <button onClick={() => setSuccessMsg(null)} className="text-slate-400 hover:text-white">✕</button>
+          </div>
+        )}
 
         {/* Overdue Warning Alert Banner */}
         {overdueLoans.length > 0 && (
@@ -400,19 +509,35 @@ export default function AdminAssetsPage() {
                       <span className="font-mono text-xs font-bold text-blue-400 bg-blue-950/60 px-2.5 py-1 rounded-md border border-blue-800/40">
                         {asset.asset_code}
                       </span>
-                      <span
-                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
-                          asset.status === 'available'
-                            ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50'
-                            : asset.status === 'borrowed'
-                            ? 'bg-blue-950/40 text-blue-300 border-blue-800/50'
-                            : 'bg-amber-950/40 text-amber-300 border-amber-800/50'
-                        }`}
-                      >
-                        {asset.status === 'available' && 'พร้อมใช้งาน'}
-                        {asset.status === 'borrowed' && 'กำลังถูกยืม'}
-                        {asset.status === 'maintenance' && 'ส่งซ่อม/บำรุง'}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
+                            asset.status === 'available'
+                              ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50'
+                              : asset.status === 'borrowed'
+                              ? 'bg-blue-950/40 text-blue-300 border-blue-800/50'
+                              : 'bg-amber-950/40 text-amber-300 border-amber-800/50'
+                          }`}
+                        >
+                          {asset.status === 'available' && 'พร้อมใช้งาน'}
+                          {asset.status === 'borrowed' && 'กำลังถูกยืม'}
+                          {asset.status === 'maintenance' && 'ส่งซ่อม/บำรุง'}
+                        </span>
+                        <button
+                          onClick={() => handleOpenEditModal(asset)}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                          title="แก้ไขข้อมูลครุภัณฑ์"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeletingAsset(asset)}
+                          className="p-1.5 rounded-lg bg-red-950/20 hover:bg-red-950/40 border border-red-900/30 text-red-400 transition"
+                          title="ลบครุภัณฑ์"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
 
                     <h3 className="text-base font-bold text-white mb-1">{asset.name}</h3>
@@ -837,6 +962,142 @@ export default function AdminAssetsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Asset */}
+      {editingAsset && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-blue-400" />
+                แก้ไขข้อมูลครุภัณฑ์
+              </h3>
+              <button
+                onClick={() => setEditingAsset(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditAsset} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  รหัสครุภัณฑ์ (Asset Code) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editAssetCode}
+                  onChange={(e) => setEditAssetCode(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-mono uppercase focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  ชื่อ / รุ่นอุปกรณ์ <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editAssetName}
+                  onChange={(e) => setEditAssetName(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    หมวดหมู่
+                  </label>
+                  <select
+                    value={editAssetCategory}
+                    onChange={(e) => setEditAssetCategory(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  >
+                    <option value="Laptop">Laptop / Notebook</option>
+                    <option value="Projector">Projector / เครื่องฉาย</option>
+                    <option value="Accessories">Accessories / สายต่อ</option>
+                    <option value="Network">Network / เราเตอร์พกพา</option>
+                    <option value="Camera">Camera / กล้องบันทึก</option>
+                    <option value="Microphone">Microphone / ไมค์ไร้สาย</option>
+                    <option value="Speaker">Speaker / ลำโพงพกพา</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    สถานะปัจจุบัน
+                  </label>
+                  <select
+                    value={editAssetStatus}
+                    onChange={(e) => setEditAssetStatus(e.target.value as any)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  >
+                    <option value="available">พร้อมใช้งาน</option>
+                    <option value="borrowed">กำลังถูกยืม</option>
+                    <option value="maintenance">ส่งซ่อม/บำรุง</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingAsset(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold"
+                >
+                  {submitting ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Delete Asset Confirm */}
+      {deletingAsset && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-red-500/30 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-950/50 border border-red-500/30 flex items-center justify-center text-red-400 mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-white">ยืนยันการลบครุภัณฑ์?</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              คุณต้องการลบครุภัณฑ์ <strong className="text-white">{deletingAsset.asset_code}</strong> ({deletingAsset.name}) หรือไม่?
+            </p>
+            <p className="text-[11px] text-amber-400/90 bg-amber-950/20 border border-amber-800/30 p-2.5 rounded-xl text-left">
+              💡 หมายเหตุ: หากครุภัณฑ์นี้เคยมีประวัติการยืม-คืนในอดีต ระบบจะเปลี่ยนสถานะเป็นส่งซ่อม/ระงับใช้งานแทน เพื่อคงประวัติการยืมในรายงาน
+            </p>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeletingAsset(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-800"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleDeleteAsset}
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-500 disabled:opacity-50 transition shadow-md shadow-red-600/20"
+              >
+                {submitting ? 'กำลังลบ...' : 'ยืนยันการลบ'}
+              </button>
+            </div>
           </div>
         </div>
       )}

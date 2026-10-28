@@ -126,11 +126,17 @@ export interface SaveReportSignatureInput {
   staffSignature?: string;
   staffName?: string;
   staffTitle?: string;
-  staffSignatureType?: 'drawn' | 'typed';
+  staffSignatureType?: 'drawn' | 'typed' | 'physical';
   supervisorSignature?: string;
   supervisorName?: string;
   supervisorTitle?: string;
-  supervisorSignatureType?: 'drawn' | 'typed';
+  supervisorSignatureType?: 'drawn' | 'typed' | 'physical';
+  actor?: {
+    id: string;
+    name: string;
+    email?: string;
+    role: string;
+  };
 }
 
 export async function saveReportSignature(
@@ -138,14 +144,22 @@ export async function saveReportSignature(
 ): Promise<{ success: boolean; data?: ReportSignature; error?: string }> {
   const existing = signaturesStore.find((s) => s.month === input.month && s.year === input.year);
 
+  const staffSig = input.staffSignature !== undefined
+    ? input.staffSignature
+    : (input.staffSignatureType === 'physical' ? 'PHYSICAL_SIGN' : existing?.staff_signature);
+
+  const supervisorSig = input.supervisorSignature !== undefined
+    ? input.supervisorSignature
+    : (input.supervisorSignatureType === 'physical' ? 'PHYSICAL_SIGN' : existing?.supervisor_signature);
+
   const updatedSig: ReportSignature = existing
     ? {
         ...existing,
-        staff_signature: input.staffSignature !== undefined ? input.staffSignature : existing.staff_signature,
+        staff_signature: staffSig,
         staff_name: input.staffName !== undefined ? input.staffName : existing.staff_name,
         staff_title: input.staffTitle !== undefined ? input.staffTitle : existing.staff_title,
         staff_signature_type: input.staffSignatureType !== undefined ? input.staffSignatureType : existing.staff_signature_type,
-        supervisor_signature: input.supervisorSignature !== undefined ? input.supervisorSignature : existing.supervisor_signature,
+        supervisor_signature: supervisorSig,
         supervisor_name: input.supervisorName !== undefined ? input.supervisorName : existing.supervisor_name,
         supervisor_title: input.supervisorTitle !== undefined ? input.supervisorTitle : existing.supervisor_title,
         supervisor_signature_type: input.supervisorSignatureType !== undefined ? input.supervisorSignatureType : existing.supervisor_signature_type,
@@ -155,11 +169,11 @@ export async function saveReportSignature(
         id: `sig-${input.year}-${input.month}`,
         month: input.month,
         year: input.year,
-        staff_signature: input.staffSignature,
+        staff_signature: staffSig,
         staff_name: input.staffName,
         staff_title: input.staffTitle,
         staff_signature_type: input.staffSignatureType || 'drawn',
-        supervisor_signature: input.supervisorSignature,
+        supervisor_signature: supervisorSig,
         supervisor_name: input.supervisorName,
         supervisor_title: input.supervisorTitle,
         supervisor_signature_type: input.supervisorSignatureType || 'drawn',
@@ -173,7 +187,76 @@ export async function saveReportSignature(
     signaturesStore.push(updatedSig);
   }
 
+  // Audit Log
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'SIGN',
+      module: 'REPORT',
+      targetId: updatedSig.id,
+      targetName: `รายงานประจำเดือน ${input.month}/${input.year}`,
+      details: `ลงนามรับรองรายงานประจำเดือน ${input.month}/${input.year}`,
+    });
+  }
+
   return { success: true, data: updatedSig };
+}
+
+export interface ClearReportSignatureInput {
+  month: number;
+  year: number;
+  role: 'staff' | 'supervisor' | 'all';
+  actor?: {
+    id: string;
+    name: string;
+    email?: string;
+    role: string;
+  };
+}
+
+export async function clearReportSignature(
+  input: ClearReportSignatureInput
+): Promise<{ success: boolean; data?: ReportSignature; error?: string }> {
+  const existing = signaturesStore.find((s) => s.month === input.month && s.year === input.year);
+  if (!existing) {
+    return { success: false, error: 'ไม่พบข้อมูลลายเซ็นในรายงานเดือนที่ระบุ' };
+  }
+
+  if (input.role === 'staff' || input.role === 'all') {
+    existing.staff_signature = undefined;
+    existing.staff_name = undefined;
+    existing.staff_title = undefined;
+    existing.staff_signature_type = undefined;
+  }
+
+  if (input.role === 'supervisor' || input.role === 'all') {
+    existing.supervisor_signature = undefined;
+    existing.supervisor_name = undefined;
+    existing.supervisor_title = undefined;
+    existing.supervisor_signature_type = undefined;
+  }
+
+  // Audit Log
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'CLEAR_SIGN',
+      module: 'REPORT',
+      targetId: existing.id,
+      targetName: `รายงานประจำเดือน ${input.month}/${input.year}`,
+      details: `ลบลายเซ็นรับรอง (${input.role}) ออกจากรายงานประจำเดือน ${input.month}/${input.year}`,
+    });
+  }
+
+  return { success: true, data: { ...existing } };
 }
 
 export function generateReportCsv(report: MonthlyReportSummary): string {

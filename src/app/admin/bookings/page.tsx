@@ -78,7 +78,7 @@ export default function AdminBookingsPage() {
     }
   };
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
         <Navbar activeSection="bookings" />

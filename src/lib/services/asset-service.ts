@@ -85,6 +85,12 @@ export interface CreateAssetInput {
   assetCode: string;
   name: string;
   category: string;
+  actor?: {
+    id: string;
+    name: string;
+    email?: string;
+    role: string;
+  };
 }
 
 export async function createAsset(
@@ -110,7 +116,146 @@ export async function createAsset(
   };
 
   assetsStore.push(newAsset);
+
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'CREATE',
+      module: 'ASSET',
+      targetId: newAsset.id,
+      targetName: `${newAsset.asset_code} - ${newAsset.name}`,
+      details: `เพิ่มครุภัณฑ์ใหม่: ${newAsset.asset_code} (${newAsset.name}) หมวดหมู่: ${newAsset.category}`,
+    });
+  }
+
   return { success: true, data: newAsset };
+}
+
+export interface UpdateAssetInput {
+  assetId: string;
+  assetCode?: string;
+  name?: string;
+  category?: string;
+  status?: AssetStatus;
+  actor?: {
+    id: string;
+    name: string;
+    email?: string;
+    role: string;
+  };
+}
+
+export async function updateAsset(
+  input: UpdateAssetInput
+): Promise<{ success: boolean; data?: Asset; error?: string }> {
+  const asset = assetsStore.find((a) => a.id === input.assetId);
+  if (!asset) {
+    return { success: false, error: 'ไม่พบครุภัณฑ์ที่ต้องการแก้ไข' };
+  }
+
+  if (input.assetCode) {
+    const codeNorm = input.assetCode.trim().toUpperCase();
+    const collision = assetsStore.some(
+      (a) => a.id !== input.assetId && a.asset_code.toUpperCase() === codeNorm
+    );
+    if (collision) {
+      return { success: false, error: `รหัสครุภัณฑ์ ${codeNorm} ซ้ำกับรายการอื่น` };
+    }
+    asset.asset_code = codeNorm;
+  }
+
+  if (input.name) asset.name = input.name.trim();
+  if (input.category) asset.category = input.category.trim();
+  if (input.status) asset.status = input.status;
+
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'UPDATE',
+      module: 'ASSET',
+      targetId: asset.id,
+      targetName: `${asset.asset_code} - ${asset.name}`,
+      details: `แก้ไขข้อมูลครุภัณฑ์: ${asset.asset_code} (${asset.name}) หมวด: ${asset.category} สถานะ: ${asset.status}`,
+    });
+  }
+
+  return { success: true, data: { ...asset } };
+}
+
+export async function deleteAsset(
+  assetId: string,
+  actor?: { id: string; name: string; email?: string; role: string },
+  options?: { force?: boolean }
+): Promise<{ success: boolean; softDeleted?: boolean; message?: string; error?: string }> {
+  const assetIdx = assetsStore.findIndex((a) => a.id === assetId);
+  if (assetIdx === -1) {
+    return { success: false, error: 'ไม่พบครุภัณฑ์ที่ต้องการลบ' };
+  }
+
+  const asset = assetsStore[assetIdx];
+
+  // Check if currently borrowed
+  if (asset.status === 'borrowed') {
+    return {
+      success: false,
+      error: 'ไม่สามารถลบครุภัณฑ์ที่กำลังถูกยืมอยู่ได้ กรุณารับคืนอุปกรณ์ก่อนดำเนินการ',
+    };
+  }
+
+  // Check if has borrow logs in history
+  const hasHistory = borrowLogsStore.some((l) => l.asset_id === assetId);
+
+  if (hasHistory && !options?.force) {
+    // Soft decommission: mark as maintenance or inactive
+    asset.status = 'maintenance';
+    if (actor) {
+      const { recordAuditLog } = await import('./audit-log-service');
+      await recordAuditLog({
+        actorId: actor.id,
+        actorName: actor.name,
+        actorEmail: actor.email,
+        actorRole: actor.role,
+        action: 'STATUS_CHANGE',
+        module: 'ASSET',
+        targetId: asset.id,
+        targetName: `${asset.asset_code} - ${asset.name}`,
+        details: `ปลดระวาง/ระงับใช้งานครุภัณฑ์ (Soft Delete): ${asset.asset_code} (${asset.name})`,
+      });
+    }
+
+    return {
+      success: true,
+      softDeleted: true,
+      message: 'ครุภัณฑ์มีประวัติการยืม-คืนในระบบ จึงทำการระงับใช้งาน (Soft Delete) เพื่อคงประวัติไว้',
+    };
+  }
+
+  assetsStore.splice(assetIdx, 1);
+
+  if (actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorEmail: actor.email,
+      actorRole: actor.role,
+      action: 'DELETE',
+      module: 'ASSET',
+      targetId: asset.id,
+      targetName: `${asset.asset_code} - ${asset.name}`,
+      details: `ลบครุภัณฑ์ออกจากคลัง: ${asset.asset_code} (${asset.name})`,
+    });
+  }
+
+  return { success: true, softDeleted: false };
 }
 
 export interface BorrowAssetInput {

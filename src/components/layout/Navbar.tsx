@@ -9,7 +9,8 @@ import AdminNotificationListener from '@/components/admin/AdminNotificationListe
 export default function Navbar({ activeSection }: { activeSection?: string }) {
   const { user, logout } = useAuth();
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+  const isSuperAdmin = user?.role === 'superadmin';
 
   return (
     <header className="sticky top-0 z-30 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md text-slate-100 no-print">
@@ -26,7 +27,7 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
                 IT Support Hub
               </span>
               <span className="text-[10px] text-slate-400 block -mt-0.5">
-                {isAdmin ? 'ระบบจัดการฝ่ายไอที' : 'ระบบบริการผู้ใช้งาน'}
+                {isAdmin ? (isSuperAdmin ? 'ระบบจัดการ Superadmin' : 'ระบบจัดการฝ่ายไอที') : 'ระบบบริการผู้ใช้งาน'}
               </span>
             </div>
           </Link>
@@ -97,6 +98,17 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
               <Settings className="w-3.5 h-3.5" />
               ตั้งค่าระบบ
             </Link>
+            {isSuperAdmin && (
+              <Link
+                href="/admin/users"
+                className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                  activeSection === 'users' ? 'bg-purple-900/40 text-purple-300 font-semibold border border-purple-500/30' : 'text-purple-300 hover:text-white hover:bg-purple-950/40'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                แอดมิน & Logs
+              </Link>
+            )}
           </nav>
         )}
 
@@ -106,10 +118,12 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
 
           {user && (
             <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 py-1.5 px-3 rounded-xl text-xs">
-              <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-emerald-400' : 'bg-blue-400'}`}></span>
+              <span className={`w-2 h-2 rounded-full ${isSuperAdmin ? 'bg-purple-400' : isAdmin ? 'bg-emerald-400' : 'bg-blue-400'}`}></span>
               <span className="text-slate-200 font-medium hidden sm:inline">{user.name}</span>
-              <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">
-                {isAdmin ? 'IT Staff' : 'User'}
+              <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold ${
+                isSuperAdmin ? 'bg-purple-900/60 text-purple-300 border border-purple-500/30' : isAdmin ? 'bg-slate-700 text-slate-300' : 'bg-blue-900/60 text-blue-300'
+              }`}>
+                {isSuperAdmin ? 'Super Admin' : isAdmin ? 'IT Staff' : 'User'}
               </span>
             </div>
           )}

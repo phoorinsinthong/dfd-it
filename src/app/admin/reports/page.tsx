@@ -9,6 +9,7 @@ import {
   generateDetailedTicketsCsv,
   getMonthlyTickets,
   saveReportSignature,
+  clearReportSignature,
 } from '@/lib/services/report-service';
 import { THAI_MONTH_NAMES } from '@/lib/services/roadmap-service';
 import { MonthlyReportSummary, Ticket } from '@/types/database';
@@ -32,6 +33,8 @@ import {
   Stamp,
   Grid3X3,
   ListOrdered,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 
 export default function AdminReportsPage() {
@@ -51,7 +54,7 @@ export default function AdminReportsPage() {
   const [signingRole, setSigningRole] = useState<'staff' | 'supervisor'>('staff');
   const [signerName, setSignerName] = useState('');
   const [signerTitle, setSignerTitle] = useState('');
-  const [signMethod, setSignMethod] = useState<'drawn' | 'typed'>('drawn');
+  const [signMethod, setSignMethod] = useState<'drawn' | 'typed' | 'physical'>('drawn');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -156,6 +159,14 @@ export default function AdminReportsPage() {
     setHasDrawn(false);
   };
 
+  // Actor for audit logging
+  const currentActor = user ? {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  } : undefined;
+
   const openSignModal = (role: 'staff' | 'supervisor') => {
     setSigningRole(role);
     if (role === 'staff') {
@@ -186,14 +197,18 @@ export default function AdminReportsPage() {
       } else if (signingRole === 'supervisor' && report.signature?.supervisor_signature) {
         signatureValue = report.signature.supervisor_signature;
       }
-    } else {
+    } else if (signMethod === 'typed') {
       // Typed Certified Stamp
       signatureValue = `CERTIFIED:${new Date().toISOString()}`;
+    } else {
+      // Physical Wet-Ink Signing
+      signatureValue = 'PHYSICAL_SIGN';
     }
 
     const input = {
       month: selectedMonth,
       year: selectedYear,
+      actor: currentActor,
       ...(signingRole === 'staff'
         ? {
             staffSignature: signatureValue,
@@ -214,7 +229,18 @@ export default function AdminReportsPage() {
     loadReport();
   };
 
-  if (!user || user.role !== 'admin') {
+  const handleClearSignature = async (role: 'staff' | 'supervisor') => {
+    await clearReportSignature({
+      month: selectedMonth,
+      year: selectedYear,
+      role,
+      actor: currentActor,
+    });
+    setIsSignModalOpen(false);
+    loadReport();
+  };
+
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
         <Navbar activeSection="reports" />
@@ -235,13 +261,18 @@ export default function AdminReportsPage() {
   const renderSignatureSection = () => (
     <div className="pt-6 border-t-2 border-slate-800 grid grid-cols-2 gap-8 text-center text-xs print:break-inside-avoid">
       {/* Left: Staff Signature */}
-      <div className="flex flex-col items-center justify-between min-h-[150px] p-4 bg-slate-50/70 border border-slate-200 rounded-2xl print:bg-white print:border-slate-300">
+      <div className="flex flex-col items-center justify-between min-h-[160px] p-4 bg-slate-50/70 border border-slate-200 rounded-2xl print:bg-white print:border-slate-300 relative group">
         <span className="font-bold text-slate-700 mb-1">
           ผู้จัดทำและตรวจสอบรายงาน (Prepared by)
         </span>
 
         <div className="my-2 flex-1 flex items-center justify-center">
-          {report?.signature?.staff_signature_type === 'typed' ? (
+          {report?.signature?.staff_signature_type === 'physical' ? (
+            <div className="w-56 text-slate-600 font-mono text-[11px] py-3 text-center">
+              ........................................................
+              <span className="block text-[10px] text-slate-500 mt-1">(เว้นว่างสำหรับลงลายมือชื่อจริงด้วยปากกา)</span>
+            </div>
+          ) : report?.signature?.staff_signature_type === 'typed' ? (
             <div className="border border-blue-600 bg-blue-50/80 text-blue-900 px-3 py-1.5 rounded-xl text-center space-y-0.5 print:border-blue-700">
               <div className="text-[10px] font-black tracking-wider uppercase text-blue-700 flex items-center justify-center gap-1">
                 <Check className="w-3 h-3 text-emerald-600" />
@@ -252,7 +283,7 @@ export default function AdminReportsPage() {
                 {report.signature.signed_at ? new Date(report.signature.signed_at).toLocaleString('th-TH') : ''}
               </div>
             </div>
-          ) : report?.signature?.staff_signature ? (
+          ) : report?.signature?.staff_signature && report.signature.staff_signature !== 'PHYSICAL_SIGN' ? (
             <img
               src={report.signature.staff_signature}
               alt="ลายเซ็นเจ้าหน้าที่ไอที"
@@ -271,22 +302,47 @@ export default function AdminReportsPage() {
           <div className="text-[11px] text-slate-600">
             {report?.signature?.staff_title || 'เจ้าหน้าที่ฝ่ายสนับสนุนเทคนิค (IT Staff)'}
           </div>
-          {report?.signature?.signed_at && (
+          {report?.signature?.signed_at && report.signature.staff_signature_type !== 'physical' && (
             <div className="text-[10px] text-slate-400">
               วันที่: {new Date(report.signature.signed_at).toLocaleDateString('th-TH')}
             </div>
           )}
         </div>
+
+        {/* Action Buttons for Staff Signature */}
+        <div className="no-print flex items-center gap-1.5 mt-2">
+          <button
+            onClick={() => openSignModal('staff')}
+            className="px-2 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-medium flex items-center gap-1 transition"
+            title="แก้ไขลายเซ็น"
+          >
+            <Pencil className="w-3 h-3" /> แก้ไข
+          </button>
+          {report?.signature?.staff_name && (
+            <button
+              onClick={() => handleClearSignature('staff')}
+              className="px-2 py-1 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-[11px] font-medium flex items-center gap-1 transition"
+              title="ลบลายเซ็นออก"
+            >
+              <Trash2 className="w-3 h-3" /> ลบออก
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Right: Supervisor Signature */}
-      <div className="flex flex-col items-center justify-between min-h-[150px] p-4 bg-slate-50/70 border border-slate-200 rounded-2xl print:bg-white print:border-slate-300">
+      <div className="flex flex-col items-center justify-between min-h-[160px] p-4 bg-slate-50/70 border border-slate-200 rounded-2xl print:bg-white print:border-slate-300 relative group">
         <span className="font-bold text-slate-700 mb-1">
           ผู้ตรวจรับรองรายงาน (Approved by)
         </span>
 
         <div className="my-2 flex-1 flex items-center justify-center">
-          {report?.signature?.supervisor_signature_type === 'typed' ? (
+          {report?.signature?.supervisor_signature_type === 'physical' ? (
+            <div className="w-56 text-slate-600 font-mono text-[11px] py-3 text-center">
+              ........................................................
+              <span className="block text-[10px] text-slate-500 mt-1">(เว้นว่างสำหรับลงลายมือชื่อจริงด้วยปากกา)</span>
+            </div>
+          ) : report?.signature?.supervisor_signature_type === 'typed' ? (
             <div className="border border-emerald-600 bg-emerald-50/80 text-emerald-900 px-3 py-1.5 rounded-xl text-center space-y-0.5 print:border-emerald-700">
               <div className="text-[10px] font-black tracking-wider uppercase text-emerald-700 flex items-center justify-center gap-1">
                 <Check className="w-3 h-3 text-emerald-600" />
@@ -297,7 +353,7 @@ export default function AdminReportsPage() {
                 {report.signature.signed_at ? new Date(report.signature.signed_at).toLocaleString('th-TH') : ''}
               </div>
             </div>
-          ) : report?.signature?.supervisor_signature ? (
+          ) : report?.signature?.supervisor_signature && report.signature.supervisor_signature !== 'PHYSICAL_SIGN' ? (
             <img
               src={report.signature.supervisor_signature}
               alt="ลายเซ็นผู้จัดการ"
@@ -318,10 +374,30 @@ export default function AdminReportsPage() {
           <div className="text-[11px] text-slate-600">
             {report?.signature?.supervisor_title || 'หัวหน้าฝ่ายไอที / ผู้จัดการ (IT Manager)'}
           </div>
-          {report?.signature?.signed_at && (
+          {report?.signature?.signed_at && report.signature.supervisor_signature_type !== 'physical' && (
             <div className="text-[10px] text-slate-400">
               วันที่: {new Date(report.signature.signed_at).toLocaleDateString('th-TH')}
             </div>
+          )}
+        </div>
+
+        {/* Action Buttons for Supervisor Signature */}
+        <div className="no-print flex items-center gap-1.5 mt-2">
+          <button
+            onClick={() => openSignModal('supervisor')}
+            className="px-2 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-medium flex items-center gap-1 transition"
+            title="แก้ไขลายเซ็น"
+          >
+            <Pencil className="w-3 h-3" /> แก้ไข
+          </button>
+          {report?.signature?.supervisor_name && (
+            <button
+              onClick={() => handleClearSignature('supervisor')}
+              className="px-2 py-1 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-[11px] font-medium flex items-center gap-1 transition"
+              title="ลบลายเซ็นออก"
+            >
+              <Trash2 className="w-3 h-3" /> ลบออก
+            </button>
           )}
         </div>
       </div>
@@ -757,27 +833,37 @@ export default function AdminReportsPage() {
             </div>
 
             <div className="space-y-3">
-              {/* Sign Method Tab: Drawn vs Certified Stamp */}
-              <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex items-center">
+              {/* Sign Method Tab: Drawn vs Certified Stamp vs Physical Wet-Ink */}
+              <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => setSignMethod('drawn')}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition ${
                     signMethod === 'drawn' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   <PenTool className="w-3.5 h-3.5" />
-                  วาดลายเซ็น (Drawn Pad)
+                  วาดลายเซ็น
                 </button>
                 <button
                   type="button"
                   onClick={() => setSignMethod('typed')}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition ${
                     signMethod === 'typed' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   <Stamp className="w-3.5 h-3.5" />
-                  ประทับตรารับรองดิจิทัล
+                  ประทับตราดิจิทัล
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSignMethod('physical')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition ${
+                    signMethod === 'physical' ? 'bg-amber-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  เว้นว่างเซ็นจริง
                 </button>
               </div>
 
@@ -839,7 +925,7 @@ export default function AdminReportsPage() {
                     />
                   </div>
                 </div>
-              ) : (
+              ) : signMethod === 'typed' ? (
                 <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-2 text-center">
                   <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto">
                     <Check className="w-5 h-5" />
@@ -849,25 +935,48 @@ export default function AdminReportsPage() {
                     ระบบจะสร้างตราประทับรับรองพร้อมระบุชื่อ: <strong>{signerName || '...'}</strong> ตำแหน่ง: <strong>{signerTitle || '...'}</strong> และวันเวลาปัจจุบันลงในรายงานโดยอัตโนมัติ
                   </p>
                 </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-center">
+                  <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="text-xs font-bold text-amber-300">เว้นว่างเพื่อพิมพ์ออกมาเซ็นจริงด้วยปากกา (Physical Wet-Ink)</div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    ระบบจะบันทึกชื่อ <strong>{signerName || '...'}</strong> และตำแหน่ง <strong>{signerTitle || '...'}</strong> พร้อมแสดงเส้นประสำหรับพิมพ์รายงานออกทางกระดาษ เพื่อให้ผู้มีอำนาจลงลายมือชื่อจริงด้วยปากกา
+                  </p>
+                </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsSignModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveSignature}
-                disabled={!signerName.trim() || (signMethod === 'drawn' && !hasDrawn && !(signingRole === 'staff' ? report?.signature?.staff_signature : report?.signature?.supervisor_signature))}
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold shadow-lg shadow-blue-600/30"
-              >
-                บันทึกลายมือชื่อรับรอง
-              </button>
+            <div className="flex items-center justify-between pt-3 border-t border-slate-800">
+              {Boolean(signingRole === 'staff' ? report?.signature?.staff_signature : report?.signature?.supervisor_signature) ? (
+                <button
+                  type="button"
+                  onClick={() => handleClearSignature(signingRole)}
+                  className="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-medium flex items-center gap-1.5 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> ลบลายเซ็นออก
+                </button>
+              ) : (
+                <div />
+              )}
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsSignModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveSignature}
+                  disabled={!signerName.trim() || (signMethod === 'drawn' && !hasDrawn && !(signingRole === 'staff' ? report?.signature?.staff_signature : report?.signature?.supervisor_signature))}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold shadow-lg shadow-blue-600/30"
+                >
+                  บันทึกลายมือชื่อรับรอง
+                </button>
+              </div>
             </div>
           </div>
         </div>

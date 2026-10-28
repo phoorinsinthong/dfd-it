@@ -129,45 +129,73 @@ export async function authenticateStaff(input: StaffLoginInput): Promise<AuthRes
     return { success: false, error: 'Valid email is required' };
   }
 
-  // Pre-configured staff accounts and passwords
-  const STAFF_CREDENTIALS: Record<string, string> = {
-    'it-admin@company.local': 'AdminPassword123!',
-    'admin@itsupport.com': 'admin-password-1234',
-    'admin@company.local': 'AdminPassword123!',
-    'admin@company.com': 'AdminPassword123!',
-    'support@company.local': 'SupportPass2026!',
-  };
+  const { getAdminUserByEmail } = await import('@/lib/services/admin-user-service');
+  const emailLower = input.email.toLowerCase().trim();
+  const dbUser = await getAdminUserByEmail(emailLower);
 
-  const envAdminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  const envAdminPassword = process.env.ADMIN_PASSWORD;
-  if (envAdminEmail && envAdminPassword) {
-    STAFF_CREDENTIALS[envAdminEmail.toLowerCase()] = envAdminPassword;
+  let isValid = false;
+  let userId = `staff_${emailLower.split('@')[0]}`;
+  let userName = 'IT Administrator';
+  let userRole: UserRole = 'admin';
+
+  if (dbUser) {
+    if (!dbUser.is_active) {
+      return { success: false, error: 'บัญชีผู้ดูแลระบบนี้ถูกระงับการใช้งานชั่วคราว' };
+    }
+    if (dbUser.password === input.password) {
+      isValid = true;
+      userId = dbUser.id;
+      userName = dbUser.name;
+      userRole = dbUser.role;
+    }
   }
 
-  const emailLower = input.email.toLowerCase();
-  const expectedPassword = STAFF_CREDENTIALS[emailLower];
-  const isValidStaff = expectedPassword !== undefined && input.password === expectedPassword;
+  // Pre-configured staff accounts fallback (for tests & default deployment)
+  if (!isValid) {
+    const STAFF_CREDENTIALS: Record<string, { pass: string; role: UserRole; name: string }> = {
+      'superadmin@company.local': { pass: 'SuperAdmin@2026!', role: 'superadmin', name: 'ผู้ดูแลระบบสูงสุด (Superadmin)' },
+      'it-admin@company.local': { pass: 'AdminPassword123!', role: 'admin', name: 'IT Administrator' },
+      'admin@itsupport.com': { pass: 'admin-password-1234', role: 'admin', name: 'IT Support' },
+      'admin@company.local': { pass: 'Admin@2026!', role: 'admin', name: 'IT Staff' },
+      'admin@company.com': { pass: 'AdminPassword123!', role: 'admin', name: 'IT Staff' },
+      'support@company.local': { pass: 'SupportPass2026!', role: 'admin', name: 'Support Staff' },
+    };
 
-  if (!isValidStaff) {
+    const envAdminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    const envAdminPassword = process.env.ADMIN_PASSWORD;
+    if (envAdminEmail && envAdminPassword) {
+      STAFF_CREDENTIALS[envAdminEmail.toLowerCase()] = {
+        pass: envAdminPassword,
+        role: 'superadmin',
+        name: 'System Superadmin',
+      };
+    }
+
+    const expected = STAFF_CREDENTIALS[emailLower];
+    if (expected && input.password === expected.pass) {
+      isValid = true;
+      userRole = expected.role;
+      userName = expected.name;
+    }
+  }
+
+  if (!isValid) {
     return { success: false, error: 'Invalid credentials or unauthorized staff account' };
   }
 
-  const userId = `staff_${input.email.split('@')[0]}`;
-  const userName = 'IT Administrator';
-
   const token = `token_staff_${encodeBase64Url(JSON.stringify({
     id: userId,
-    email: input.email,
+    email: emailLower,
     name: userName,
-    role: 'admin',
+    role: userRole,
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
   }))}`;
 
   tokenStore.set(token, {
     id: userId,
-    email: input.email,
+    email: emailLower,
     name: userName,
-    role: 'admin',
+    role: userRole,
     expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -175,9 +203,9 @@ export async function authenticateStaff(input: StaffLoginInput): Promise<AuthRes
     success: true,
     user: {
       id: userId,
-      email: input.email,
+      email: emailLower,
       name: userName,
-      role: 'admin',
+      role: userRole,
     },
     token,
   };

@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'user' | 'admin' | 'superadmin';
 
 export interface Division {
   id: string;
@@ -182,15 +182,43 @@ export interface ReportSignature {
   id: string;
   month: number;
   year: number;
-  staff_signature?: string; // base64 data url or certified stamp
+  staff_signature?: string; // base64 data url, certified stamp, or empty for physical
   staff_name?: string;
   staff_title?: string;
-  staff_signature_type?: 'drawn' | 'typed';
-  supervisor_signature?: string; // base64 data url or certified stamp
+  staff_signature_type?: 'drawn' | 'typed' | 'physical';
+  supervisor_signature?: string; // base64 data url, certified stamp, or empty for physical
   supervisor_name?: string;
   supervisor_title?: string;
-  supervisor_signature_type?: 'drawn' | 'typed';
+  supervisor_signature_type?: 'drawn' | 'typed' | 'physical';
   signed_at?: string;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  password?: string;
+  role: 'admin' | 'superadmin';
+  title?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'SIGN' | 'CLEAR_SIGN' | 'STATUS_CHANGE';
+export type AuditModule = 'ASSET' | 'PM' | 'BOOKING' | 'REPORT' | 'USER_ADMIN' | 'MASTER_DATA' | 'TICKET' | 'AUTH';
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  actor_id: string;
+  actor_name: string;
+  actor_email?: string;
+  actor_role: string;
+  action: AuditAction;
+  module: AuditModule;
+  target_id?: string;
+  target_name?: string;
+  details: string;
 }
 
 export interface MonthlyReportSummary {

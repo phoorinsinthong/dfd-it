@@ -76,6 +76,12 @@ export interface CreateChecklistTemplateInput {
   scheduledMonths?: number[];
   periodLabel?: string;
   items: string[];
+  actor?: {
+    id: string;
+    name: string;
+    email?: string;
+    role: string;
+  };
 }
 
 export async function createChecklistTemplate(
@@ -97,7 +103,104 @@ export async function createChecklistTemplate(
   };
 
   templatesStore.push(newTemplate);
+
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'CREATE',
+      module: 'PM',
+      targetId: newTemplate.id,
+      targetName: newTemplate.title,
+      details: `สร้างแม่แบบแผนบำรุงรักษา PM: ${newTemplate.title}`,
+    });
+  }
+
   return { success: true, data: newTemplate };
+}
+
+export interface UpdateChecklistTemplateInput {
+  id: string;
+  title?: string;
+  description?: string;
+  frequency?: 'monthly' | 'quarterly' | 'annually' | 'custom_range';
+  scheduledMonths?: number[];
+  periodLabel?: string;
+  items?: string[];
+  actor?: {
+    id: string;
+    name: string;
+    email?: string;
+    role: string;
+  };
+}
+
+export async function updateChecklistTemplate(
+  input: UpdateChecklistTemplateInput
+): Promise<{ success: boolean; data?: ChecklistTemplate; error?: string }> {
+  const target = templatesStore.find((t) => t.id === input.id);
+  if (!target) {
+    return { success: false, error: 'ไม่พบแม่แบบแผนงานที่ต้องการแก้ไข' };
+  }
+
+  if (input.title) target.title = input.title.trim();
+  if (input.description !== undefined) target.description = input.description.trim();
+  if (input.frequency) target.frequency = input.frequency;
+  if (input.scheduledMonths !== undefined) target.scheduled_months = input.scheduledMonths;
+  if (input.periodLabel !== undefined) target.period_label = input.periodLabel;
+  if (input.items && input.items.length > 0) {
+    target.items = input.items.map((i) => i.trim()).filter(Boolean);
+  }
+
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'UPDATE',
+      module: 'PM',
+      targetId: target.id,
+      targetName: target.title,
+      details: `แก้ไขแม่แบบแผนงาน PM: ${target.title}`,
+    });
+  }
+
+  return { success: true, data: { ...target } };
+}
+
+export async function deleteChecklistTemplate(
+  templateId: string,
+  actor?: { id: string; name: string; email?: string; role: string }
+): Promise<{ success: boolean; error?: string }> {
+  const targetIdx = templatesStore.findIndex((t) => t.id === templateId);
+  if (targetIdx === -1) {
+    return { success: false, error: 'ไม่พบแม่แบบแผนงานที่ต้องการลบ' };
+  }
+
+  const target = templatesStore[targetIdx];
+  templatesStore.splice(targetIdx, 1);
+
+  if (actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorEmail: actor.email,
+      actorRole: actor.role,
+      action: 'DELETE',
+      module: 'PM',
+      targetId: target.id,
+      targetName: target.title,
+      details: `ลบแม่แบบแผนงาน PM: ${target.title}`,
+    });
+  }
+
+  return { success: true };
 }
 
 export interface GenerateAnnualRoadmapOptions {
@@ -258,3 +361,108 @@ export async function toggleChecklistItem(
 
   return { success: false, error: 'Checklist item not found' };
 }
+
+export interface UpdateMonthlyChecklistInput {
+  checklistId: string;
+  title?: string;
+  targetMonth?: number;
+  periodLabel?: string;
+  items?: string[];
+  actor?: { id: string; name: string; email?: string; role: string };
+}
+
+export async function updateMonthlyChecklist(
+  input: UpdateMonthlyChecklistInput
+): Promise<{ success: boolean; data?: Checklist; error?: string }> {
+  const target = checklistsStore.find((c) => c.id === input.checklistId);
+  if (!target) {
+    return { success: false, error: 'ไม่พบรายการแผนงานที่ต้องการแก้ไข' };
+  }
+
+  if (input.title !== undefined && input.title.trim()) {
+    target.title = input.title.trim();
+  }
+  if (input.targetMonth !== undefined) {
+    target.target_month = input.targetMonth;
+  }
+  if (input.periodLabel !== undefined) {
+    target.period_label = input.periodLabel;
+  }
+
+  if (input.items && input.items.length > 0) {
+    const cleanItems = input.items.map((i) => i.trim()).filter(Boolean);
+    // Preserve existing items completion state if task_name matches
+    target.items = cleanItems.map((taskName, idx) => {
+      const existing = target.items.find((i) => i.task_name === taskName);
+      if (existing) {
+        return existing;
+      }
+      return {
+        id: `${target.id}-item-${Date.now().toString().slice(-4)}-${idx + 1}`,
+        checklist_id: target.id,
+        task_name: taskName,
+        is_completed: false,
+      };
+    });
+  }
+
+  // Recalculate progress
+  const total = target.items.length;
+  const completed = target.items.filter((i) => i.is_completed).length;
+  target.progress_percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+  if (target.progress_percent === 100) {
+    target.status = 'completed';
+  } else if (target.progress_percent > 0) {
+    target.status = 'in_progress';
+  } else {
+    target.status = 'pending';
+  }
+
+  if (input.actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: input.actor.id,
+      actorName: input.actor.name,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: 'UPDATE',
+      module: 'PM',
+      targetId: target.id,
+      targetName: target.title,
+      details: `แก้ไขรายการแผนงาน PM ประจำเดือน: ${target.title}`,
+    });
+  }
+
+  return { success: true, data: { ...target } };
+}
+
+export async function deleteMonthlyChecklist(
+  checklistId: string,
+  actor?: { id: string; name: string; email?: string; role: string }
+): Promise<{ success: boolean; error?: string }> {
+  const targetIdx = checklistsStore.findIndex((c) => c.id === checklistId);
+  if (targetIdx === -1) {
+    return { success: false, error: 'ไม่พบรายการแผนงานที่ต้องการลบ' };
+  }
+
+  const target = checklistsStore[targetIdx];
+  checklistsStore.splice(targetIdx, 1);
+
+  if (actor) {
+    const { recordAuditLog } = await import('./audit-log-service');
+    await recordAuditLog({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorEmail: actor.email,
+      actorRole: actor.role,
+      action: 'DELETE',
+      module: 'PM',
+      targetId: target.id,
+      targetName: target.title,
+      details: `ลบรายการแผนงาน PM ประจำเดือน: ${target.title}`,
+    });
+  }
+
+  return { success: true };
+}
+

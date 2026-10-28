@@ -32,7 +32,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      if (user.role === 'admin') {
+      if (user.role === 'admin' || user.role === 'superadmin') {
         router.push('/admin');
       } else {
         router.push('/portal');
