@@ -391,6 +391,7 @@ CREATE TABLE IF NOT EXISTS public.servers (
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
 ALTER TABLE public.servers ALTER COLUMN id TYPE TEXT USING id::text;
 ALTER TABLE public.servers ALTER COLUMN unit_size DROP NOT NULL;
 ALTER TABLE public.servers ALTER COLUMN unit_size SET DEFAULT 1;
