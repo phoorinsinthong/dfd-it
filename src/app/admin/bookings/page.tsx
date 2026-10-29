@@ -11,6 +11,7 @@ import {
 import { Room, Booking } from '@/types/database';
 import RoomOverviewCalendar from '@/components/bookings/RoomOverviewCalendar';
 import RoomManagementModal from '@/components/bookings/RoomManagementModal';
+import WalkinBookingModal from '@/components/bookings/WalkinBookingModal';
 import {
   Calendar,
   Clock,
@@ -28,6 +29,8 @@ import {
   Settings,
   Grid3X3,
   ListOrdered,
+  Plus,
+  Sparkles,
 } from 'lucide-react';
 
 export default function AdminBookingsPage() {
@@ -43,6 +46,11 @@ export default function AdminBookingsPage() {
 
   // Room Management Modal State
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
+
+  // Walk-in Booking Modal State
+  const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
+  const [walkinSlotInfo, setWalkinSlotInfo] = useState<{ roomId?: string; date?: string; hour?: number }>({});
+  const [successToast, setSuccessToast] = useState<string | null>(null);
 
   // Filters
   const [selectedDate, setSelectedDate] = useState('');
@@ -140,7 +148,17 @@ export default function AdminBookingsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => {
+                setWalkinSlotInfo({ date: selectedDate });
+                setIsWalkinModalOpen(true);
+              }}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-emerald-600/30 self-start sm:self-auto"
+            >
+              <Plus className="w-4 h-4" />
+              + บันทึกการจอง Walk-in
+            </button>
             <button
               onClick={() => setIsRoomModalOpen(true)}
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-blue-600/30 self-start sm:self-auto"
@@ -150,6 +168,19 @@ export default function AdminBookingsPage() {
             </button>
           </div>
         </div>
+
+        {/* Success Toast */}
+        {successToast && (
+          <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-600/60 text-emerald-300 text-xs sm:text-sm flex items-center justify-between shadow-lg animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{successToast}</span>
+            </div>
+            <button onClick={() => setSuccessToast(null)} className="text-emerald-400 hover:text-white">
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* View Mode Tabs: Overview Calendar vs Detailed List */}
         <div className="flex items-center justify-between bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
@@ -195,6 +226,10 @@ export default function AdminBookingsPage() {
               selectedDate={selectedDate}
               onSelectDate={(newDate) => {
                 setSelectedDate(newDate);
+              }}
+              onSlotClick={(roomId, hour, dateStr) => {
+                setWalkinSlotInfo({ roomId, hour, date: dateStr });
+                setIsWalkinModalOpen(true);
               }}
               isAdmin={true}
             />
@@ -285,7 +320,7 @@ export default function AdminBookingsPage() {
                       className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition flex flex-col md:flex-row md:items-center justify-between gap-4"
                     >
                       <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-xs font-bold text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">
                             {sTime} - {eTime}
                           </span>
@@ -298,6 +333,12 @@ export default function AdminBookingsPage() {
                           >
                             {b.status === 'confirmed' ? 'ยืนยัน' : 'ยกเลิก'}
                           </span>
+                          {b.is_walkin && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/50 flex items-center gap-1 shadow-sm">
+                              <Sparkles className="w-3 h-3 text-emerald-400" />
+                              Walk-in (โดย {b.booked_by_staff_name || 'Admin'})
+                            </span>
+                          )}
                         </div>
 
                         <h3 className="text-base font-bold text-white">{b.title}</h3>
@@ -342,6 +383,21 @@ export default function AdminBookingsPage() {
         rooms={allRoomsIncludingInactive}
         onClose={() => setIsRoomModalOpen(false)}
         onRefresh={() => loadData()}
+      />
+
+      {/* Walk-in Booking Modal */}
+      <WalkinBookingModal
+        isOpen={isWalkinModalOpen}
+        rooms={rooms}
+        initialRoomId={walkinSlotInfo.roomId}
+        initialDate={walkinSlotInfo.date || selectedDate}
+        initialHour={walkinSlotInfo.hour}
+        onClose={() => setIsWalkinModalOpen(false)}
+        onSuccess={(bookingTitle) => {
+          setSuccessToast(`บันทึกการจอง Walk-in "${bookingTitle}" เรียบร้อยแล้ว`);
+          loadData();
+          setTimeout(() => setSuccessToast(null), 5000);
+        }}
       />
     </div>
   );

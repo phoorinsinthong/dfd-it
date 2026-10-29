@@ -225,7 +225,7 @@ export default function AdminSettingsPage() {
     setError(null);
     const res = await updateDepartment(id, {
       name: editName,
-      divisionId: editDivisionId || undefined,
+      divisionId: editDivisionId ? editDivisionId : null,
       building: editBuilding || undefined,
       floor: editFloor || undefined,
       room: editRoom || undefined,
@@ -797,7 +797,7 @@ export default function AdminSettingsPage() {
                               </div>
                               <div className="text-xs text-slate-400 flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
                                 <span>
-                                  สังกัด: <strong className="text-blue-300">{dept.division_name || 'ไม่ระบุกองงาน'}</strong>
+                                  สังกัด: <strong className="text-blue-300">{dept.division_name || divisions.find(d => d.id === dept.division_id)?.name || 'ไม่ระบุกองงาน'}</strong>
                                 </span>
                                 {(dept.building || dept.floor || dept.room) && (
                                   <span className="inline-flex items-center gap-1 text-slate-300 bg-slate-800 px-2 py-0.5 rounded-md text-[11px]">

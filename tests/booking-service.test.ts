@@ -293,5 +293,43 @@ describe('Ticket 05: Meeting Room & Online Account Booking Service', () => {
       const allRooms = await getRooms({ includeInactive: true });
       expect(allRooms.some((r) => r.id === tempRoom.data!.id)).toBe(false);
     });
+
+    it('records a Walk-in booking by Admin staff with audit trail logging', async () => {
+      const rooms = await getRooms();
+      const targetRoom = rooms[0];
+
+      const res = await createBooking({
+        userId: 'walkin-12345',
+        userName: 'สมชาย ผู้มาติดต่อ',
+        userDepartment: 'ฝ่ายการตลาด',
+        roomId: targetRoom.id,
+        title: 'ประชุมประสานงาน Walk-in ด่วน',
+        startTime: '2026-11-15T14:00:00.000Z',
+        endTime: '2026-11-15T15:00:00.000Z',
+        requiredEquipment: ['โปรเจคเตอร์และจอภาพ'],
+        isWalkin: true,
+        bookedByStaffId: 'staff-admin-1',
+        bookedByStaffName: 'ภูรินทร์ ไอที',
+        actor: {
+          id: 'staff-admin-1',
+          name: 'ภูรินทร์ ไอที',
+          email: 'admin@company.com',
+          role: 'admin',
+        },
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.data?.is_walkin).toBe(true);
+      expect(res.data?.booked_by_staff_id).toBe('staff-admin-1');
+      expect(res.data?.booked_by_staff_name).toBe('ภูรินทร์ ไอที');
+
+      // Verify audit logs
+      const { getAuditLogs } = await import('@/lib/services/audit-log-service');
+      const logs = await getAuditLogs();
+      const bookingLog = logs.find((l) => l.target_id === res.data?.id);
+      expect(bookingLog).toBeDefined();
+      expect(bookingLog?.module).toBe('BOOKING');
+      expect(bookingLog?.details).toContain('Walk-in');
+    });
   });
 });

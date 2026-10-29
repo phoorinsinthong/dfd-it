@@ -77,6 +77,10 @@ export interface CreateBookingInput {
   startTime: string; // ISO string
   endTime: string;   // ISO string
   requiredEquipment?: string[];
+  isWalkin?: boolean;
+  bookedByStaffId?: string;
+  bookedByStaffName?: string;
+  actor?: { id: string; name: string; email?: string; role: string };
 }
 
 let roomsStore: Room[] = [...INITIAL_ROOMS];
@@ -362,10 +366,13 @@ export async function createBooking(
     room_type: room.type,
     room_static_url: room.static_url,
     room_passcode: room.passcode,
-    title: input.title.trim() || 'Meeting',
+    title: input.title.trim() || (input.isWalkin ? 'Walk-in Meeting' : 'Meeting'),
     start_time: new Date(input.startTime).toISOString(),
     end_time: new Date(input.endTime).toISOString(),
     required_equipment: input.requiredEquipment || [],
+    is_walkin: input.isWalkin ?? false,
+    booked_by_staff_id: input.bookedByStaffId,
+    booked_by_staff_name: input.bookedByStaffName,
     status: 'confirmed',
     created_at: new Date().toISOString(),
   };
@@ -386,6 +393,9 @@ export async function createBooking(
         start_time: newBooking.start_time,
         end_time: newBooking.end_time,
         required_equipment: newBooking.required_equipment,
+        is_walkin: newBooking.is_walkin,
+        booked_by_staff_id: newBooking.booked_by_staff_id,
+        booked_by_staff_name: newBooking.booked_by_staff_name,
         status: newBooking.status,
       }).select().single();
       if (!error && dbBooking) {
@@ -397,6 +407,29 @@ export async function createBooking(
   }
 
   bookingsStore.unshift(newBooking);
+
+  if (input.actor) {
+    try {
+      const { recordAuditLog } = await import('./audit-log-service');
+      const startFmt = new Date(newBooking.start_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const endFmt = new Date(newBooking.end_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      await recordAuditLog({
+        actorId: input.actor.id,
+        actorName: input.actor.name,
+        actorEmail: input.actor.email,
+        actorRole: input.actor.role,
+        action: 'CREATE',
+        module: 'BOOKING',
+        targetId: newBooking.id,
+        targetName: room.name,
+        details: input.isWalkin
+          ? `จองห้องประชุมแบบ Walk-in: "${newBooking.title}" สำหรับ ${newBooking.user_name} (${newBooking.user_department || 'ไม่ระบุแผนก'}) เวลา ${startFmt} - ${endFmt}`
+          : `สร้างการจองห้องประชุม: "${newBooking.title}" สำหรับ ${newBooking.user_name} (${newBooking.user_department || '-'}) เวลา ${startFmt} - ${endFmt}`,
+      });
+    } catch (auditErr) {
+      console.warn('Failed to record booking audit log:', auditErr);
+    }
+  }
 
   return {
     success: true,

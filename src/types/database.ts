@@ -108,6 +108,9 @@ export interface Booking {
   end_time: string;   // ISO 8601
   required_equipment: string[];
   status: BookingStatus;
+  is_walkin?: boolean;
+  booked_by_staff_id?: string;
+  booked_by_staff_name?: string;
   created_at: string;
 }
 

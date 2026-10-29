@@ -174,6 +174,35 @@ describe('Master Data Service Seam (Divisions, Departments & Categories)', () =>
       const allAfterForce = await getDepartments({ includeInactive: true });
       expect(allAfterForce.some((d) => d.id === deptId)).toBe(false);
     });
+
+    it('changes parent division and supports unlinking division with null', async () => {
+      const divs = await getDivisions();
+      const div1 = divs[0];
+      const div2 = divs[1];
+
+      const added = await addDepartment({
+        name: 'ฝ่ายงานแผนใหม่',
+        divisionId: div1.id,
+      });
+      expect(added.data?.division_id).toBe(div1.id);
+      expect(added.data?.division_name).toBe(div1.name);
+
+      // Change to div2
+      const updatedToDiv2 = await updateDepartment(added.data!.id, {
+        divisionId: div2.id,
+      });
+      expect(updatedToDiv2.success).toBe(true);
+      expect(updatedToDiv2.data?.division_id).toBe(div2.id);
+      expect(updatedToDiv2.data?.division_name).toBe(div2.name);
+
+      // Unlink division with null
+      const unlinked = await updateDepartment(added.data!.id, {
+        divisionId: null,
+      });
+      expect(unlinked.success).toBe(true);
+      expect(unlinked.data?.division_id).toBeUndefined();
+      expect(unlinked.data?.division_name).toBeUndefined();
+    });
   });
 
   describe('Categories Management', () => {

@@ -293,7 +293,7 @@ export interface AddDepartmentInput {
 
 export interface UpdateDepartmentInput {
   name?: string;
-  divisionId?: string;
+  divisionId?: string | null;
   building?: string;
   floor?: string;
   room?: string;
@@ -305,6 +305,19 @@ export async function getDepartments(options?: { divisionId?: string; includeIna
     try {
       const { data, error } = await supabase.from('departments').select('*').order('created_at', { ascending: true });
       if (!error && data && data.length > 0) {
+        // Ensure divisions are synced from DB if needed
+        if (divisionsStore.length === 0 || divisionsStore.every((d) => d.id.startsWith('div-'))) {
+          const { data: divData } = await supabase.from('divisions').select('*').order('created_at', { ascending: true });
+          if (divData && divData.length > 0) {
+            divisionsStore = divData.map((d: { id: string; name: string; is_active: boolean | null; created_at?: string }) => ({
+              id: d.id,
+              name: d.name,
+              is_active: d.is_active ?? true,
+              created_at: d.created_at,
+            }));
+          }
+        }
+
         departmentsStore = data.map((d: {
           id: string;
           name: string;
@@ -315,17 +328,20 @@ export async function getDepartments(options?: { divisionId?: string; includeIna
           room?: string | null;
           is_active?: boolean | null;
           created_at?: string;
-        }) => ({
-          id: d.id,
-          name: d.name,
-          division_id: d.division_id || undefined,
-          division_name: d.division_name || undefined,
-          building: d.building || undefined,
-          floor: d.floor || undefined,
-          room: d.room || undefined,
-          is_active: d.is_active ?? true,
-          created_at: d.created_at,
-        }));
+        }) => {
+          const parentDiv = divisionsStore.find((div) => div.id === d.division_id);
+          return {
+            id: d.id,
+            name: d.name,
+            division_id: d.division_id || undefined,
+            division_name: d.division_name || parentDiv?.name || undefined,
+            building: d.building || undefined,
+            floor: d.floor || undefined,
+            room: d.room || undefined,
+            is_active: d.is_active ?? true,
+            created_at: d.created_at,
+          };
+        });
       }
     } catch (e) {
       console.warn('Supabase getDepartments warning:', e);
@@ -381,16 +397,27 @@ export async function addDepartment(
 
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase.from('departments').insert({
+      const payload: Record<string, any> = {
         name,
-        division_id: divisionId,
-        division_name: divisionName,
-        building,
-        floor,
-        room,
+        division_id: divisionId || null,
+        building: building || null,
+        floor: floor || null,
+        room: room || null,
         is_active: true,
-      }).select().single();
-      if (!error && data) {
+      };
+      if (divisionName) {
+        payload.division_name = divisionName;
+      }
+
+      const { data, error } = await supabase.from('departments').insert(payload).select().single();
+      if (error && (error as any).message?.includes('division_name')) {
+        delete payload.division_name;
+        const retry = await supabase.from('departments').insert(payload).select().single();
+        if (!retry.error && retry.data) {
+          newDept.id = retry.data.id;
+          newDept.created_at = retry.data.created_at;
+        }
+      } else if (!error && data) {
         newDept.id = data.id;
         newDept.created_at = data.created_at;
       }
@@ -446,8 +473,8 @@ export async function updateDepartment(
 
   if (typeof input === 'object') {
     if (input.divisionId !== undefined) {
-      dept.division_id = input.divisionId || undefined;
-      const parentDiv = divisionsStore.find((d) => d.id === input.divisionId);
+      dept.division_id = input.divisionId ? input.divisionId : undefined;
+      const parentDiv = input.divisionId ? divisionsStore.find((d) => d.id === input.divisionId) : undefined;
       dept.division_name = parentDiv ? parentDiv.name : undefined;
     }
     if (input.building !== undefined) dept.building = input.building.trim() || undefined;
@@ -458,15 +485,23 @@ export async function updateDepartment(
 
   if (isSupabaseConfigured()) {
     try {
-      await supabase.from('departments').update({
+      const payload: Record<string, any> = {
         name: dept.name,
-        division_id: dept.division_id,
-        division_name: dept.division_name,
-        building: dept.building,
-        floor: dept.floor,
-        room: dept.room,
+        division_id: dept.division_id || null,
+        building: dept.building || null,
+        floor: dept.floor || null,
+        room: dept.room || null,
         is_active: dept.is_active,
-      }).eq('id', id);
+      };
+      if (dept.division_name !== undefined) {
+        payload.division_name = dept.division_name;
+      }
+
+      const { error } = await supabase.from('departments').update(payload).eq('id', id);
+      if (error && (error as any).message?.includes('division_name')) {
+        delete payload.division_name;
+        await supabase.from('departments').update(payload).eq('id', id);
+      }
     } catch (e) {
       console.warn('Supabase updateDepartment warning:', e);
     }
