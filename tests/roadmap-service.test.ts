@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   getChecklistTemplates,
   createChecklistTemplate,
+  updateChecklistTemplate,
+  deleteChecklistTemplate,
   generateAnnualRoadmap,
   createAdhocChecklist,
   getChecklists,
@@ -38,6 +40,43 @@ describe('Ticket 07: Preventive Maintenance Roadmap & Checklist Seam', () => {
       expect(res.success).toBe(true);
       expect(res.data?.id).toBeDefined();
       expect(res.data?.items.length).toBe(3);
+    });
+
+    it('updates an existing checklist template', async () => {
+      const created = await createChecklistTemplate({
+        title: 'Original Template',
+        description: 'Original Desc',
+        items: ['Task 1', 'Task 2'],
+      });
+
+      const updated = await updateChecklistTemplate(created.data!.id, {
+        title: 'Updated Template Title',
+        description: 'Updated Desc',
+        items: ['Task 1 modified', 'Task 2', 'Task 3 added'],
+      });
+
+      expect(updated.success).toBe(true);
+      expect(updated.data?.title).toBe('Updated Template Title');
+      expect(updated.data?.items.length).toBe(3);
+
+      const allTemplates = await getChecklistTemplates();
+      const found = allTemplates.find((t) => t.id === created.data!.id);
+      expect(found?.title).toBe('Updated Template Title');
+    });
+
+    it('deletes an existing checklist template', async () => {
+      const created = await createChecklistTemplate({
+        title: 'To Be Deleted',
+        description: 'Will be removed',
+        items: ['Task A'],
+      });
+
+      const res = await deleteChecklistTemplate(created.data!.id);
+      expect(res.success).toBe(true);
+
+      const allTemplates = await getChecklistTemplates();
+      const found = allTemplates.find((t) => t.id === created.data!.id);
+      expect(found).toBeUndefined();
     });
   });
 

@@ -68,8 +68,23 @@ export async function getChecklistTemplates(): Promise<ChecklistTemplate[]> {
         .from('checklist_templates')
         .select('*')
         .order('created_at', { ascending: true });
-      if (!error && data && data.length > 0) {
-        templatesStore = data as ChecklistTemplate[];
+      if (!error && data) {
+        if (data.length > 0) {
+          templatesStore = data as ChecklistTemplate[];
+        } else {
+          // If Supabase table has 0 templates, seed initial templates so they persist and are editable/deletable
+          for (const t of INITIAL_TEMPLATES) {
+            await supabase.from('checklist_templates').upsert({
+              id: t.id,
+              title: t.title,
+              description: t.description,
+              frequency: t.frequency,
+              scheduled_months: t.scheduled_months,
+              period_label: t.period_label,
+              items: t.items,
+            }, { onConflict: 'id' });
+          }
+        }
       }
     } catch (e) {
       console.warn('Supabase getChecklistTemplates warning:', e);
@@ -136,6 +151,7 @@ export async function createChecklistTemplate(
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase.from('checklist_templates').insert({
+        id: newTemplate.id,
         title: newTemplate.title,
         description: newTemplate.description,
         frequency: newTemplate.frequency,
@@ -189,8 +205,14 @@ export interface UpdateChecklistTemplateInput {
 }
 
 export async function updateChecklistTemplate(
-  input: UpdateChecklistTemplateInput
+  inputOrId: string | UpdateChecklistTemplateInput,
+  maybeInput?: Omit<UpdateChecklistTemplateInput, 'id'>
 ): Promise<{ success: boolean; data?: ChecklistTemplate; error?: string }> {
+  const input: UpdateChecklistTemplateInput =
+    typeof inputOrId === 'string'
+      ? { id: inputOrId, ...(maybeInput || {}) }
+      : inputOrId;
+
   const target = templatesStore.find((t) => t.id === input.id);
   if (!target) {
     return { success: false, error: 'ไม่พบแม่แบบแผนงานที่ต้องการแก้ไข' };
@@ -207,14 +229,15 @@ export async function updateChecklistTemplate(
 
   if (isSupabaseConfigured()) {
     try {
-      await supabase.from('checklist_templates').update({
+      await supabase.from('checklist_templates').upsert({
+        id: target.id,
         title: target.title,
         description: target.description,
         frequency: target.frequency,
         scheduled_months: target.scheduled_months,
         period_label: target.period_label,
         items: target.items,
-      }).eq('id', input.id);
+      }, { onConflict: 'id' });
     } catch (e) {
       console.warn('Supabase updateChecklistTemplate warning:', e);
     }

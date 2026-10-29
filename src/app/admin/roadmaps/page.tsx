@@ -345,6 +345,18 @@ export default function AdminRoadmapsPage() {
               สร้างแผน 12 เดือนจากแม่แบบ
             </button>
             <button
+              onClick={() => setActiveTab('templates')}
+              className={`px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                activeTab === 'templates'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+              }`}
+              title="ดู แก้ไข หรือลบแม่แบบมาตรฐาน"
+            >
+              <Layers className="w-4 h-4 text-blue-400" />
+              จัดการแม่แบบ ({templates.length})
+            </button>
+            <button
               onClick={() => setIsAdhocModalOpen(true)}
               className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold border border-slate-700 transition flex items-center gap-1.5"
             >
@@ -353,11 +365,11 @@ export default function AdminRoadmapsPage() {
             </button>
             <button
               onClick={() => setIsNewTemplateModalOpen(true)}
-              className="px-3.5 py-2.5 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs sm:text-sm border border-slate-800 transition flex items-center gap-1.5"
-              title="จัดการแม่แบบมาตรฐาน"
+              className="px-3.5 py-2.5 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 text-white text-xs sm:text-sm transition flex items-center gap-1.5 shadow-md shadow-emerald-700/20"
+              title="เพิ่มแม่แบบมาตรฐานใหม่"
             >
-              <Layers className="w-4 h-4" />
-              เพิ่มแม่แบบ
+              <Plus className="w-4 h-4" />
+              เพิ่มแม่แบบใหม่
             </button>
           </div>
         </div>
@@ -726,8 +738,40 @@ export default function AdminRoadmapsPage() {
 
             <form onSubmit={handleGenerateAnnualSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  เลือกแม่แบบมาตรฐาน (Checklist Template)
+                <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between flex-wrap gap-1">
+                  <span>เลือกแม่แบบมาตรฐาน (Checklist Template)</span>
+                  {selectedTemplateId && (
+                    <span className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const tpl = templates.find((t) => t.id === selectedTemplateId);
+                          if (tpl) {
+                            setIsGenerateModalOpen(false);
+                            handleOpenEditTemplate(tpl);
+                          }
+                        }}
+                        className="text-blue-400 hover:text-blue-300 text-[11px] font-semibold flex items-center gap-1 hover:underline"
+                        title="แก้ไขแม่แบบที่เลือก"
+                      >
+                        <Pencil className="w-3 h-3" /> แก้ไขแม่แบบนี้
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const tpl = templates.find((t) => t.id === selectedTemplateId);
+                          if (tpl) {
+                            setIsGenerateModalOpen(false);
+                            setDeletingTemplate(tpl);
+                          }
+                        }}
+                        className="text-red-400 hover:text-red-300 text-[11px] font-semibold flex items-center gap-1 hover:underline"
+                        title="ลบแม่แบบที่เลือก"
+                      >
+                        <Trash2 className="w-3 h-3" /> ลบแม่แบบนี้
+                      </button>
+                    </span>
+                  )}
                 </label>
                 <select
                   value={selectedTemplateId}

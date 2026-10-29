@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
-import { Wrench, LogOut, ShieldCheck, User, Calendar, Laptop, ClipboardList, Settings, FileText } from 'lucide-react';
+import { Wrench, LogOut, ShieldCheck, User, Calendar, Laptop, ClipboardList, Settings, FileText, Server } from 'lucide-react';
 import AdminNotificationListener from '@/components/admin/AdminNotificationListener';
 
 export default function Navbar({ activeSection }: { activeSection?: string }) {
@@ -79,6 +79,15 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
             >
               <ClipboardList className="w-3.5 h-3.5" />
               แผนงาน PM
+            </Link>
+            <Link
+              href="/admin/servers"
+              className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+                activeSection === 'servers' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <Server className="w-3.5 h-3.5 text-blue-400" />
+              เซิร์ฟเวอร์
             </Link>
             <Link
               href="/admin/reports"
@@ -180,6 +189,14 @@ export default function Navbar({ activeSection }: { activeSection?: string }) {
             }`}
           >
             <ClipboardList className="w-3 h-3" /> แผนงาน PM
+          </Link>
+          <Link
+            href="/admin/servers"
+            className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition flex items-center gap-1 ${
+              activeSection === 'servers' ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Server className="w-3 h-3 text-blue-400" /> เซิร์ฟเวอร์
           </Link>
           <Link
             href="/admin/reports"

@@ -19,6 +19,7 @@ import {
   FileText,
   Settings,
   ShieldCheck,
+  Server,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -295,6 +296,27 @@ export default function AdminDashboardPage() {
                   <span>จัดการแผนงาน PM</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <Server className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>5. ตู้ Server Rack 3D & Cloud Infrastructure</span>
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      แผนผังตู้แร็ค 42U สเปก CPU/RAM/Disk, IP Address, รหัสผ่าน และระบบจัดการ Cloud Server
+                    </p>
+                  </div>
+                  <Link
+                    href="/admin/servers"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-semibold transition shrink-0"
+                  >
+                    <span>เปิดผังตู้แร็ค 3D</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

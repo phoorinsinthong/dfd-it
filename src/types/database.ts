@@ -208,7 +208,7 @@ export interface AdminUser {
 }
 
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'SIGN' | 'CLEAR_SIGN' | 'STATUS_CHANGE';
-export type AuditModule = 'ASSET' | 'PM' | 'BOOKING' | 'REPORT' | 'USER_ADMIN' | 'MASTER_DATA' | 'TICKET' | 'AUTH';
+export type AuditModule = 'ASSET' | 'PM' | 'BOOKING' | 'REPORT' | 'USER_ADMIN' | 'MASTER_DATA' | 'TICKET' | 'AUTH' | 'SERVER';
 
 export interface AuditLog {
   id: string;
@@ -222,6 +222,43 @@ export interface AuditLog {
   target_id?: string;
   target_name?: string;
   details: string;
+}
+
+export type ServerEnvironment = 'internal' | 'cloud';
+export type ServerStatus = 'online' | 'maintenance' | 'offline';
+export type RackId = 'rack-1' | 'rack-2';
+
+export interface ServerSpecs {
+  cpu?: string;
+  ram?: string;
+  storage?: string;
+  os?: string;
+  brand_model?: string;
+}
+
+export interface ServerRecord {
+  id: string;
+  name: string;
+  environment: ServerEnvironment;
+  rack_id?: RackId; // 'rack-1' | 'rack-2'
+  rack_name?: string;
+  unit_position?: number; // 1 to 42
+  unit_size?: number; // 1, 2, 3, 4 U
+  ip_address: string;
+  ilo_ip?: string;
+  public_ip?: string;
+  domain_name?: string;
+  cloud_provider?: string;
+  cloud_region?: string;
+  specs: ServerSpecs;
+  username: string;
+  password?: string;
+  role_purpose: string;
+  status: ServerStatus;
+  notes?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface MonthlyReportSummary {
