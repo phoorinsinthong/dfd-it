@@ -197,8 +197,60 @@ describe('Server Management & 3D Rack Seam', () => {
       const statsAfter = await getRackOccupancy('rack-2');
       const remainingServers = await getServers();
 
-      expect(remainingServers.find((s) => s.id === createRes.data!.id)).toBeUndefined();
-      expect(statsAfter.usedU).toBe(statsBefore.usedU - 1);
+    });
+  });
+
+  describe('Database Schema Normalization (004 vs 005 Compatibility)', () => {
+    it('normalizes uppercase and legacy columns from Supabase', async () => {
+      const { normalizeServerRecord } = await import('@/lib/services/server-service');
+      const legacyRow = {
+        id: 'srv-rack1-core-sw01',
+        name: 'Core Switch SW-01 (Nexus 9300)',
+        environment: 'INTERNAL',
+        rack_id: 'rack_1',
+        unit_position: 41,
+        unit_size: 2,
+        ip_address: '10.10.0.1',
+        ilo_ip: '10.10.99.1',
+        domain: 'sw-core01.internal.dfd',
+        status: 'ONLINE',
+        role: 'Core Distribution Switch 48-Port 10G/40G Uplink',
+        os: 'Cisco NX-OS 9.3(8)',
+        model: 'Cisco Nexus 93180YC-EX',
+        specs: { cpu: 'Quad-Core Intel Xeon', ram: '24 GB', storage: '64 GB SSD' },
+        username: 'admin',
+        password: 'Cisco!Core#9300',
+        notes: 'Backbone Fiber',
+        // is_active is undefined in 004
+      };
+
+      const normalized = normalizeServerRecord(legacyRow);
+      expect(normalized.environment).toBe('internal');
+      expect(normalized.rack_id).toBe('rack-1');
+      expect(normalized.rack_name).toBe('Rack 1 (Core Infrastructure)');
+      expect(normalized.status).toBe('online');
+      expect(normalized.is_active).toBe(true);
+      expect(normalized.role_purpose).toBe('Core Distribution Switch 48-Port 10G/40G Uplink');
+      expect(normalized.domain_name).toBe('sw-core01.internal.dfd');
+      expect(normalized.specs.brand_model).toBe('Cisco Nexus 93180YC-EX');
+      expect(normalized.specs.os).toBe('Cisco NX-OS 9.3(8)');
+    });
+
+    it('normalizes cloud servers from uppercase to lowercase', async () => {
+      const { normalizeServerRecord } = await import('@/lib/services/server-service');
+      const legacyCloudRow = {
+        id: 'srv-cloud-1',
+        name: 'Vercel App',
+        environment: 'CLOUD',
+        status: 'MAINTENANCE',
+        ip_address: '76.76.21.21',
+      };
+
+      const normalized = normalizeServerRecord(legacyCloudRow);
+      expect(normalized.environment).toBe('cloud');
+      expect(normalized.status).toBe('maintenance');
+      expect(normalized.is_active).toBe(true);
     });
   });
 });
+

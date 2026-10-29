@@ -358,6 +358,73 @@ export function resetServerStore() {
   serversStore = JSON.parse(JSON.stringify(INITIAL_SERVERS));
 }
 
+export function normalizeServerRecord(raw: any): ServerRecord {
+  if (!raw) return raw;
+
+  const envLower = String(raw.environment || 'internal').toLowerCase();
+  const environment: ServerEnvironment = envLower === 'cloud' ? 'cloud' : 'internal';
+
+  let rackId: RackId | undefined = undefined;
+  if (raw.rack_id) {
+    const r = String(raw.rack_id).toLowerCase().replace('_', '-');
+    if (r === 'rack-1' || r === 'rack-2') {
+      rackId = r;
+    }
+  }
+
+  const statusLower = String(raw.status || 'online').toLowerCase();
+  const status: ServerStatus =
+    statusLower === 'maintenance' ? 'maintenance' : statusLower === 'offline' ? 'offline' : 'online';
+
+  const rackName =
+    raw.rack_name ||
+    (rackId === 'rack-1'
+      ? 'Rack 1 (Core Infrastructure)'
+      : rackId === 'rack-2'
+      ? 'Rack 2 (Storage & Virtualization)'
+      : undefined);
+
+  const rawSpecs = raw.specs && typeof raw.specs === 'object' ? raw.specs : {};
+  const specs: ServerSpecs = {
+    cpu: rawSpecs.cpu || undefined,
+    ram: rawSpecs.ram || undefined,
+    storage: rawSpecs.storage || undefined,
+    os: rawSpecs.os || raw.os || undefined,
+    brand_model: rawSpecs.brand_model || raw.model || undefined,
+  };
+
+  return {
+    id: String(raw.id),
+    name: String(raw.name || 'Server'),
+    environment,
+    rack_id: rackId,
+    rack_name: rackName,
+    unit_position:
+      raw.unit_position !== undefined && raw.unit_position !== null ? Number(raw.unit_position) : undefined,
+    unit_size:
+      raw.unit_size !== undefined && raw.unit_size !== null
+        ? Number(raw.unit_size)
+        : environment === 'internal'
+        ? 1
+        : undefined,
+    ip_address: String(raw.ip_address || ''),
+    ilo_ip: raw.ilo_ip || undefined,
+    public_ip: raw.public_ip || undefined,
+    domain_name: raw.domain_name || raw.domain || undefined,
+    cloud_provider: raw.cloud_provider || undefined,
+    cloud_region: raw.cloud_region || undefined,
+    specs,
+    username: raw.username || 'admin',
+    password: raw.password || undefined,
+    role_purpose: raw.role_purpose || raw.role || 'General Server',
+    status,
+    notes: raw.notes || undefined,
+    is_active: raw.is_active !== undefined && raw.is_active !== null ? Boolean(raw.is_active) : true,
+    created_at: raw.created_at || new Date().toISOString(),
+    updated_at: raw.updated_at || undefined,
+  };
+}
+
 export interface GetServersFilter {
   environment?: ServerEnvironment | 'all';
   rackId?: RackId | 'all';
@@ -375,7 +442,7 @@ export async function getServers(filter?: GetServersFilter): Promise<ServerRecor
 
       if (!error && data) {
         if (data.length > 0) {
-          serversStore = data as ServerRecord[];
+          serversStore = data.map(normalizeServerRecord);
         } else {
           // If Supabase table is empty, seed initial servers
           for (const s of INITIAL_SERVERS) {
@@ -425,7 +492,7 @@ export async function getServerById(id: string): Promise<ServerRecord | null> {
     try {
       const { data, error } = await supabase.from('servers').select('*').eq('id', id).maybeSingle();
       if (!error && data) {
-        return data as ServerRecord;
+        return normalizeServerRecord(data);
       }
     } catch (e) {
       console.warn('Supabase getServerById warning:', e);
@@ -535,7 +602,14 @@ export async function createServer(
 
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase.from('servers').insert(newServer).select().single();
+      const payload: Record<string, any> = {
+        ...newServer,
+        role: newServer.role_purpose,
+        domain: newServer.domain_name,
+        model: newServer.specs?.brand_model,
+        os: newServer.specs?.os,
+      };
+      const { data, error } = await supabase.from('servers').insert(payload).select().single();
       if (!error && data) {
         newServer.id = data.id;
         newServer.created_at = data.created_at;
@@ -668,7 +742,14 @@ export async function updateServer(
 
   if (isSupabaseConfigured()) {
     try {
-      await supabase.from('servers').upsert(target, { onConflict: 'id' });
+      const payload: Record<string, any> = {
+        ...target,
+        role: target.role_purpose,
+        domain: target.domain_name,
+        model: target.specs?.brand_model,
+        os: target.specs?.os,
+      };
+      await supabase.from('servers').upsert(payload, { onConflict: 'id' });
     } catch (e) {
       console.warn('Supabase updateServer warning:', e);
     }
