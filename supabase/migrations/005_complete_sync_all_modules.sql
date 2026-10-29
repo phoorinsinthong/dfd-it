@@ -153,6 +153,16 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   resolved_at TIMESTAMPTZ
 );
 
+DO $$
+BEGIN
+  ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_assigned_to_fkey;
+  ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_user_id_fkey;
+  ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_division_id_fkey;
+  ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_department_id_fkey;
+  ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_category_id_fkey;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
 ALTER TABLE public.tickets ALTER COLUMN id TYPE TEXT USING id::text;
 ALTER TABLE public.tickets ALTER COLUMN user_id TYPE TEXT USING user_id::text;
 ALTER TABLE public.tickets ALTER COLUMN division_id TYPE TEXT USING division_id::text;

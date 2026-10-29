@@ -92,8 +92,8 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
         role: 'user',
       }, { onConflict: 'id' });
 
-      const { data: dbTicket, error } = await supabase.from('tickets').insert({
-        id: newTicket.id,
+      // Build payload matching database columns
+      const insertPayload: Record<string, any> = {
         user_id: newTicket.user_id,
         user_name: newTicket.user_name,
         user_employee_id: newTicket.user_employee_id,
@@ -114,12 +114,33 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
         urgency: newTicket.urgency,
         status: newTicket.status,
         created_at: newTicket.created_at,
-      }).select().single();
+      };
+
+      // If newTicket.id is already UUID or table allows TEXT, include it; otherwise let gen_random_uuid() assign
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(newTicket.id);
+      if (isUuid) {
+        insertPayload.id = newTicket.id;
+      }
+
+      let { data: dbTicket, error } = await supabase.from('tickets').insert(insertPayload).select().single();
+
+      // If rejected due to UUID syntax error on non-UUID id, retry without id so PostgreSQL gen_random_uuid() generates it
+      if (error && (error.code === '22P02' || error.code === '23502')) {
+        delete insertPayload.id;
+        const retryRes = await supabase.from('tickets').insert(insertPayload).select().single();
+        if (!retryRes.error && retryRes.data) {
+          dbTicket = retryRes.data;
+          error = null;
+        }
+      }
 
       if (error) {
         console.warn('Supabase createTicket warning:', error);
       } else if (dbTicket) {
         newTicket.id = dbTicket.id;
+        if (ticketsStore[0]) {
+          ticketsStore[0].id = dbTicket.id;
+        }
       }
     } catch (e) {
       console.warn('Supabase createTicket exception:', e);
@@ -226,9 +247,17 @@ export async function acceptTicket(input: {
   staffId: string;
   staffName: string;
 }): Promise<{ success: boolean; data?: Ticket; error?: string }> {
-  const ticket = ticketsStore.find((t) => t.id === input.ticketId);
+  let ticket = ticketsStore.find((t) => t.id === input.ticketId);
   if (!ticket) {
-    return { success: false, error: 'Ticket not found' };
+    const fetched = await getTicketById(input.ticketId);
+    if (fetched) {
+      ticket = fetched;
+      ticketsStore.unshift(ticket);
+    }
+  }
+
+  if (!ticket) {
+    return { success: false, error: 'ไม่พบใบแจ้งซ่อมที่ระบุ' };
   }
 
   ticket.status = 'in_progress';
@@ -237,13 +266,36 @@ export async function acceptTicket(input: {
 
   if (isSupabaseConfigured()) {
     try {
-      await supabase.from('tickets').update({
+      // 1. Upsert staff into users table first so foreign key tickets_assigned_to_fkey constraint is always satisfied
+      await supabase.from('users').upsert({
+        id: input.staffId,
+        name: input.staffName,
+        role: 'admin',
+      }, { onConflict: 'id' });
+
+      // 2. Update tickets table in Supabase
+      const { data: updated, error: updateErr } = await supabase.from('tickets').update({
         status: 'in_progress',
         assigned_to: input.staffId,
         assigned_to_name: input.staffName,
-      }).eq('id', input.ticketId);
+      }).eq('id', input.ticketId).select().maybeSingle();
+
+      if (updateErr) {
+        console.warn('Supabase acceptTicket warning:', updateErr);
+        // Fallback: If foreign key error occurs, update status and staff name without assigned_to id
+        if (updateErr.code === '23503') {
+          await supabase.from('tickets').update({
+            status: 'in_progress',
+            assigned_to_name: input.staffName,
+          }).eq('id', input.ticketId);
+        }
+      } else if (updated) {
+        ticket.status = updated.status;
+        ticket.assigned_to = updated.assigned_to;
+        ticket.assigned_to_name = updated.assigned_to_name;
+      }
     } catch (e) {
-      console.warn('Supabase acceptTicket warning:', e);
+      console.warn('Supabase acceptTicket exception:', e);
     }
   }
 
@@ -255,9 +307,17 @@ export async function resolveTicket(input: {
   solutionNote: string;
   rootCause?: string;
 }): Promise<{ success: boolean; data?: Ticket; error?: string }> {
-  const ticket = ticketsStore.find((t) => t.id === input.ticketId);
+  let ticket = ticketsStore.find((t) => t.id === input.ticketId);
   if (!ticket) {
-    return { success: false, error: 'Ticket not found' };
+    const fetched = await getTicketById(input.ticketId);
+    if (fetched) {
+      ticket = fetched;
+      ticketsStore.unshift(ticket);
+    }
+  }
+
+  if (!ticket) {
+    return { success: false, error: 'ไม่พบใบแจ้งซ่อมที่ระบุ' };
   }
 
   ticket.status = 'resolved';

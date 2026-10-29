@@ -102,6 +102,21 @@ function AdminTicketsContent() {
   // Handle Accept Ticket
   const handleAccept = async (ticket: Ticket) => {
     if (!user) return;
+
+    // Optimistically update UI so button immediately shows In Progress without bouncing
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticket.id
+          ? {
+              ...t,
+              status: 'in_progress',
+              assigned_to: user.id,
+              assigned_to_name: user.name,
+            }
+          : t
+      )
+    );
+
     const res = await acceptTicket({
       ticketId: ticket.id,
       staffId: user.id,
@@ -109,7 +124,10 @@ function AdminTicketsContent() {
     });
 
     if (res.success) {
-      loadData();
+      await loadData();
+    } else {
+      alert(res.error || 'เกิดข้อผิดพลาดในการรับเรื่อง');
+      await loadData();
     }
   };
 
