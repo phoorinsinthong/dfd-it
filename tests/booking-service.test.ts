@@ -331,5 +331,39 @@ describe('Ticket 05: Meeting Room & Online Account Booking Service', () => {
       expect(bookingLog?.module).toBe('BOOKING');
       expect(bookingLog?.details).toContain('Walk-in');
     });
+
+    it('correctly handles local time without timezone drift', async () => {
+      const rooms = await getRooms();
+      const targetRoom = rooms[0];
+
+      // Booking date and time input from UI (e.g., 09:00 AM on 2026-11-20)
+      const bookingDate = '2026-11-20';
+      const startTime = '09:00';
+      const endTime = '10:00';
+
+      const startIso = new Date(`${bookingDate}T${startTime}:00`).toISOString();
+      const endIso = new Date(`${bookingDate}T${endTime}:00`).toISOString();
+
+      const res = await createBooking({
+        userId: 'walkin-local-time',
+        userName: 'ทดสอบ เวลา',
+        roomId: targetRoom.id,
+        title: 'ทดสอบเวลา 09:00',
+        startTime: startIso,
+        endTime: endIso,
+        isWalkin: true,
+      });
+
+      expect(res.success).toBe(true);
+      const created = res.data!;
+      // When converted back with new Date, local time hours and minutes should match the input
+      const localDate = new Date(created.start_time);
+      const hours = localDate.getHours();
+      const minutes = localDate.getMinutes();
+
+      // Ensure start_time matches original local 09:00 (not shifted +7 hours to 16:00)
+      expect(hours).toBe(9);
+      expect(minutes).toBe(0);
+    });
   });
 });

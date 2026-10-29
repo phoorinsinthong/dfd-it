@@ -96,6 +96,9 @@ describe('Ticket 08: Monthly Summary Report Seam', () => {
       expect(detailedCsv).toContain('รายงานรายละเอียดรายการแจ้งซ่อมประจำเดือน');
       expect(detailedCsv).toContain('ปริ้นเตอร์ไม่ออก');
       expect(detailedCsv).toContain('กานดา การเงิน');
+      expect(detailedCsv).not.toContain('รหัสตั๋ว');
+      expect(detailedCsv).not.toContain('ความเร่งด่วน');
+      expect(detailedCsv).not.toContain('ผู้รับผิดชอบ');
     });
 
     it('saves dual digital signatures with customizable name, title, and signature type', async () => {

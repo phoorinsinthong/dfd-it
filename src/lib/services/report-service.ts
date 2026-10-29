@@ -406,7 +406,7 @@ export function generateDetailedTicketsCsv(tickets: import('@/types/database').T
   lines.push(`รายงานรายละเอียดรายการแจ้งซ่อมประจำเดือน ${monthName} ${year}`);
   lines.push(`วันที่ออกรายงาน: ${new Date().toLocaleDateString('th-TH')}`);
   lines.push('');
-  lines.push('ลำดับ,รหัสตั๋ว,วันที่แจ้ง,ผู้แจ้ง,รหัสพนักงาน,กองงาน,แผนก,อาคาร/ชั้น/ห้อง,จุดระบุตำแหน่ง,หมวดหมู่ปัญหา,หัวข้อปัญหา,รายละเอียดอาการ,ความเร่งด่วน,สถานะ,ผู้รับผิดชอบ,วิธีแก้ไขปัญหา');
+  lines.push('ลำดับ,วันที่แจ้ง,ผู้แจ้ง,รหัสพนักงาน,กองงาน,แผนก,อาคาร/ชั้น/ห้อง,จุดระบุตำแหน่ง,หมวดหมู่ปัญหา,หัวข้อปัญหา,รายละเอียดอาการ,ผลการดำเนินงานและวิธีแก้ไขปัญหา');
 
   const filtered = tickets.filter((t) => {
     const d = new Date(t.created_at);
@@ -415,12 +415,9 @@ export function generateDetailedTicketsCsv(tickets: import('@/types/database').T
 
   filtered.forEach((t, index) => {
     const locParts = [t.building, t.floor, t.room].filter(Boolean).join(' ');
-    const urgencyMap: Record<string, string> = { low: 'ปกติ', medium: 'ปานกลาง', high: 'สูง', urgent: 'เร่งด่วนที่สุด' };
-    const statusMap: Record<string, string> = { pending: 'รอดำเนินการ', in_progress: 'กำลังดำเนินการ', resolved: 'แก้ไขเสร็จสิ้น', cancelled: 'ยกเลิก' };
 
     lines.push([
       index + 1,
-      `"${t.id}"`,
       `"${new Date(t.created_at).toLocaleString('th-TH')}"`,
       `"${t.user_name || '-'}"`,
       `"${t.user_employee_id || '-'}"`,
@@ -431,10 +428,7 @@ export function generateDetailedTicketsCsv(tickets: import('@/types/database').T
       `"${t.category_name || '-'}"`,
       `"${(t.title || '').replace(/"/g, '""')}"`,
       `"${(t.description || '').replace(/"/g, '""')}"`,
-      `"${urgencyMap[t.urgency || 'low'] || t.urgency}"`,
-      `"${statusMap[t.status] || t.status}"`,
-      `"${t.assigned_to_name || '-'}"`,
-      `"${(t.solution_note || '-').replace(/"/g, '""')}"`
+      `"${(t.solution_note || t.root_cause || '-').replace(/"/g, '""')}"`
     ].join(','));
   });
 

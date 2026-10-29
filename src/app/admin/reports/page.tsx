@@ -700,19 +700,16 @@ export default function AdminReportsPage() {
                       <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-50 print:bg-transparent">
                         <th className="py-2.5 px-2 w-10 text-center">#</th>
                         <th className="py-2.5 px-2 w-28">วันที่-เวลา</th>
-                        <th className="py-2.5 px-2 w-24">รหัส Ticket</th>
                         <th className="py-2.5 px-2">ผู้แจ้ง / กองงาน - แผนก</th>
                         <th className="py-2.5 px-2">สถานที่ (อาคาร/ชั้น/ห้อง)</th>
                         <th className="py-2.5 px-2">หมวดหมู่ / หัวข้อปัญหา</th>
-                        <th className="py-2.5 px-2 w-20 text-center">ความเร่งด่วน</th>
-                        <th className="py-2.5 px-2 w-24 text-center">สถานะ</th>
-                        <th className="py-2.5 px-2">ช่างผู้ดูแล / วิธีแก้ไข</th>
+                        <th className="py-2.5 px-2">ผลการดำเนินงาน / วิธีแก้ไขปัญหา</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {monthlyTickets.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="py-8 text-center text-slate-400">
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
                             ไม่มีรายการแจ้งซ่อมในเดือน {monthName} {selectedYear}
                           </td>
                         </tr>
@@ -728,7 +725,6 @@ export default function AdminReportsPage() {
                               <td className="py-2 px-2 text-slate-700 font-mono text-[11px]">
                                 {dateStr} <span className="text-slate-400">{timeStr}</span>
                               </td>
-                              <td className="py-2 px-2 font-mono font-bold text-blue-700 text-[11px]">{t.id}</td>
                               <td className="py-2 px-2">
                                 <div className="font-bold text-slate-900">{t.user_name}</div>
                                 <div className="text-[11px] text-slate-500">
@@ -744,45 +740,8 @@ export default function AdminReportsPage() {
                                 <div className="text-[11px] text-blue-600 font-medium">{t.category_name || 'ทั่วไป'}</div>
                                 <div className="text-[11px] text-slate-500 truncate max-w-xs">{t.description}</div>
                               </td>
-                              <td className="py-2 px-2 text-center">
-                                <span
-                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                    t.urgency === 'urgent'
-                                      ? 'bg-red-100 text-red-800'
-                                      : t.urgency === 'high'
-                                      ? 'bg-amber-100 text-amber-800'
-                                      : 'bg-slate-100 text-slate-700'
-                                  }`}
-                                >
-                                  {t.urgency === 'urgent' ? 'ด่วนที่สุด' : t.urgency === 'high' ? 'สูง' : 'ปกติ'}
-                                </span>
-                              </td>
-                              <td className="py-2 px-2 text-center">
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    t.status === 'resolved'
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : t.status === 'in_progress'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : t.status === 'cancelled'
-                                      ? 'bg-slate-100 text-slate-500'
-                                      : 'bg-amber-100 text-amber-800'
-                                  }`}
-                                >
-                                  {t.status === 'resolved'
-                                    ? 'เสร็จสิ้น'
-                                    : t.status === 'in_progress'
-                                    ? 'กำลังทำ'
-                                    : t.status === 'cancelled'
-                                    ? 'ยกเลิก'
-                                    : 'รอรับเรื่อง'}
-                                </span>
-                              </td>
                               <td className="py-2 px-2">
-                                {t.assigned_to_name && (
-                                  <div className="font-bold text-slate-800 text-[11px]">ช่าง: {t.assigned_to_name}</div>
-                                )}
-                                <div className="text-[11px] text-slate-600 italic">
+                                <div className="text-[11px] text-slate-700">
                                   {t.solution_note || t.root_cause || '-'}
                                 </div>
                               </td>

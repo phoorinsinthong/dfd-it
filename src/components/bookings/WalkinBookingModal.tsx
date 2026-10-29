@@ -147,8 +147,8 @@ export default function WalkinBookingModal({
 
     setSubmitting(true);
 
-    const startIso = `${bookingDate}T${startTime}:00.000Z`;
-    const endIso = `${bookingDate}T${endTime}:00.000Z`;
+    const startIso = new Date(`${bookingDate}T${startTime}:00`).toISOString();
+    const endIso = new Date(`${bookingDate}T${endTime}:00`).toISOString();
 
     const selectedDeptObj = departments.find((d) => d.id === departmentId);
     const selectedDivObj = divisions.find((d) => d.id === divisionId);

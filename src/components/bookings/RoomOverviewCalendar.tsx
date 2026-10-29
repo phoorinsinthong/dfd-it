@@ -26,6 +26,17 @@ interface RoomOverviewCalendarProps {
   isAdmin?: boolean;
 }
 
+function isBookingOnDate(isoTime: string, targetDateStr: string): boolean {
+  if (!isoTime) return false;
+  if (isoTime.startsWith(targetDateStr)) return true;
+  const d = new Date(isoTime);
+  if (isNaN(d.getTime())) return false;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}` === targetDateStr;
+}
+
 export default function RoomOverviewCalendar({
   rooms,
   bookings,
@@ -103,7 +114,7 @@ export default function RoomOverviewCalendar({
       // Find all confirmed bookings on this day
       const dayBookings = bookings.filter((b) => {
         if (b.status === 'cancelled') return false;
-        return b.start_time.startsWith(dateStr);
+        return isBookingOnDate(b.start_time, dateStr);
       });
 
       const onsiteCount = dayBookings.filter((b) => b.room_type === 'onsite').length;
@@ -130,7 +141,7 @@ export default function RoomOverviewCalendar({
   // Bookings specifically for the selected date
   const selectedDateBookings = useMemo(() => {
     return bookings.filter(
-      (b) => b.status === 'cancelled' ? false : b.start_time.startsWith(selectedDate)
+      (b) => b.status === 'cancelled' ? false : isBookingOnDate(b.start_time, selectedDate)
     );
   }, [bookings, selectedDate]);
 
