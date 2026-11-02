@@ -175,10 +175,49 @@ export async function sendLineTicketNotification(
     };
   }
 
-  const token = options?.lineChannelAccessToken || process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  const groupId = options?.lineGroupId || process.env.LINE_GROUP_ID;
+  // 1. Client-side browser execution: Dispatch to internal secure Next.js API route to prevent CORS and protect bot token
+  if (typeof window !== 'undefined') {
+    try {
+      const apiRes = await fetch('/api/notify/line', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ticket }),
+      });
+      const resData = await apiRes.json();
+      if (apiRes.ok && resData.success) {
+        return {
+          success: true,
+          delivered: true,
+          message: 'LINE notification sent via API route.',
+          payload,
+        };
+      }
+      return {
+        success: false,
+        delivered: false,
+        fallbackTriggered: true,
+        message: resData.error || 'Failed to dispatch via API route',
+        payload,
+      };
+    } catch (clientErr: any) {
+      console.warn('Browser dispatch to /api/notify/line error:', clientErr);
+      return {
+        success: false,
+        delivered: false,
+        fallbackTriggered: true,
+        message: clientErr.message,
+        payload,
+      };
+    }
+  }
 
-  if (!token || !groupId) {
+  // 2. Server-side execution (Node.js runtime / SSR / scripts)
+  const token = options?.lineChannelAccessToken || process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const rawGroupId = options?.lineGroupId || process.env.LINE_ADMIN_GROUP_ID || process.env.LINE_GROUP_ID;
+
+  if (!token || !rawGroupId) {
     // Development / Zero-config fallback mode
     return {
       success: true,
@@ -186,6 +225,12 @@ export async function sendLineTicketNotification(
       message: 'Simulated LINE notification delivered in development mode.',
       payload,
     };
+  }
+
+  // Auto-normalize group ID: prepend 'C' if 32 hex chars without prefix
+  let targetGroupId = rawGroupId.trim();
+  if (/^[0-9a-f]{32}$/i.test(targetGroupId)) {
+    targetGroupId = 'C' + targetGroupId;
   }
 
   try {
@@ -196,7 +241,7 @@ export async function sendLineTicketNotification(
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        to: groupId,
+        to: targetGroupId,
         messages: [payload],
       }),
     });
