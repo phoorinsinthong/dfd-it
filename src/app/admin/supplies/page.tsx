@@ -35,7 +35,9 @@ import {
   X,
   RefreshCw,
   Archive,
+  Printer,
 } from 'lucide-react';
+import SupplyRequisitionSlipModal from '@/components/supplies/SupplyRequisitionSlipModal';
 
 export default function AdminSuppliesPage() {
   const { user } = useAuth();
@@ -95,6 +97,7 @@ export default function AdminSuppliesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [selectedRequisitionForSlip, setSelectedRequisitionForSlip] = useState<SupplyRequisition | null>(null);
 
   const currentActor = user
     ? {
@@ -392,6 +395,9 @@ export default function AdminSuppliesPage() {
       if (result.success) {
         setSuccessMsg(`ทำรายการเบิก "${item.name}" จำนวน ${reqQuantity} ${item.unit} สำเร็จ (ตัดสต็อกแล้ว)`);
         setIsRequisitionModalOpen(false);
+        if (result.data) {
+          setSelectedRequisitionForSlip(result.data);
+        }
         await loadData();
       } else {
         setErrorMsg(result.error || 'ไม่สามารถทำรายการเบิกได้');
@@ -805,19 +811,20 @@ export default function AdminSuppliesPage() {
                       <th className="py-3.5 px-4 font-semibold">วัตถุประสงค์การนำไปใช้</th>
                       <th className="py-3.5 px-4 font-semibold text-center">Ticket อ้างอิง</th>
                       <th className="py-3.5 px-4 font-semibold text-right">จนท. ผู้จ่าย</th>
+                      <th className="py-3.5 px-4 font-semibold text-center w-24">พิมพ์เอกสาร</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/80">
                     {loading ? (
                       <tr>
-                        <td colSpan={9} className="py-12 text-center text-slate-500">
+                        <td colSpan={10} className="py-12 text-center text-slate-500">
                           <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-500" />
                           กำลังโหลดประวัติการเบิก...
                         </td>
                       </tr>
                     ) : filteredRequisitions.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="py-12 text-center text-slate-500">
+                        <td colSpan={10} className="py-12 text-center text-slate-500">
                           ไม่พบประวัติการเบิกวัสดุในเดือนหรือคำค้นหานี้
                         </td>
                       </tr>
@@ -862,6 +869,16 @@ export default function AdminSuppliesPage() {
                           </td>
                           <td className="py-3.5 px-4 text-right text-xs text-slate-400">
                             {req.issuer_staff_name || '-'}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              onClick={() => setSelectedRequisitionForSlip(req)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 text-xs font-medium border border-blue-500/30 transition shadow-sm"
+                              title="พิมพ์ใบเบิกพัสดุ (Print Slip)"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>พิมพ์</span>
+                            </button>
                           </td>
                         </tr>
                       ))
@@ -1439,6 +1456,13 @@ export default function AdminSuppliesPage() {
             </form>
           </div>
         </div>
+      )}
+      {/* Modal: Printable Slip Preview */}
+      {selectedRequisitionForSlip && (
+        <SupplyRequisitionSlipModal
+          requisition={selectedRequisitionForSlip}
+          onClose={() => setSelectedRequisitionForSlip(null)}
+        />
       )}
     </div>
   );

@@ -126,3 +126,4 @@ ON CONFLICT (id) DO UPDATE SET
   quantity = EXCLUDED.quantity,
   recipient_name = EXCLUDED.recipient_name,
   purpose = EXCLUDED.purpose;
+
