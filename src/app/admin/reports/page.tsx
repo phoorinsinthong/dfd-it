@@ -10,9 +10,15 @@ import {
   getMonthlyTickets,
   saveReportSignature,
   clearReportSignature,
+  getMonthlyRequisitions,
+  generateRequisitionsCsv,
+  getInventoryBalanceReportData,
+  generateInventoryBalanceCsv,
+  getMonthlyBorrowLogs,
+  generateBorrowLogsCsv,
 } from '@/lib/services/report-service';
 import { THAI_MONTH_NAMES } from '@/lib/services/roadmap-service';
-import { MonthlyReportSummary, Ticket } from '@/types/database';
+import { MonthlyReportSummary, Ticket, SupplyItem, SupplyRequisition, BorrowLog } from '@/types/database';
 import {
   FileText,
   Printer,
@@ -35,6 +41,9 @@ import {
   ListOrdered,
   Pencil,
   Trash2,
+  Package,
+  Boxes,
+  ShoppingBag,
 } from 'lucide-react';
 
 export default function AdminReportsPage() {
@@ -44,10 +53,15 @@ export default function AdminReportsPage() {
   const [selectedYear, setSelectedYear] = useState(2026);
   const [report, setReport] = useState<MonthlyReportSummary | null>(null);
   const [monthlyTickets, setMonthlyTickets] = useState<Ticket[]>([]);
+  const [monthlyRequisitions, setMonthlyRequisitions] = useState<SupplyRequisition[]>([]);
+  const [suppliesBalance, setSuppliesBalance] = useState<SupplyItem[]>([]);
+  const [monthlyBorrowLogs, setMonthlyBorrowLogs] = useState<BorrowLog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Active Report Tab: Executive Summary vs Detailed Incident List
-  const [activeReportTab, setActiveReportTab] = useState<'summary' | 'incidents'>('summary');
+  // Active Report Tab: 1. Executive Summary, 2. Incident List, 3. Requisitions, 4. Inventory Balance, 5. Borrow Logs
+  const [activeReportTab, setActiveReportTab] = useState<
+    'summary' | 'incidents' | 'requisitions' | 'supplies_balance' | 'borrow_logs'
+  >('summary');
 
   // Signature Modal state
   const [isSignModalOpen, setIsSignModalOpen] = useState(false);
@@ -62,12 +76,18 @@ export default function AdminReportsPage() {
 
   const loadReport = async () => {
     setLoading(true);
-    const [data, tickets] = await Promise.all([
+    const [data, tickets, reqs, balance, borrowLogs] = await Promise.all([
       generateMonthlyReport(selectedMonth, selectedYear),
       getMonthlyTickets(selectedMonth, selectedYear),
+      getMonthlyRequisitions(selectedMonth, selectedYear),
+      getInventoryBalanceReportData(),
+      getMonthlyBorrowLogs(selectedMonth, selectedYear),
     ]);
     setReport(data);
     setMonthlyTickets(tickets);
+    setMonthlyRequisitions(reqs);
+    setSuppliesBalance(balance);
+    setMonthlyBorrowLogs(borrowLogs);
     setLoading(false);
   };
 
@@ -106,6 +126,45 @@ export default function AdminReportsPage() {
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `IT-Incidents-Detail-${selectedYear}-${selectedMonth.toString().padStart(2, '0')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportRequisitionsCsv = () => {
+    if (!monthlyRequisitions) return;
+    const csvContent = generateRequisitionsCsv(monthlyRequisitions, selectedMonth, selectedYear);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `IT-Supplies-Requisitions-${selectedYear}-${selectedMonth.toString().padStart(2, '0')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportInventoryBalanceCsv = () => {
+    if (!suppliesBalance) return;
+    const csvContent = generateInventoryBalanceCsv(suppliesBalance);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `IT-Supplies-Inventory-Balance-${selectedYear}-${selectedMonth.toString().padStart(2, '0')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportBorrowLogsCsv = () => {
+    if (!monthlyBorrowLogs) return;
+    const csvContent = generateBorrowLogsCsv(monthlyBorrowLogs, selectedMonth, selectedYear);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `IT-Asset-Borrow-Logs-${selectedYear}-${selectedMonth.toString().padStart(2, '0')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -445,7 +504,7 @@ export default function AdminReportsPage() {
               ลงชื่อผู้ตรวจรับรอง
             </button>
 
-            {activeReportTab === 'summary' ? (
+            {activeReportTab === 'summary' && (
               <button
                 onClick={handleExportCsv}
                 className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5"
@@ -453,13 +512,41 @@ export default function AdminReportsPage() {
                 <Download className="w-3.5 h-3.5 text-blue-400" />
                 สรุป KPI (.csv)
               </button>
-            ) : (
+            )}
+            {activeReportTab === 'incidents' && (
               <button
                 onClick={handleExportDetailedCsv}
                 className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 text-xs font-semibold border border-blue-500/40 transition flex items-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5 text-blue-400" />
-                รายการแจ้งซ่อมละเอียด (.csv)
+                แจ้งซ่อมละเอียด (.csv)
+              </button>
+            )}
+            {activeReportTab === 'requisitions' && (
+              <button
+                onClick={handleExportRequisitionsCsv}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-semibold border border-emerald-500/40 transition flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                รายงานการเบิก (.csv)
+              </button>
+            )}
+            {activeReportTab === 'supplies_balance' && (
+              <button
+                onClick={handleExportInventoryBalanceCsv}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold border border-amber-500/40 transition flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                สต็อกคงเหลือ (.csv)
+              </button>
+            )}
+            {activeReportTab === 'borrow_logs' && (
+              <button
+                onClick={handleExportBorrowLogsCsv}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-semibold border border-purple-500/40 transition flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5 text-purple-400" />
+                รายงานยืม-คืน (.csv)
               </button>
             )}
 
@@ -475,32 +562,77 @@ export default function AdminReportsPage() {
       </div>
 
       {/* Tabs Switcher Bar (Hidden when printing) */}
-      <div className="no-print max-w-7xl w-full mx-auto px-4 sm:px-8 pt-6 pb-2">
-        <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-1.5 rounded-2xl w-fit">
+      <div className="no-print max-w-7xl w-full mx-auto px-4 sm:px-8 pt-6 pb-2 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-1.5 rounded-2xl w-fit whitespace-nowrap">
           <button
             onClick={() => setActiveReportTab('summary')}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
               activeReportTab === 'summary'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
             <Grid3X3 className="w-4 h-4" />
-            1. รายงานสรุปภาพรวม KPI (Executive Summary)
+            1. สรุปภาพรวม KPI
           </button>
 
           <button
             onClick={() => setActiveReportTab('incidents')}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
               activeReportTab === 'incidents'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
             <ListOrdered className="w-4 h-4" />
-            2. รายงานรายละเอียดรายการแจ้งซ่อม (Incident Detail List)
+            2. รายละเอียดแจ้งซ่อม
             <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-800 text-blue-300">
-              {monthlyTickets.length} งาน
+              {monthlyTickets.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveReportTab('requisitions')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+              activeReportTab === 'requisitions'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4" />
+            3. รายงานการเบิกวัสดุ
+            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-800 text-emerald-300">
+              {monthlyRequisitions.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveReportTab('supplies_balance')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+              activeReportTab === 'supplies_balance'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Boxes className="w-4 h-4" />
+            4. คลังวัสดุคงเหลือ
+            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-800 text-amber-300">
+              {suppliesBalance.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveReportTab('borrow_logs')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+              activeReportTab === 'borrow_logs'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Laptop className="w-4 h-4" />
+            5. รายงานการยืม-คืน
+            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-800 text-purple-300">
+              {monthlyBorrowLogs.length}
             </span>
           </button>
         </div>
@@ -754,6 +886,421 @@ export default function AdminReportsPage() {
                 </div>
 
                 {/* Signatures Block for Tab 2 */}
+                {renderSignatureSection()}
+              </div>
+            )}
+
+            {/* TAB 3: SUPPLIES REQUISITIONS REPORT SHEET */}
+            {activeReportTab === 'requisitions' && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="border-b-2 border-slate-800 pb-5 mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+                        IT
+                      </div>
+                      <span className="text-xs uppercase tracking-widest font-bold text-emerald-700">
+                        Technical Support & IT Operations Department
+                      </span>
+                    </div>
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      รายงานการเบิกจ่ายวัสดุและอุปกรณ์สิ้นเปลืองประจำเดือน (Supplies Requisitions Report)
+                    </h1>
+                    <p className="text-xs text-slate-600">
+                      ประจำเดือน <strong className="text-slate-900">{monthName} {selectedYear}</strong> | รายการเบิกจ่ายทั้งหมด <strong className="text-emerald-700">{monthlyRequisitions.length}</strong> รายการ
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs text-slate-500 print:text-black">
+                    <div>วันที่ออกรายงาน: <strong>{new Date().toLocaleDateString('th-TH')}</strong></div>
+                    <div>สถานะเอกสาร: <span className="text-emerald-700 font-bold">สมบูรณ์พร้อมรับรอง</span></div>
+                  </div>
+                </div>
+
+                {/* KPI Summary Row */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">รายการเบิกทั้งหมด</span>
+                    <div className="text-2xl font-black text-slate-900 mt-1">{monthlyRequisitions.length} ครั้ง</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">จำนวนชิ้นที่จ่ายออกรวม</span>
+                    <div className="text-2xl font-black text-emerald-600 mt-1">
+                      {monthlyRequisitions.reduce((acc, r) => acc + (r.quantity || 0), 0)} ชิ้น
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">แผนกที่มีการเบิกใช้วัสดุ</span>
+                    <div className="text-2xl font-black text-blue-600 mt-1">
+                      {new Set(monthlyRequisitions.map((r) => r.department_name).filter(Boolean)).size} แผนก
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">เบิกเกี่ยวกับงานแจ้งซ่อม</span>
+                    <div className="text-2xl font-black text-purple-600 mt-1">
+                      {monthlyRequisitions.filter((r) => !!r.ticket_id).length} รายการ
+                    </div>
+                  </div>
+                </div>
+
+                {/* Requisitions Table */}
+                <div className="overflow-x-auto border border-slate-200 rounded-2xl print:border-slate-300">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-50 print:bg-transparent">
+                        <th className="py-2.5 px-2 w-10 text-center">#</th>
+                        <th className="py-2.5 px-2 w-28">วันที่-เวลา</th>
+                        <th className="py-2.5 px-2 w-24">เลขที่ใบเบิก</th>
+                        <th className="py-2.5 px-2">รหัส-ชื่อพัสดุ/วัสดุ</th>
+                        <th className="py-2.5 px-2 text-center w-20">จำนวน</th>
+                        <th className="py-2.5 px-2">ผู้รับพัสดุ / แผนก</th>
+                        <th className="py-2.5 px-2">วัตถุประสงค์การใช้งาน</th>
+                        <th className="py-2.5 px-2 text-center w-24">Ticket อ้างอิง</th>
+                        <th className="py-2.5 px-2 text-right w-24">จนท.ผู้จ่าย</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {monthlyRequisitions.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-400">
+                            ไม่มีรายการเบิกจ่ายวัสดุในเดือน {monthName} {selectedYear}
+                          </td>
+                        </tr>
+                      ) : (
+                        monthlyRequisitions.map((r, idx) => (
+                          <tr key={r.id} className="hover:bg-slate-50/80 transition">
+                            <td className="py-2 px-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                            <td className="py-2 px-2 text-slate-700 font-mono text-[11px]">
+                              {new Date(r.requisition_date || r.created_at).toLocaleDateString('th-TH', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit',
+                              })}{' '}
+                              <span className="text-slate-400">
+                                {new Date(r.requisition_date || r.created_at).toLocaleTimeString('th-TH', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 font-mono text-[11px] font-semibold text-emerald-700">
+                              {r.requisition_number}
+                            </td>
+                            <td className="py-2 px-2">
+                              <span className="font-mono text-[10px] text-blue-600 block">{r.item_code}</span>
+                              <span className="font-bold text-slate-900">{r.item_name}</span>
+                            </td>
+                            <td className="py-2 px-2 text-center font-bold text-slate-900">
+                              {r.quantity} <span className="font-normal text-slate-500 text-[10px]">{r.unit || 'ชิ้น'}</span>
+                            </td>
+                            <td className="py-2 px-2">
+                              <div className="font-bold text-slate-900">{r.recipient_name}</div>
+                              <div className="text-[11px] text-slate-500">{r.department_name || '-'}</div>
+                            </td>
+                            <td className="py-2 px-2 text-slate-700 max-w-xs">{r.purpose}</td>
+                            <td className="py-2 px-2 text-center">
+                              {r.ticket_id ? (
+                                <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                                  {r.ticket_id}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-right text-slate-600">{r.issuer_staff_name || '-'}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Signatures Block for Tab 3 */}
+                {renderSignatureSection()}
+              </div>
+            )}
+
+            {/* TAB 4: INVENTORY BALANCE REPORT SHEET */}
+            {activeReportTab === 'supplies_balance' && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="border-b-2 border-slate-800 pb-5 mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm">
+                        IT
+                      </div>
+                      <span className="text-xs uppercase tracking-widest font-bold text-amber-700">
+                        Technical Support & IT Operations Department
+                      </span>
+                    </div>
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      รายงานสถานะสต็อกและคลังพัสดุคงเหลือ (IT Supplies Inventory & Stock Balance)
+                    </h1>
+                    <p className="text-xs text-slate-600">
+                      ข้อมูลสถานะสต็อกคงเหลือปัจจุบัน | ทั้งหมด <strong className="text-slate-900">{suppliesBalance.length}</strong> รายการพัสดุ
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs text-slate-500 print:text-black">
+                    <div>วันที่ออกรายงาน: <strong>{new Date().toLocaleDateString('th-TH')}</strong></div>
+                    <div>สถานะเอกสาร: <span className="text-emerald-700 font-bold">สมบูรณ์พร้อมรับรอง</span></div>
+                  </div>
+                </div>
+
+                {/* KPI Summary Row */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">รายการทั้งหมด</span>
+                    <div className="text-2xl font-black text-slate-900 mt-1">{suppliesBalance.length} รายการ</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">สต็อกพร้อมจ่าย</span>
+                    <div className="text-2xl font-black text-emerald-600 mt-1">
+                      {suppliesBalance.filter((s) => s.status === 'in_stock').length} รายการ
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">ใกล้หมดสต็อก</span>
+                    <div className="text-2xl font-black text-amber-600 mt-1">
+                      {suppliesBalance.filter((s) => s.status === 'low_stock').length} รายการ
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">หมดสต็อก</span>
+                    <div className="text-2xl font-black text-red-600 mt-1">
+                      {suppliesBalance.filter((s) => s.status === 'out_of_stock').length} รายการ
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300 col-span-2 sm:col-span-1">
+                    <span className="text-xs text-slate-500 font-semibold block">มูลค่าประเมินรวม</span>
+                    <div className="text-2xl font-black text-blue-700 mt-1">
+                      ฿{suppliesBalance.reduce((acc, s) => acc + (s.unit_price || 0) * s.quantity, 0).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stock Balance Table */}
+                <div className="overflow-x-auto border border-slate-200 rounded-2xl print:border-slate-300">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-50 print:bg-transparent">
+                        <th className="py-2.5 px-2 w-10 text-center">#</th>
+                        <th className="py-2.5 px-2 w-28">รหัสพัสดุ</th>
+                        <th className="py-2.5 px-2">ชื่อรายการพัสดุ / วัสดุ</th>
+                        <th className="py-2.5 px-2">หมวดหมู่</th>
+                        <th className="py-2.5 px-2">สถานที่จัดเก็บ</th>
+                        <th className="py-2.5 px-2 text-center w-24">คงเหลือ / เตือน</th>
+                        <th className="py-2.5 px-2 text-right w-20">ราคา/หน่วย</th>
+                        <th className="py-2.5 px-2 text-right w-24">มูลค่ารวม</th>
+                        <th className="py-2.5 px-2 text-center w-24">สถานะ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {suppliesBalance.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-400">
+                            ไม่มีรายการพัสดุในคลัง
+                          </td>
+                        </tr>
+                      ) : (
+                        suppliesBalance.map((s, idx) => {
+                          const totalVal = (s.unit_price || 0) * s.quantity;
+                          return (
+                            <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                              <td className="py-2 px-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                              <td className="py-2 px-2 font-mono text-[11px] font-semibold text-blue-700">{s.item_code}</td>
+                              <td className="py-2 px-2 font-bold text-slate-900">{s.name}</td>
+                              <td className="py-2 px-2 text-slate-600">{s.category}</td>
+                              <td className="py-2 px-2 text-slate-600">{s.location || '-'}</td>
+                              <td className="py-2 px-2 text-center">
+                                <span className={`font-bold ${s.quantity <= 0 ? 'text-red-600' : s.quantity <= s.min_quantity ? 'text-amber-600' : 'text-emerald-700'}`}>
+                                  {s.quantity}
+                                </span>{' '}
+                                <span className="text-slate-500 text-[10px]">{s.unit}</span>
+                                <span className="text-slate-400 text-[10px] block">(&le; {s.min_quantity})</span>
+                              </td>
+                              <td className="py-2 px-2 text-right text-slate-700">
+                                {s.unit_price ? `฿${s.unit_price.toLocaleString()}` : '-'}
+                              </td>
+                              <td className="py-2 px-2 text-right font-semibold text-slate-900">
+                                {totalVal ? `฿${totalVal.toLocaleString()}` : '-'}
+                              </td>
+                              <td className="py-2 px-2 text-center">
+                                {s.status === 'in_stock' ? (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                    พร้อมจ่าย
+                                  </span>
+                                ) : s.status === 'low_stock' ? (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                                    ใกล้หมด
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">
+                                    หมดสต็อก
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Signatures Block for Tab 4 */}
+                {renderSignatureSection()}
+              </div>
+            )}
+
+            {/* TAB 5: BORROW LOGS REPORT SHEET */}
+            {activeReportTab === 'borrow_logs' && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="border-b-2 border-slate-800 pb-5 mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-sm">
+                        IT
+                      </div>
+                      <span className="text-xs uppercase tracking-widest font-bold text-purple-700">
+                        Technical Support & IT Operations Department
+                      </span>
+                    </div>
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      รายงานประวัติการยืม-คืนอุปกรณ์และครุภัณฑ์คอมพิวเตอร์ (Asset Loan & Return Report)
+                    </h1>
+                    <p className="text-xs text-slate-600">
+                      ประจำเดือน <strong className="text-slate-900">{monthName} {selectedYear}</strong> | รวมรายการยืมทั้งหมด <strong className="text-purple-700">{monthlyBorrowLogs.length}</strong> รายการ
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs text-slate-500 print:text-black">
+                    <div>วันที่ออกรายงาน: <strong>{new Date().toLocaleDateString('th-TH')}</strong></div>
+                    <div>สถานะเอกสาร: <span className="text-emerald-700 font-bold">สมบูรณ์พร้อมรับรอง</span></div>
+                  </div>
+                </div>
+
+                {/* KPI Summary Row */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">รายการยืมทั้งหมด</span>
+                    <div className="text-2xl font-black text-slate-900 mt-1">{monthlyBorrowLogs.length} รายการ</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">คืนแล้วเรียบร้อย</span>
+                    <div className="text-2xl font-black text-emerald-600 mt-1">
+                      {monthlyBorrowLogs.filter((l) => !!l.actual_return_date).length} รายการ
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">กำลังยืม (ยังไม่คืน)</span>
+                    <div className="text-2xl font-black text-blue-600 mt-1">
+                      {monthlyBorrowLogs.filter((l) => !l.actual_return_date && !l.is_overdue).length} รายการ
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300">
+                    <span className="text-xs text-slate-500 font-semibold block">เกินกำหนดส่งคืน</span>
+                    <div className="text-2xl font-black text-red-600 mt-1">
+                      {monthlyBorrowLogs.filter((l) => !l.actual_return_date && l.is_overdue).length} รายการ
+                    </div>
+                  </div>
+                </div>
+
+                {/* Borrow Logs Table */}
+                <div className="overflow-x-auto border border-slate-200 rounded-2xl print:border-slate-300">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-50 print:bg-transparent">
+                        <th className="py-2.5 px-2 w-10 text-center">#</th>
+                        <th className="py-2.5 px-2 w-24">วันที่ยืม</th>
+                        <th className="py-2.5 px-2">รหัส-รายการครุภัณฑ์</th>
+                        <th className="py-2.5 px-2">ผู้ยืม / แผนก</th>
+                        <th className="py-2.5 px-2 w-24">กำหนดคืน</th>
+                        <th className="py-2.5 px-2 w-24">วันที่คืนจริง</th>
+                        <th className="py-2.5 px-2">สภาพตอนยืม / ตอนคืน</th>
+                        <th className="py-2.5 px-2 text-center w-24">สถานะ</th>
+                        <th className="py-2.5 px-2 text-right w-24">จนท.บันทึก</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {monthlyBorrowLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-400">
+                            ไม่มีประวัติการยืมอุปกรณ์ในเดือน {monthName} {selectedYear}
+                          </td>
+                        </tr>
+                      ) : (
+                        monthlyBorrowLogs.map((l, idx) => (
+                          <tr key={l.id} className="hover:bg-slate-50/80 transition">
+                            <td className="py-2 px-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                            <td className="py-2 px-2 text-slate-700 font-mono text-[11px]">
+                              {new Date(l.borrow_date).toLocaleDateString('th-TH', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit',
+                              })}
+                            </td>
+                            <td className="py-2 px-2">
+                              <span className="font-mono text-[10px] text-blue-600 block">{l.asset_code}</span>
+                              <span className="font-bold text-slate-900">{l.asset_name}</span>
+                            </td>
+                            <td className="py-2 px-2">
+                              <div className="font-bold text-slate-900">{l.borrower_name}</div>
+                              <div className="text-[11px] text-slate-500">
+                                {l.borrower_division_name ? `${l.borrower_division_name} › ` : ''}{l.borrower_dept_name || '-'}
+                              </div>
+                            </td>
+                            <td className="py-2 px-2 font-mono text-[11px] text-slate-700">
+                              {new Date(l.expected_return_date).toLocaleDateString('th-TH', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit',
+                              })}
+                            </td>
+                            <td className="py-2 px-2 font-mono text-[11px]">
+                              {l.actual_return_date ? (
+                                <span className="text-emerald-700">
+                                  {new Date(l.actual_return_date).toLocaleDateString('th-TH', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: '2-digit',
+                                  })}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-slate-600 text-[11px]">
+                              <div><span className="text-slate-400">ยืม:</span> {l.condition_out || '-'}</div>
+                              {l.condition_in && <div><span className="text-slate-400">คืน:</span> {l.condition_in}</div>}
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              {l.actual_return_date ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                  คืนเรียบร้อย
+                                </span>
+                              ) : l.is_overdue ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">
+                                  เกินกำหนด
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">
+                                  กำลังยืม
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-right text-slate-600">{l.staff_name || '-'}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Signatures Block for Tab 5 */}
                 {renderSignatureSection()}
               </div>
             )}

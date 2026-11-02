@@ -14,6 +14,7 @@ import {
   updateMonthlyChecklist,
   deleteMonthlyChecklist,
   toggleChecklistItem,
+  updateChecklistItemDueDate,
   THAI_MONTH_NAMES,
 } from '@/lib/services/roadmap-service';
 import { Checklist, ChecklistTemplate, ChecklistItem } from '@/types/database';
@@ -34,16 +35,28 @@ import {
   ListTodo,
   Pencil,
   Trash2,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 
 export default function AdminRoadmapsPage() {
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'checklists' | 'templates'>('checklists');
+  const [viewMode, setViewMode] = useState<'overview' | 'calendar'>('overview');
+  const [calendarMonth, setCalendarMonth] = useState<number>(10);
+  const [todayDateStr, setTodayDateStr] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState(2026);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Due Date Modal State
+  const [dueDateModalItem, setDueDateModalItem] = useState<{ id: string; title: string; currentDate?: string } | null>(null);
+  const [selectedDueDate, setSelectedDueDate] = useState<string>('');
 
   // Modals
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
@@ -98,6 +111,13 @@ export default function AdminRoadmapsPage() {
   };
 
   useEffect(() => {
+    const now = new Date();
+    setCalendarMonth(now.getMonth() + 1);
+    setSelectedYear(now.getFullYear());
+    setTodayDateStr(now.toISOString().split('T')[0]);
+  }, []);
+
+  useEffect(() => {
     loadData();
   }, [selectedYear]);
 
@@ -106,6 +126,16 @@ export default function AdminRoadmapsPage() {
     if (!user) return;
     const res = await toggleChecklistItem(itemId, user.name);
     if (res.success) {
+      loadData();
+    }
+  };
+
+  // Handle Set Due Date for Task
+  const handleSetDueDate = async (itemId: string, dateStr: string) => {
+    const res = await updateChecklistItemDueDate(itemId, dateStr || undefined);
+    if (res.success) {
+      setStatusMessage(dateStr ? `กำหนดวันทำงานเรียบร้อยแล้ว` : `ยกเลิกกำหนดวันทำงานแล้ว`);
+      setDueDateModalItem(null);
       loadData();
     }
   };
@@ -464,7 +494,52 @@ export default function AdminRoadmapsPage() {
               </div>
             </div>
 
-            {/* 12-Month Timeline / Checklists Grid */}
+            {/* View Mode Switcher: Overview vs Monthly Calendar Checklist */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
+              <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button
+                  onClick={() => setViewMode('overview')}
+                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition ${
+                    viewMode === 'overview'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <ListTodo className="w-4 h-4" />
+                  มุมมองภาพรวมรายปี (Annual Overview)
+                </button>
+                <button
+                  onClick={() => setViewMode('calendar')}
+                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition ${
+                    viewMode === 'calendar'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  ปฏิทินเช็คลิสต์รายเดือน (Monthly Calendar)
+                </button>
+              </div>
+
+              {viewMode === 'calendar' && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">เลือกเดือน:</span>
+                  <select
+                    value={calendarMonth}
+                    onChange={(e) => setCalendarMonth(Number(e.target.value))}
+                    className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-500 font-medium"
+                  >
+                    {THAI_MONTH_NAMES.map((m, idx) => (
+                      <option key={idx + 1} value={idx + 1}>
+                        {m} ({idx + 1})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* 12-Month Timeline / Checklists Grid or Calendar */}
             {loading ? (
               <div className="p-12 text-center text-slate-400">กำลังโหลดแผนงาน PM...</div>
             ) : checklists.length === 0 ? (
@@ -486,7 +561,7 @@ export default function AdminRoadmapsPage() {
                   สร้างแผน 12 เดือนทันที
                 </button>
               </div>
-            ) : (
+            ) : viewMode === 'overview' ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-slate-200">
@@ -633,6 +708,324 @@ export default function AdminRoadmapsPage() {
                   })}
                 </div>
               </div>
+            ) : (
+              (() => {
+                const daysInMonth = new Date(selectedYear, calendarMonth, 0).getDate();
+                const startWeekday = new Date(selectedYear, calendarMonth - 1, 1).getDay();
+
+                const currentMonthChecklists = checklists.filter(
+                  (c) =>
+                    c.target_month === calendarMonth ||
+                    (c.scheduled_months && c.scheduled_months.includes(calendarMonth))
+                );
+                const monthTasks: ChecklistItem[] = [];
+                currentMonthChecklists.forEach((c) => {
+                  c.items.forEach((item) => {
+                    monthTasks.push(item);
+                  });
+                });
+                const monthCompletedTasks = monthTasks.filter((t) => t.is_completed).length;
+                const monthProgressPercent =
+                  monthTasks.length === 0
+                    ? 0
+                    : Math.round((monthCompletedTasks / monthTasks.length) * 100);
+
+                return (
+                  <div className="space-y-6">
+                    {/* Month Navigator Toolbar */}
+                    <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setCalendarMonth((prev) => (prev > 1 ? prev - 1 : 12))}
+                          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                          title="เดือนก่อนหน้า"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <div>
+                          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                            <CalendarDays className="w-5 h-5 text-blue-400" />
+                            ปฏิทินเช็คลิสต์: เดือน{THAI_MONTH_NAMES[calendarMonth - 1]} {selectedYear}
+                          </h2>
+                          <p className="text-xs text-slate-400">
+                            {monthTasks.length} รายการงานทั้งหมด | สำเร็จ {monthCompletedTasks} รายการ ({monthProgressPercent}%)
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setCalendarMonth((prev) => (prev < 12 ? prev + 1 : 1))}
+                          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                          title="เดือนถัดไป"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      {/* 12 Months Fast Selector */}
+                      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
+                        {THAI_MONTH_NAMES.map((m, idx) => {
+                          const mNum = idx + 1;
+                          const isCurrent = calendarMonth === mNum;
+                          return (
+                            <button
+                              key={mNum}
+                              onClick={() => setCalendarMonth(mNum)}
+                              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
+                                isCurrent
+                                  ? 'bg-blue-600 text-white shadow'
+                                  : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700'
+                              }`}
+                            >
+                              {m.slice(0, 3)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Calendar & Checklist Side-by-Side Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                      
+                      {/* Left Column (8 cols): 1-31 Days Calendar Matrix */}
+                      <div className="lg:col-span-8 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-xs">
+                          <span className="font-semibold text-slate-300">
+                            ตารางงานประจำวัน (1 - {daysInMonth} {THAI_MONTH_NAMES[calendarMonth - 1]})
+                          </span>
+                          <span className="text-[11px] text-slate-500">
+                            * คลิกที่รายการงานเพื่อติ๊กเสร็จสิ้นทันที
+                          </span>
+                        </div>
+
+                        {/* Day-of-Week Headers */}
+                        <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-slate-400 py-1">
+                          <span className="text-red-400">อา.</span>
+                          <span>จ.</span>
+                          <span>อ.</span>
+                          <span>พ.</span>
+                          <span>พฤ.</span>
+                          <span>ศ.</span>
+                          <span className="text-blue-400">ส.</span>
+                        </div>
+
+                        {/* Days Grid */}
+                        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                          {/* Blank pads before 1st day */}
+                          {Array.from({ length: startWeekday }).map((_, idx) => (
+                            <div
+                              key={`empty-${idx}`}
+                              className="min-h-[85px] sm:min-h-[105px] bg-slate-950/40 rounded-xl border border-slate-900/60 opacity-30"
+                            />
+                          ))}
+
+                          {/* Day cells 1..daysInMonth */}
+                          {Array.from({ length: daysInMonth }).map((_, idx) => {
+                            const dayNum = idx + 1;
+                            const dateStr = `${selectedYear}-${String(calendarMonth).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                            const isToday = todayDateStr === dateStr;
+                            const dayTasks = monthTasks.filter((t) => t.due_date === dateStr);
+
+                            return (
+                              <div
+                                key={dayNum}
+                                className={`min-h-[85px] sm:min-h-[105px] p-1.5 rounded-xl border flex flex-col justify-between transition group relative ${
+                                  isToday
+                                    ? 'bg-blue-950/30 border-blue-500/60 shadow-md shadow-blue-500/10'
+                                    : 'bg-slate-950/70 border-slate-800/80 hover:border-slate-700'
+                                }`}
+                              >
+                                {/* Day Header */}
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
+                                      isToday
+                                        ? 'bg-blue-600 text-white font-extrabold'
+                                        : 'text-slate-300 group-hover:text-white'
+                                    }`}
+                                  >
+                                    {dayNum}
+                                  </span>
+
+                                  {/* Quick assign button on hover */}
+                                  {monthTasks.some((t) => !t.due_date) && (
+                                    <button
+                                      onClick={() => {
+                                        const firstUnassigned = monthTasks.find((t) => !t.due_date);
+                                        if (firstUnassigned) {
+                                          setDueDateModalItem({
+                                            id: firstUnassigned.id,
+                                            title: firstUnassigned.task_name,
+                                            currentDate: dateStr,
+                                          });
+                                          setSelectedDueDate(dateStr);
+                                        }
+                                      }}
+                                      title="มอบหมายงานลงวันนี้"
+                                      className="opacity-0 group-hover:opacity-100 p-1 text-[10px] rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition"
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Task Pills on this Day */}
+                                <div className="space-y-1 my-1 flex-1 overflow-y-auto max-h-[75px] no-scrollbar">
+                                  {dayTasks.map((task) => (
+                                    <div
+                                      key={task.id}
+                                      onClick={() => handleToggleTask(task.id)}
+                                      className={`p-1 rounded-md text-[10px] font-medium transition cursor-pointer flex items-center justify-between gap-1 group/task ${
+                                        task.is_completed
+                                          ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-800/50 line-through'
+                                          : 'bg-blue-950/70 text-blue-200 border border-blue-800/50 hover:bg-blue-900/80'
+                                      }`}
+                                      title={`${task.task_name} (คลิกเพื่อติ๊กเสร็จ)`}
+                                    >
+                                      <div className="flex items-center gap-1 truncate">
+                                        <span className="shrink-0 font-bold">
+                                          {task.is_completed ? '✓' : '○'}
+                                        </span>
+                                        <span className="truncate">{task.task_name}</span>
+                                      </div>
+
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSetDueDate(task.id, '');
+                                        }}
+                                        title="ลบกำหนดวันออกจากปฏิทิน"
+                                        className="opacity-0 group-hover/task:opacity-100 p-0.5 hover:text-red-400 text-slate-400 shrink-0"
+                                      >
+                                        <X className="w-2.5 h-2.5" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="text-[9px] text-slate-500 font-mono text-right">
+                                  {dayTasks.length > 0 && `${dayTasks.filter(t => t.is_completed).length}/${dayTasks.length}`}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Right Column (4 cols): Monthly Checklist Side-Panel */}
+                      <div className="lg:col-span-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+                        <div>
+                          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                            <CheckSquare className="w-4 h-4 text-emerald-400" />
+                            เช็คลิสต์ประจำเดือน {THAI_MONTH_NAMES[calendarMonth - 1]}
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {monthTasks.length} รายการงานทั้งหมดประจำเดือนนี้
+                          </p>
+                        </div>
+
+                        {/* Monthly Progress Bar */}
+                        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-400 font-medium">ความคืบหน้า</span>
+                            <span className="font-bold text-white">{monthProgressPercent}% ({monthCompletedTasks}/{monthTasks.length})</span>
+                          </div>
+                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-emerald-400 h-full rounded-full transition-all duration-300"
+                              style={{ width: `${monthProgressPercent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Task List */}
+                        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                          {monthTasks.length === 0 ? (
+                            <div className="p-8 text-center text-slate-500 text-xs">
+                              ไม่มีรายการตรวจเช็คในเดือนนี้
+                            </div>
+                          ) : (
+                            monthTasks.map((task) => (
+                              <div
+                                key={task.id}
+                                className={`p-3 rounded-xl border transition flex flex-col justify-between gap-2 ${
+                                  task.is_completed
+                                    ? 'bg-emerald-950/20 border-emerald-900/40'
+                                    : 'bg-slate-950/80 border-slate-800/80 hover:border-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <button
+                                    onClick={() => handleToggleTask(task.id)}
+                                    className={`mt-0.5 shrink-0 w-4 h-4 rounded flex items-center justify-center transition ${
+                                      task.is_completed
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'border border-slate-600 hover:border-blue-400 text-transparent'
+                                    }`}
+                                  >
+                                    ✓
+                                  </button>
+                                  <div className="flex-1 text-xs">
+                                    <span
+                                      onClick={() => handleToggleTask(task.id)}
+                                      className={`cursor-pointer font-medium ${
+                                        task.is_completed
+                                          ? 'line-through text-slate-400'
+                                          : 'text-slate-200'
+                                      }`}
+                                    >
+                                      {task.task_name}
+                                    </span>
+
+                                    {task.is_completed && task.completed_by && (
+                                      <div className="text-[10px] text-emerald-400 mt-0.5">
+                                        ✓ โดย: {task.completed_by}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Due Date & Action */}
+                                <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800/60">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                                    {task.due_date ? (
+                                      <span className="text-blue-400 font-mono">
+                                        {new Date(task.due_date).toLocaleDateString('th-TH', {
+                                          day: 'numeric',
+                                          month: 'short',
+                                        })}
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-500">ยังไม่ระบุวัน</span>
+                                    )}
+                                  </div>
+
+                                  <button
+                                    onClick={() => {
+                                      setDueDateModalItem({
+                                        id: task.id,
+                                        title: task.task_name,
+                                        currentDate: task.due_date,
+                                      });
+                                      setSelectedDueDate(
+                                        task.due_date ||
+                                          `${selectedYear}-${String(calendarMonth).padStart(2, '0')}-01`
+                                      );
+                                    }}
+                                    className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] transition"
+                                  >
+                                    {task.due_date ? 'เปลี่ยนวัน' : '+ กำหนดวัน'}
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                );
+              })()
             )}
           </div>
         )}
@@ -1413,6 +1806,76 @@ export default function AdminRoadmapsPage() {
               >
                 {submitting ? 'กำลังลบ...' : 'ยืนยันการลบ'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Set Task Due Date */}
+      {dueDateModalItem && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-blue-400" />
+                กำหนดวันทำงานในปฏิทิน PM
+              </h3>
+              <button
+                onClick={() => setDueDateModalItem(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+              <span className="text-[11px] text-slate-400 block font-medium">รายการตรวจเช็ค:</span>
+              <p className="text-sm font-semibold text-white">{dueDateModalItem.title}</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                เลือกวันที่กำหนดตรวจเช็ค (Due Date) *
+              </label>
+              <input
+                type="date"
+                required
+                value={selectedDueDate}
+                onChange={(e) => setSelectedDueDate(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500 font-mono"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-slate-800">
+              {dueDateModalItem.currentDate ? (
+                <button
+                  type="button"
+                  onClick={() => handleSetDueDate(dueDateModalItem.id, '')}
+                  className="px-3 py-2 rounded-xl text-xs font-medium bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition"
+                >
+                  ลบกำหนดวัน
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDueDateModalItem(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSetDueDate(dueDateModalItem.id, selectedDueDate)}
+                  disabled={!selectedDueDate}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition disabled:opacity-50"
+                >
+                  บันทึกวัน
+                </button>
+              </div>
             </div>
           </div>
         </div>

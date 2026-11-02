@@ -129,5 +129,67 @@ describe('Ticket 08: Monthly Summary Report Seam', () => {
       expect(res.data?.supervisor_signature_type).toBe('typed');
       expect(res.data?.signed_at).toBeDefined();
     });
+
+    it('generates material requisitions CSV and fetches monthly requisitions', async () => {
+      const {
+        getMonthlyRequisitions,
+        generateRequisitionsCsv,
+      } = await import('@/lib/services/report-service');
+
+      const reqs = await getMonthlyRequisitions(10, 2026);
+      expect(reqs.length).toBeGreaterThanOrEqual(1);
+
+      const csv = generateRequisitionsCsv(reqs, 10, 2026);
+      expect(csv.startsWith('\uFEFF')).toBe(true);
+      expect(csv).toContain('รายงานการเบิกจ่ายวัสดุและอุปกรณ์สิ้นเปลืองประจำเดือน');
+      expect(csv).toContain('REQ-2610-001');
+      expect(csv).toContain('สมชาย รักงาน');
+    });
+
+    it('generates inventory stock balance CSV with valuations and status', async () => {
+      const {
+        getInventoryBalanceReportData,
+        generateInventoryBalanceCsv,
+      } = await import('@/lib/services/report-service');
+
+      const supplies = await getInventoryBalanceReportData();
+      expect(supplies.length).toBeGreaterThanOrEqual(6);
+
+      const csv = generateInventoryBalanceCsv(supplies);
+      expect(csv.startsWith('\uFEFF')).toBe(true);
+      expect(csv).toContain('รายงานสรุปยอดพัสดุและวัสดุคงเหลือในคลัง');
+      expect(csv).toContain('MAT-LAN-001');
+      expect(csv).toContain('มูลค่ารวม');
+    });
+
+    it('generates asset borrowing logs CSV and fetches monthly borrow logs', async () => {
+      const {
+        getMonthlyBorrowLogs,
+        generateBorrowLogsCsv,
+      } = await import('@/lib/services/report-service');
+
+      // Create a borrow log
+      const { borrowAsset } = await import('@/lib/services/asset-service');
+      const now = new Date();
+      const m = now.getMonth() + 1;
+      const y = now.getFullYear();
+
+      await borrowAsset({
+        assetId: 'asset-1',
+        borrowerName: 'อาจารย์ วารุณี',
+        borrowerDeptName: 'คณะวิศวกรรม',
+        expectedReturnDate: new Date(now.getTime() + 86400000).toISOString(),
+        staffId: 'staff-1',
+        staffName: 'เจ้าหน้าที่ไอที',
+      });
+
+      const logs = await getMonthlyBorrowLogs(m, y);
+      expect(logs.length).toBeGreaterThanOrEqual(1);
+
+      const csv = generateBorrowLogsCsv(logs, m, y);
+      expect(csv.startsWith('\uFEFF')).toBe(true);
+      expect(csv).toContain('รายงานประวัติการยืม-คืนครุภัณฑ์ประจำเดือน');
+      expect(csv).toContain('อาจารย์ วารุณี');
+    });
   });
 });

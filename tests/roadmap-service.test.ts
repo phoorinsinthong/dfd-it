@@ -152,5 +152,27 @@ describe('Ticket 07: Preventive Maintenance Roadmap & Checklist Seam', () => {
       expect(fullCompleted?.progress_percent).toBe(100);
       expect(fullCompleted?.status).toBe('completed');
     });
+
+    it('sets and updates due date for a checklist item to support monthly calendar view', async () => {
+      const { updateChecklistItemDueDate, getChecklistItemsByMonth } = await import('@/lib/services/roadmap-service');
+
+      const adhoc = await createAdhocChecklist({
+        title: 'Server Monthly Maintenance',
+        year: 2026,
+        targetMonth: 11,
+        items: ['ทำความสะอาดฝุ่นตู้ Rack', 'ตรวจสอบความร้อนแอร์ห้อง Server'],
+      });
+
+      const itemId = adhoc.data!.items[0].id;
+      const res = await updateChecklistItemDueDate(itemId, '2026-11-10');
+      expect(res.success).toBe(true);
+      expect(res.data?.due_date).toBe('2026-11-10');
+
+      // Fetch items by month
+      const monthlyItems = await getChecklistItemsByMonth(2026, 11);
+      expect(monthlyItems.length).toBeGreaterThanOrEqual(2);
+      const datedItem = monthlyItems.find((i) => i.id === itemId);
+      expect(datedItem?.due_date).toBe('2026-11-10');
+    });
   });
 });

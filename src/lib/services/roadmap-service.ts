@@ -642,3 +642,51 @@ export async function deleteMonthlyChecklist(
 
   return { success: true };
 }
+
+export async function updateChecklistItemDueDate(
+  itemId: string,
+  dueDate?: string
+): Promise<{ success: boolean; data?: ChecklistItem; error?: string }> {
+  for (const checklist of checklistsStore) {
+    const item = checklist.items.find((i) => i.id === itemId);
+    if (item) {
+      item.due_date = dueDate ? dueDate.trim() : undefined;
+
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase.from('checklists').update({
+            items: checklist.items,
+          }).eq('id', checklist.id);
+        } catch (e) {
+          console.warn('Supabase updateChecklistItemDueDate warning:', e);
+        }
+      }
+
+      return { success: true, data: { ...item } };
+    }
+  }
+
+  return { success: false, error: 'Checklist item not found' };
+}
+
+export async function getChecklistItemsByMonth(
+  year: number,
+  month: number
+): Promise<ChecklistItem[]> {
+  const checklists = await getChecklists(year);
+  const monthChecklists = checklists.filter((c) => {
+    if (c.target_month === month) return true;
+    if (c.scheduled_months && c.scheduled_months.includes(month)) return true;
+    return false;
+  });
+
+  const allItems: ChecklistItem[] = [];
+  monthChecklists.forEach((c) => {
+    c.items.forEach((item) => {
+      allItems.push({ ...item });
+    });
+  });
+
+  return allItems;
+}
+

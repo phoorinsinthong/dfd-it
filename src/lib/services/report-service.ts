@@ -1,7 +1,8 @@
-import { MonthlyReportSummary, ReportSignature } from '@/types/database';
+import { MonthlyReportSummary, ReportSignature, SupplyItem, SupplyRequisition, BorrowLog } from '@/types/database';
 import { getAllTickets } from './ticket-service';
 import { getAllBookings } from './booking-service';
 import { getAllBorrowLogs } from './asset-service';
+import { getSupplies, getRequisitions } from './supply-service';
 import { getChecklists, THAI_MONTH_NAMES } from './roadmap-service';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
@@ -436,3 +437,154 @@ export function generateDetailedTicketsCsv(tickets: import('@/types/database').T
 }
 
 export const generateIncidentDetailCsv = generateDetailedTicketsCsv;
+
+// =====================================================================
+// รายงานการเบิกจ่ายพัสดุ/วัสดุ (Supplies Requisition Report)
+// =====================================================================
+export async function getMonthlyRequisitions(month: number, year: number): Promise<SupplyRequisition[]> {
+  const all = await getRequisitions();
+  return all.filter((r) => {
+    const d = new Date(r.requisition_date);
+    return d.getMonth() + 1 === month && d.getFullYear() === year;
+  });
+}
+
+export function generateRequisitionsCsv(
+  requisitions: SupplyRequisition[],
+  month: number,
+  year: number
+): string {
+  const monthName = THAI_MONTH_NAMES[month - 1] || `Month ${month}`;
+  const bom = '\uFEFF';
+  const lines: string[] = [];
+
+  lines.push(`รายงานการเบิกจ่ายวัสดุและอุปกรณ์สิ้นเปลืองประจำเดือน ${monthName} ${year}`);
+  lines.push(`วันที่ออกรายงาน: ${new Date().toLocaleDateString('th-TH')}`);
+  lines.push('');
+  lines.push(
+    'ลำดับ,วันที่เบิก,เลขที่ใบเบิก,รหัสพัสดุ,ชื่อพัสดุ/วัสดุ,จำนวนที่เบิก,หน่วยนับ,ผู้ขอเบิก,รหัสพนักงาน,กองงาน,แผนก,วัตถุประสงค์,อ้างอิงตั๋วแจ้งซ่อม,เจ้าหน้าที่ผู้จ่ายของ,หมายเหตุ'
+  );
+
+  requisitions.forEach((r, idx) => {
+    lines.push(
+      [
+        idx + 1,
+        `"${new Date(r.requisition_date).toLocaleString('th-TH')}"`,
+        `"${r.requisition_number}"`,
+        `"${r.item_code || '-'}"`,
+        `"${(r.item_name || '').replace(/"/g, '""')}"`,
+        r.quantity,
+        `"${r.unit || 'ชิ้น'}"`,
+        `"${(r.recipient_name || '').replace(/"/g, '""')}"`,
+        `"${r.recipient_employee_id || '-'}"`,
+        `"${(r.division_name || '-').replace(/"/g, '""')}"`,
+        `"${(r.department_name || '-').replace(/"/g, '""')}"`,
+        `"${(r.purpose || '').replace(/"/g, '""')}"`,
+        `"${r.ticket_id || '-'}"`,
+        `"${r.issuer_staff_name || '-'}"`,
+        `"${(r.notes || '-').replace(/"/g, '""')}"`,
+      ].join(',')
+    );
+  });
+
+  return bom + lines.join('\n');
+}
+
+// =====================================================================
+// รายงานสรุปยอดพัสดุคงเหลือในคลัง (Inventory Balance Report)
+// =====================================================================
+export async function getInventoryBalanceReportData(): Promise<SupplyItem[]> {
+  return getSupplies();
+}
+
+export function generateInventoryBalanceCsv(supplies: SupplyItem[]): string {
+  const bom = '\uFEFF';
+  const lines: string[] = [];
+
+  lines.push('รายงานสรุปยอดพัสดุและวัสดุคงเหลือในคลัง (Inventory Stock Balance Report)');
+  lines.push(`วันที่ออกรายงาน: ${new Date().toLocaleDateString('th-TH')} เวลา ${new Date().toLocaleTimeString('th-TH')}`);
+  lines.push('');
+  lines.push(
+    'ลำดับ,รหัสพัสดุ,ชื่อพัสดุ/วัสดุ,หมวดหมู่,สต็อกคงเหลือ,หน่วยนับ,จุดสั่งซื้อขั้นต่ำ,ราคาต่อหน่วย(บาท),มูลค่ารวม(บาท),สถานะสต็อก,สถานที่จัดเก็บ'
+  );
+
+  const statusLabel: Record<string, string> = {
+    in_stock: 'ปกติ',
+    low_stock: 'ใกล้หมด',
+    out_of_stock: 'สินค้าหมด',
+  };
+
+  supplies.forEach((s, idx) => {
+    const totalVal = (s.unit_price || 0) * s.quantity;
+    lines.push(
+      [
+        idx + 1,
+        `"${s.item_code}"`,
+        `"${s.name.replace(/"/g, '""')}"`,
+        `"${s.category.replace(/"/g, '""')}"`,
+        s.quantity,
+        `"${s.unit}"`,
+        s.min_quantity,
+        s.unit_price || 0,
+        totalVal,
+        `"${statusLabel[s.status] || s.status}"`,
+        `"${(s.location || '-').replace(/"/g, '""')}"`,
+      ].join(',')
+    );
+  });
+
+  return bom + lines.join('\n');
+}
+
+// =====================================================================
+// รายงานการยืม-คืนครุภัณฑ์ (Asset Borrowing Report)
+// =====================================================================
+export async function getMonthlyBorrowLogs(month: number, year: number): Promise<BorrowLog[]> {
+  const all = await getAllBorrowLogs();
+  return all.filter((l) => {
+    const d = new Date(l.borrow_date);
+    return d.getMonth() + 1 === month && d.getFullYear() === year;
+  });
+}
+
+export function generateBorrowLogsCsv(
+  logs: BorrowLog[],
+  month: number,
+  year: number
+): string {
+  const monthName = THAI_MONTH_NAMES[month - 1] || `Month ${month}`;
+  const bom = '\uFEFF';
+  const lines: string[] = [];
+
+  lines.push(`รายงานประวัติการยืม-คืนครุภัณฑ์ประจำเดือน ${monthName} ${year}`);
+  lines.push(`วันที่ออกรายงาน: ${new Date().toLocaleDateString('th-TH')}`);
+  lines.push('');
+  lines.push(
+    'ลำดับ,วันที่ยืม,รหัสครุภัณฑ์,รายการครุภัณฑ์,ผู้ยืม,กองงาน,แผนก,กำหนดส่งคืน,วันที่คืนจริง,สถานะการยืม,สภาพตอนยืม,สภาพตอนคืน,เจ้าหน้าที่บันทึก,หมายเหตุ'
+  );
+
+  logs.forEach((l, idx) => {
+    const status = l.actual_return_date ? 'คืนเรียบร้อย' : l.is_overdue ? 'เกินกำหนด' : 'กำลังยืม';
+    lines.push(
+      [
+        idx + 1,
+        `"${new Date(l.borrow_date).toLocaleString('th-TH')}"`,
+        `"${l.asset_code || '-'}"`,
+        `"${(l.asset_name || '').replace(/"/g, '""')}"`,
+        `"${(l.borrower_name || '').replace(/"/g, '""')}"`,
+        `"${(l.borrower_division_name || '-').replace(/"/g, '""')}"`,
+        `"${(l.borrower_dept_name || '-').replace(/"/g, '""')}"`,
+        `"${new Date(l.expected_return_date).toLocaleDateString('th-TH')}"`,
+        `"${l.actual_return_date ? new Date(l.actual_return_date).toLocaleString('th-TH') : '-'}"`,
+        `"${status}"`,
+        `"${(l.condition_out || '-').replace(/"/g, '""')}"`,
+        `"${(l.condition_in || '-').replace(/"/g, '""')}"`,
+        `"${l.staff_name || '-'}"`,
+        `"${(l.notes || '-').replace(/"/g, '""')}"`,
+      ].join(',')
+    );
+  });
+
+  return bom + lines.join('\n');
+}
+

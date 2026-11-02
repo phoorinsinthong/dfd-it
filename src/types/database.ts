@@ -164,6 +164,7 @@ export interface ChecklistItem {
   is_completed: boolean;
   completed_by?: string;
   completed_at?: string;
+  due_date?: string; // YYYY-MM-DD
 }
 
 export interface Checklist {
@@ -207,8 +208,8 @@ export interface AdminUser {
   created_at: string;
 }
 
-export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'SIGN' | 'CLEAR_SIGN' | 'STATUS_CHANGE';
-export type AuditModule = 'ASSET' | 'PM' | 'BOOKING' | 'REPORT' | 'USER_ADMIN' | 'MASTER_DATA' | 'TICKET' | 'AUTH' | 'SERVER';
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'SIGN' | 'CLEAR_SIGN' | 'STATUS_CHANGE' | 'DISPENSE' | 'RESTOCK';
+export type AuditModule = 'ASSET' | 'PM' | 'BOOKING' | 'REPORT' | 'USER_ADMIN' | 'MASTER_DATA' | 'TICKET' | 'AUTH' | 'SERVER' | 'SUPPLY';
 
 export interface AuditLog {
   id: string;
@@ -222,6 +223,46 @@ export interface AuditLog {
   target_id?: string;
   target_name?: string;
   details: string;
+}
+
+export type SupplyStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
+
+export interface SupplyItem {
+  id: string;
+  item_code: string;
+  name: string;
+  category: string;
+  unit: string;
+  quantity: number;
+  min_quantity: number;
+  unit_price?: number;
+  location?: string;
+  status: SupplyStatus;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface SupplyRequisition {
+  id: string;
+  requisition_number: string;
+  item_id: string;
+  item_code?: string;
+  item_name?: string;
+  quantity: number;
+  unit?: string;
+  recipient_name: string;
+  recipient_employee_id?: string;
+  division_id?: string;
+  division_name?: string;
+  department_id?: string;
+  department_name?: string;
+  purpose: string;
+  ticket_id?: string;
+  issuer_staff_id?: string;
+  issuer_staff_name?: string;
+  requisition_date: string;
+  notes?: string;
+  created_at: string;
 }
 
 export type ServerEnvironment = 'internal' | 'cloud';
