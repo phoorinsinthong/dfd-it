@@ -1,11 +1,20 @@
 -- ====================================================================
 -- IT Support & Resource Management System
 -- Migration: 006_create_supplies_and_pm_date.sql
--- Description: เพิ่มตารางคลังวัสดุสิ้นเปลืองและการเบิกจ่าย (Supplies & Requisitions)
+-- Description: ซิงค์ฐานข้อมูลทั้งหมดให้สมบูรณ์ 100% 
+--              1. สร้างตาราง supplies (คลังวัสดุสิ้นเปลือง)
+--              2. สร้างตาราง supply_requisitions (ประวัติการเบิกจ่ายวัสดุ)
+--              3. อัปเดตตาราง reports ให้รองรับลายเซ็นอิเล็กทรอนิกส์
+--              4. ปรับจูน constraint ตาราง tickets และ bookings ให้ยืดหยุ่น ป้องกัน error
+--              5. ตั้งค่า RLS (Row Level Security) และ Realtime
+--              6. นำเข้าข้อมูลวัสดุตั้งต้นพร้อมใช้งาน (Pre-seed Supplies)
+--
 -- วิธีใช้: คัดลอกโค้ดทั้งหมดนี้ไปวางในหน้า Supabase SQL Editor แล้วกด "Run"
 -- ====================================================================
 
+-- --------------------------------------------------------------------
 -- 1. ตารางคลังพัสดุและวัสดุสิ้นเปลือง (Supplies Inventory)
+-- --------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.supplies (
   id TEXT PRIMARY KEY,
   item_code TEXT NOT NULL UNIQUE,
@@ -22,7 +31,9 @@ CREATE TABLE IF NOT EXISTS public.supplies (
 );
 ALTER TABLE public.supplies ALTER COLUMN id TYPE TEXT USING id::text;
 
+-- --------------------------------------------------------------------
 -- 2. ตารางประวัติการเบิกจ่ายพัสดุ/วัสดุ (Supply Requisitions)
+-- --------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.supply_requisitions (
   id TEXT PRIMARY KEY,
   requisition_number TEXT NOT NULL UNIQUE,
@@ -48,7 +59,45 @@ CREATE TABLE IF NOT EXISTS public.supply_requisitions (
 ALTER TABLE public.supply_requisitions ALTER COLUMN id TYPE TEXT USING id::text;
 ALTER TABLE public.supply_requisitions ALTER COLUMN item_id TYPE TEXT USING item_id::text;
 
--- 3. เปิดระบบ Row Level Security (RLS) และสร้าง Policies แบบเปิด
+-- --------------------------------------------------------------------
+-- 3. อัปเดตตาราง reports (เพิ่มคอลัมน์ลายเซ็น staff_signature & supervisor_signature)
+-- --------------------------------------------------------------------
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS staff_name TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS staff_title TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS staff_signature TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS staff_signature_type TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS staff_signature_url TEXT;
+
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS supervisor_name TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS supervisor_title TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS supervisor_signature TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS supervisor_signature_type TEXT;
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS manager_signature_url TEXT;
+
+ALTER TABLE public.reports ADD COLUMN IF NOT EXISTS signed_at TIMESTAMPTZ;
+
+-- ให้มั่นใจว่ามี Unique Constraint (month, year) สำหรับ UPSERT
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname IN ('reports_month_year_unique', 'reports_month_year_key')
+  ) THEN
+    ALTER TABLE public.reports ADD CONSTRAINT reports_month_year_unique UNIQUE (month, year);
+  END IF;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- --------------------------------------------------------------------
+-- 4. ปรับจูน constraint ตาราง tickets และ bookings ป้องกัน error
+-- --------------------------------------------------------------------
+ALTER TABLE public.tickets ALTER COLUMN location SET DEFAULT 'ภายในสำนักงาน';
+ALTER TABLE public.tickets ALTER COLUMN location DROP NOT NULL;
+
+ALTER TABLE public.bookings ALTER COLUMN user_id DROP NOT NULL;
+
+-- --------------------------------------------------------------------
+-- 5. เปิดระบบ Row Level Security (RLS) และสร้าง Policies แบบเปิด
+-- --------------------------------------------------------------------
 DO $$
 DECLARE
   t TEXT;
@@ -71,7 +120,9 @@ BEGIN
   END LOOP;
 END $$;
 
--- 4. Realtime publication สำหรับ Live Sync
+-- --------------------------------------------------------------------
+-- 6. Realtime publication สำหรับ Live Sync
+-- --------------------------------------------------------------------
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -90,7 +141,9 @@ BEGIN
 EXCEPTION WHEN others THEN NULL;
 END $$;
 
--- 5. ข้อมูลพัสดุตั้งต้น (Pre-seed Supplies)
+-- --------------------------------------------------------------------
+-- 7. ข้อมูลพัสดุตั้งต้น (Pre-seed Supplies)
+-- --------------------------------------------------------------------
 INSERT INTO public.supplies (
   id, item_code, name, category, unit, quantity, min_quantity, unit_price, location, status
 ) VALUES
@@ -113,7 +166,9 @@ ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   updated_at = NOW();
 
--- 6. ข้อมูลตัวอย่างการเบิกจ่าย (Pre-seed Requisitions)
+-- --------------------------------------------------------------------
+-- 8. ข้อมูลตัวอย่างการเบิกจ่าย (Pre-seed Requisitions)
+-- --------------------------------------------------------------------
 INSERT INTO public.supply_requisitions (
   id, requisition_number, item_id, item_code, item_name, quantity, unit,
   recipient_name, recipient_employee_id, division_name, department_name,
@@ -126,4 +181,3 @@ ON CONFLICT (id) DO UPDATE SET
   quantity = EXCLUDED.quantity,
   recipient_name = EXCLUDED.recipient_name,
   purpose = EXCLUDED.purpose;
-

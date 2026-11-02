@@ -54,9 +54,12 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 
   const title = input.title?.trim() || input.description.slice(0, 40) + '...';
 
+  const safeLocation = (input.location?.trim()) || 'ภายในสำนักงาน';
+  const resolvedUserId = input.userId || `usr_${Date.now().toString(36)}`;
+
   const newTicket: Ticket = {
     id: `TK-${Date.now().toString().slice(-6)}`,
-    user_id: input.userId,
+    user_id: resolvedUserId,
     user_name: input.userName || 'Employee',
     user_employee_id: input.userEmployeeId,
     division_id: input.divisionId,
@@ -71,7 +74,7 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
     category_name: input.categoryName,
     title,
     description: input.description.trim(),
-    location: input.location.trim(),
+    location: safeLocation,
     image_url: input.imageUrl,
     urgency: input.urgency || 'low',
     status: 'pending',
@@ -84,7 +87,7 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
     try {
       // Upsert user if needed so foreign key doesn't block ticket creation
       await supabase.from('users').upsert({
-        id: input.userId,
+        id: resolvedUserId,
         name: input.userName || 'Employee',
         employee_id: input.userEmployeeId,
         division_id: input.divisionId?.trim() || null,
@@ -94,7 +97,7 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 
       // Build payload matching database columns
       const insertPayload: Record<string, any> = {
-        user_id: newTicket.user_id,
+        user_id: resolvedUserId,
         user_name: newTicket.user_name,
         user_employee_id: newTicket.user_employee_id,
         division_id: newTicket.division_id?.trim() || null,

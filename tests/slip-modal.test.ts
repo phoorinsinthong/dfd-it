@@ -52,3 +52,4 @@ describe('Printable Slip Formats (Requisitions & Asset Loans)', () => {
     expect(loan.condition_out).toContain('สภาพสมบูรณ์');
   });
 });
+

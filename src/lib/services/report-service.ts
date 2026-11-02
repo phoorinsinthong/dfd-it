@@ -102,11 +102,11 @@ export async function generateMonthlyReport(
           id: data.id,
           month: data.month,
           year: data.year,
-          staff_signature: data.staff_signature || undefined,
+          staff_signature: data.staff_signature || data.staff_signature_url || undefined,
           staff_name: data.staff_name || undefined,
           staff_title: data.staff_title || undefined,
           staff_signature_type: data.staff_signature_type || undefined,
-          supervisor_signature: data.supervisor_signature || undefined,
+          supervisor_signature: data.supervisor_signature || data.manager_signature_url || undefined,
           supervisor_name: data.supervisor_name || undefined,
           supervisor_title: data.supervisor_title || undefined,
           supervisor_signature_type: data.supervisor_signature_type || undefined,
@@ -228,19 +228,29 @@ export async function saveReportSignature(
 
   if (isSupabaseConfigured()) {
     try {
-      await supabase.from('reports').upsert({
+      const payload: Record<string, any> = {
         month: updatedSig.month,
         year: updatedSig.year,
         staff_signature: updatedSig.staff_signature,
+        staff_signature_url: updatedSig.staff_signature,
         staff_name: updatedSig.staff_name,
         staff_title: updatedSig.staff_title,
         staff_signature_type: updatedSig.staff_signature_type,
         supervisor_signature: updatedSig.supervisor_signature,
+        manager_signature_url: updatedSig.supervisor_signature,
         supervisor_name: updatedSig.supervisor_name,
         supervisor_title: updatedSig.supervisor_title,
         supervisor_signature_type: updatedSig.supervisor_signature_type,
         signed_at: updatedSig.signed_at,
-      }, { onConflict: 'month,year' });
+      };
+
+      const { error } = await supabase.from('reports').upsert(payload, { onConflict: 'month,year' });
+      if (error && error.code === 'PGRST204') {
+        // Fallback for older schema lacking staff_signature/supervisor_signature
+        delete payload.staff_signature;
+        delete payload.supervisor_signature;
+        await supabase.from('reports').upsert(payload, { onConflict: 'month,year' });
+      }
     } catch (e) {
       console.warn('Supabase saveReportSignature warning:', e);
     }
@@ -301,16 +311,24 @@ export async function clearReportSignature(
 
   if (isSupabaseConfigured()) {
     try {
-      await supabase.from('reports').update({
+      const clearPayload: Record<string, any> = {
         staff_signature: existing.staff_signature || null,
+        staff_signature_url: existing.staff_signature || null,
         staff_name: existing.staff_name || null,
         staff_title: existing.staff_title || null,
         staff_signature_type: existing.staff_signature_type || null,
         supervisor_signature: existing.supervisor_signature || null,
+        manager_signature_url: existing.supervisor_signature || null,
         supervisor_name: existing.supervisor_name || null,
         supervisor_title: existing.supervisor_title || null,
         supervisor_signature_type: existing.supervisor_signature_type || null,
-      }).eq('month', input.month).eq('year', input.year);
+      };
+      const { error } = await supabase.from('reports').update(clearPayload).eq('month', input.month).eq('year', input.year);
+      if (error && error.code === 'PGRST204') {
+        delete clearPayload.staff_signature;
+        delete clearPayload.supervisor_signature;
+        await supabase.from('reports').update(clearPayload).eq('month', input.month).eq('year', input.year);
+      }
     } catch (e) {
       console.warn('Supabase clearReportSignature warning:', e);
     }

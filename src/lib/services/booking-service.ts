@@ -356,9 +356,11 @@ export async function createBooking(
     };
   }
 
+  const resolvedUserId = input.userId || `usr_${Date.now().toString(36)}`;
+
   const newBooking: Booking = {
     id: `BK-${Date.now().toString().slice(-6)}`,
-    user_id: input.userId,
+    user_id: resolvedUserId,
     user_name: input.userName || 'Employee',
     user_department: input.userDepartment,
     room_id: room.id,
@@ -379,9 +381,15 @@ export async function createBooking(
 
   if (isSupabaseConfigured()) {
     try {
+      await supabase.from('users').upsert({
+        id: resolvedUserId,
+        name: input.userName || 'Employee',
+        role: 'user',
+      }, { onConflict: 'id' });
+
       const { data: dbBooking, error } = await supabase.from('bookings').insert({
         id: newBooking.id,
-        user_id: newBooking.user_id,
+        user_id: resolvedUserId,
         user_name: newBooking.user_name,
         user_department: newBooking.user_department,
         room_id: newBooking.room_id,

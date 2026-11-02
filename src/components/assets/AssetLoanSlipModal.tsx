@@ -252,3 +252,4 @@ export default function AssetLoanSlipModal({ loan, onClose }: AssetLoanSlipModal
     </div>
   );
 }
+
