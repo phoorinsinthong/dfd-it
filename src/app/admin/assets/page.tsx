@@ -15,6 +15,7 @@ import {
   getAllBorrowLogs,
 } from '@/lib/services/asset-service';
 import { getDepartments } from '@/lib/services/master-data-service';
+import { sendLineOverdueSummaryNotification } from '@/lib/services/line-notification-service';
 import { Asset, BorrowLog, AssetStatus, Department } from '@/types/database';
 import {
   Laptop,
@@ -310,16 +311,11 @@ export default function AdminAssetsPage() {
         setSuccessMsg('ไม่มีรายการครุภัณฑ์ที่เกินกำหนดส่งคืนในขณะนี้');
         return;
       }
-      const res = await fetch('/api/notify/line', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ overdueLoans }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const res = await sendLineOverdueSummaryNotification(overdueLoans);
+      if (res.success) {
         setSuccessMsg(`ส่งการแจ้งเตือนครุภัณฑ์เกินกำหนด (${overdueLoans.length} รายการ) เข้ากลุ่ม LINE เรียบร้อยแล้ว`);
       } else {
-        setErrorMsg(data.error || 'เกิดข้อผิดพลาดในการส่งข้อความ LINE');
+        setErrorMsg(res.error || 'เกิดข้อผิดพลาดในการส่งข้อความ LINE');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้');

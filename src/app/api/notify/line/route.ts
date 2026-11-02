@@ -33,9 +33,7 @@ export async function POST(req: NextRequest) {
 
     let messagePayload: any;
 
-    if (body.payload) {
-      messagePayload = body.payload;
-    } else if (body.test) {
+    if (body.test) {
       // Test Notification Payload
       messagePayload = {
         type: 'flex',
@@ -102,22 +100,22 @@ export async function POST(req: NextRequest) {
           },
         },
       };
-    } else if (body.ticket) {
+    } else if (body.ticket && body.ticket.id && body.ticket.title) {
       const ticket: Ticket = body.ticket;
       messagePayload = buildTicketFlexMessage(ticket, baseUrl);
-    } else if (body.supply) {
+    } else if (body.supply && body.supply.id && body.supply.name) {
       const supply: SupplyItem = body.supply;
       const requisition: SupplyRequisition | undefined = body.requisition;
       messagePayload = buildLowStockFlexMessage(supply, requisition, baseUrl);
-    } else if (body.overdueLoans && Array.isArray(body.overdueLoans)) {
+    } else if (Array.isArray(body.overdueLoans) && body.overdueLoans.length > 0) {
       const overdueLoans: BorrowLog[] = body.overdueLoans;
       messagePayload = buildOverdueLoansFlexMessage(overdueLoans, baseUrl);
-    } else if (body.lowStockSummary && Array.isArray(body.lowStockSummary)) {
+    } else if (Array.isArray(body.lowStockSummary) && body.lowStockSummary.length > 0) {
       const items: SupplyItem[] = body.lowStockSummary;
       messagePayload = buildLowStockSummaryFlexMessage(items, baseUrl);
     } else {
       return NextResponse.json(
-        { success: false, error: 'Missing valid payload, ticket, supply, or overdueLoans in request body' },
+        { success: false, error: 'Invalid or unsupported request payload for LINE notification' },
         { status: 400 }
       );
     }

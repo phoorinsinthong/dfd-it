@@ -452,10 +452,12 @@ export interface SendLineNotificationResult {
   delivered: boolean;
   fallbackTriggered?: boolean;
   message?: string;
+  error?: string;
   payload?: LineFlexMessagePayload;
 }
 
 export async function dispatchLineMessage(
+  bodyData: Record<string, any>,
   payload: LineFlexMessagePayload,
   options?: SendLineNotificationOptions
 ): Promise<SendLineNotificationResult> {
@@ -479,7 +481,7 @@ export async function dispatchLineMessage(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ payload }),
+        body: JSON.stringify(bodyData),
       });
       const resData = await apiRes.json();
       if (apiRes.ok && resData.success) {
@@ -495,6 +497,7 @@ export async function dispatchLineMessage(
         delivered: false,
         fallbackTriggered: true,
         message: resData.error || 'Failed to dispatch via API route',
+        error: resData.error || 'Failed to dispatch via API route',
         payload,
       };
     } catch (clientErr: any) {
@@ -504,6 +507,7 @@ export async function dispatchLineMessage(
         delivered: false,
         fallbackTriggered: true,
         message: clientErr.message,
+        error: clientErr.message,
         payload,
       };
     }
@@ -587,7 +591,7 @@ export async function sendLineTicketNotification(
   options?: SendLineNotificationOptions
 ): Promise<SendLineNotificationResult> {
   const payload = buildTicketFlexMessage(ticket, options?.baseUrl);
-  return dispatchLineMessage(payload, options);
+  return dispatchLineMessage({ ticket }, payload, options);
 }
 
 export async function sendLineLowStockNotification(
@@ -596,7 +600,7 @@ export async function sendLineLowStockNotification(
   options?: SendLineNotificationOptions
 ): Promise<SendLineNotificationResult> {
   const payload = buildLowStockFlexMessage(supply, requisition, options?.baseUrl);
-  return dispatchLineMessage(payload, options);
+  return dispatchLineMessage({ supply, requisition }, payload, options);
 }
 
 export async function sendLineOverdueSummaryNotification(
@@ -604,7 +608,7 @@ export async function sendLineOverdueSummaryNotification(
   options?: SendLineNotificationOptions
 ): Promise<SendLineNotificationResult> {
   const payload = buildOverdueLoansFlexMessage(overdueLoans, options?.baseUrl);
-  return dispatchLineMessage(payload, options);
+  return dispatchLineMessage({ overdueLoans }, payload, options);
 }
 
 export async function sendLineLowStockSummaryNotification(
@@ -612,5 +616,5 @@ export async function sendLineLowStockSummaryNotification(
   options?: SendLineNotificationOptions
 ): Promise<SendLineNotificationResult> {
   const payload = buildLowStockSummaryFlexMessage(items, options?.baseUrl);
-  return dispatchLineMessage(payload, options);
+  return dispatchLineMessage({ lowStockSummary: items }, payload, options);
 }
