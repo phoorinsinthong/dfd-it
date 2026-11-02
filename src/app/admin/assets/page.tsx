@@ -35,6 +35,7 @@ import {
   Pencil,
   Trash2,
   Printer,
+  Bell,
 } from 'lucide-react';
 import AssetLoanSlipModal from '@/components/assets/AssetLoanSlipModal';
 
@@ -85,6 +86,7 @@ export default function AdminAssetsPage() {
   const [returnNotes, setReturnNotes] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
+  const [sendingLineAlert, setSendingLineAlert] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -296,6 +298,33 @@ export default function AdminAssetsPage() {
       loadData();
     } else {
       setErrorMsg(res.error || 'เกิดข้อผิดพลาดในการบันทึกการคืน');
+    }
+  };
+
+  // Send Overdue Loans Summary Alert to LINE Group
+  const handleSendOverdueLineAlert = async () => {
+    setSendingLineAlert(true);
+    setErrorMsg(null);
+    try {
+      if (overdueLoans.length === 0) {
+        setSuccessMsg('ไม่มีรายการครุภัณฑ์ที่เกินกำหนดส่งคืนในขณะนี้');
+        return;
+      }
+      const res = await fetch('/api/notify/line', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ overdueLoans }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccessMsg(`ส่งการแจ้งเตือนครุภัณฑ์เกินกำหนด (${overdueLoans.length} รายการ) เข้ากลุ่ม LINE เรียบร้อยแล้ว`);
+      } else {
+        setErrorMsg(data.error || 'เกิดข้อผิดพลาดในการส่งข้อความ LINE');
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้');
+    } finally {
+      setSendingLineAlert(false);
     }
   };
 
@@ -580,6 +609,34 @@ export default function AdminAssetsPage() {
         {/* Tab 2: Active Loans & Check-in Return */}
         {activeTab === 'active_loans' && (
           <div className="space-y-4">
+            {overdueLoans.length > 0 && (
+              <div className="bg-red-950/30 border border-red-500/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-red-950/80 border border-red-500/50 flex items-center justify-center text-red-400 shrink-0">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-red-300">
+                      พบครุภัณฑ์เกินกำหนดส่งคืน {overdueLoans.length} รายการ
+                    </h4>
+                    <p className="text-xs text-red-400/80">
+                      สามารถส่งข้อความแจ้งเตือนสรุปเข้ากลุ่มแชต LINE เจ้าหน้าที่ไอทีเพื่อช่วยเร่งรัดติดตามได้
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={sendingLineAlert}
+                  onClick={handleSendOverdueLineAlert}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold text-xs shadow-md shadow-red-950/50 transition self-start sm:self-auto shrink-0"
+                >
+                  <Bell className={`w-3.5 h-3.5 ${sendingLineAlert ? 'animate-bounce' : ''}`} />
+                  {sendingLineAlert ? 'กำลังส่ง LINE...' : 'ส่งแจ้งเตือนเข้ากลุ่ม LINE'}
+                </button>
+              </div>
+            )}
+
             {activeLoans.length === 0 ? (
               <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-12 text-center">
                 <CheckCircle2 className="w-10 h-10 text-slate-600 mx-auto mb-3" />

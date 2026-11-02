@@ -190,6 +190,13 @@ export async function getSupplies(filter?: GetSuppliesFilter): Promise<SupplyIte
   return result;
 }
 
+export async function getLowStockSupplies(): Promise<SupplyItem[]> {
+  const all = await getSupplies();
+  return all.filter(
+    (s) => s.status === 'low_stock' || s.status === 'out_of_stock' || s.quantity <= s.min_quantity
+  );
+}
+
 export async function getSupplyById(id: string): Promise<SupplyItem | null> {
   const found = suppliesStore.find((s) => s.id === id);
   if (found) return { ...found };
@@ -535,6 +542,16 @@ export async function createRequisition(
   }
 
   requisitionsStore.unshift(newRequisition);
+
+  // Trigger Low-Stock notification to LINE if remaining stock is at or below threshold
+  if (targetSupply.quantity <= targetSupply.min_quantity) {
+    try {
+      const { sendLineLowStockNotification } = await import('./line-notification-service');
+      await sendLineLowStockNotification(targetSupply, newRequisition);
+    } catch (lineErr) {
+      console.warn('Failed to dispatch low stock LINE alert:', lineErr);
+    }
+  }
 
   if (input.actor) {
     try {

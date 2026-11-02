@@ -10,9 +10,12 @@ import {
 } from '@/lib/services/ticket-service';
 import {
   buildTicketFlexMessage,
+  buildLowStockFlexMessage,
+  buildOverdueLoansFlexMessage,
+  buildLowStockSummaryFlexMessage,
   sendLineTicketNotification,
 } from '@/lib/services/line-notification-service';
-import { Ticket } from '@/types/database';
+import { Ticket, SupplyItem, SupplyRequisition, BorrowLog } from '@/types/database';
 
 describe('Ticket 04: IT Ticket Resolution & LINE Notification Adapter', () => {
   beforeEach(() => {
@@ -77,6 +80,95 @@ describe('Ticket 04: IT Ticket Resolution & LINE Notification Adapter', () => {
       expect(quotaFallbackResult.delivered).toBe(false);
       expect(quotaFallbackResult.fallbackTriggered).toBe(true);
       expect(quotaFallbackResult.message).toMatch(/quota/i);
+    });
+
+    it('builds a valid LINE Flex Message for low-stock and out-of-stock supply items', () => {
+      const mockSupply: SupplyItem = {
+        id: 'mat-1',
+        item_code: 'MAT-LAN-001',
+        name: 'สาย LAN Cat6',
+        category: 'สายสัญญาณ',
+        unit: 'เส้น',
+        quantity: 2,
+        min_quantity: 5,
+        status: 'low_stock',
+        location: 'ตู้ A ชั้น 1',
+        created_at: new Date().toISOString(),
+      };
+
+      const mockReq: SupplyRequisition = {
+        id: 'req-1',
+        requisition_number: 'REQ-001',
+        item_id: 'mat-1',
+        quantity: 3,
+        recipient_name: 'สมหมาย การช่าง',
+        purpose: 'ต่อเน็ต',
+        requisition_date: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+
+      const flexPayload = buildLowStockFlexMessage(mockSupply, mockReq, 'https://dfd-it-support.vercel.app');
+      expect(flexPayload.type).toBe('flex');
+      expect(flexPayload.altText).toContain('สาย LAN Cat6');
+      expect(flexPayload.altText).toContain('เหลือ 2 เส้น');
+
+      const bodyText = JSON.stringify(flexPayload.contents);
+      expect(bodyText).toContain('MAT-LAN-001');
+      expect(bodyText).toContain('จุดเตือน: 5 เส้น');
+      expect(bodyText).toContain('สมหมาย การช่าง');
+      expect(bodyText).toContain('ตู้ A ชั้น 1');
+      expect(bodyText).toContain('https://dfd-it-support.vercel.app/admin/supplies');
+    });
+
+    it('builds a valid LINE Flex Message for overdue equipment loans', () => {
+      const mockOverdueLoans: BorrowLog[] = [
+        {
+          id: 'log-1',
+          asset_id: 'ast-1',
+          asset_code: 'NB-001',
+          asset_name: 'Dell Latitude 5420',
+          borrower_name: 'วิภาดา',
+          borrower_dept_name: 'การเงิน',
+          borrow_date: '2026-10-01T00:00:00Z',
+          expected_return_date: '2026-10-08T00:00:00Z',
+          is_overdue: true,
+        },
+      ];
+
+      const flexPayload = buildOverdueLoansFlexMessage(mockOverdueLoans, 'https://dfd-it-support.vercel.app');
+      expect(flexPayload.type).toBe('flex');
+      expect(flexPayload.altText).toContain('ครุภัณฑ์เกินกำหนดส่งคืน');
+      expect(flexPayload.altText).toContain('1 รายการ');
+
+      const bodyText = JSON.stringify(flexPayload.contents);
+      expect(bodyText).toContain('Dell Latitude 5420');
+      expect(bodyText).toContain('วิภาดา');
+      expect(bodyText).toContain('การเงิน');
+      expect(bodyText).toContain('https://dfd-it-support.vercel.app/admin/assets');
+    });
+
+    it('builds a valid LINE Flex Message for low-stock summary digest', () => {
+      const mockItems: SupplyItem[] = [
+        {
+          id: 'mat-1',
+          item_code: 'MAT-MSE-001',
+          name: 'เมาส์ USB',
+          category: 'อุปกรณ์ต่อพ่วง',
+          unit: 'ตัว',
+          quantity: 0,
+          min_quantity: 5,
+          status: 'out_of_stock',
+          created_at: new Date().toISOString(),
+        },
+      ];
+
+      const flexPayload = buildLowStockSummaryFlexMessage(mockItems, 'https://dfd-it-support.vercel.app');
+      expect(flexPayload.type).toBe('flex');
+      expect(flexPayload.altText).toContain('รายงานสรุปพัสดุใกล้หมดสต็อก');
+
+      const bodyText = JSON.stringify(flexPayload.contents);
+      expect(bodyText).toContain('MAT-MSE-001');
+      expect(bodyText).toContain('เมาส์ USB');
     });
   });
 

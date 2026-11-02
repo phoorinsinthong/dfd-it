@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { buildTicketFlexMessage } from '@/lib/services/line-notification-service';
-import { Ticket } from '@/types/database';
+import {
+  buildTicketFlexMessage,
+  buildLowStockFlexMessage,
+  buildOverdueLoansFlexMessage,
+  buildLowStockSummaryFlexMessage,
+} from '@/lib/services/line-notification-service';
+import { Ticket, SupplyItem, SupplyRequisition, BorrowLog } from '@/types/database';
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +33,9 @@ export async function POST(req: NextRequest) {
 
     let messagePayload: any;
 
-    if (body.test) {
+    if (body.payload) {
+      messagePayload = body.payload;
+    } else if (body.test) {
       // Test Notification Payload
       messagePayload = {
         type: 'flex',
@@ -98,9 +105,19 @@ export async function POST(req: NextRequest) {
     } else if (body.ticket) {
       const ticket: Ticket = body.ticket;
       messagePayload = buildTicketFlexMessage(ticket, baseUrl);
+    } else if (body.supply) {
+      const supply: SupplyItem = body.supply;
+      const requisition: SupplyRequisition | undefined = body.requisition;
+      messagePayload = buildLowStockFlexMessage(supply, requisition, baseUrl);
+    } else if (body.overdueLoans && Array.isArray(body.overdueLoans)) {
+      const overdueLoans: BorrowLog[] = body.overdueLoans;
+      messagePayload = buildOverdueLoansFlexMessage(overdueLoans, baseUrl);
+    } else if (body.lowStockSummary && Array.isArray(body.lowStockSummary)) {
+      const items: SupplyItem[] = body.lowStockSummary;
+      messagePayload = buildLowStockSummaryFlexMessage(items, baseUrl);
     } else {
       return NextResponse.json(
-        { success: false, error: 'Missing ticket object or test flag in request body' },
+        { success: false, error: 'Missing valid payload, ticket, supply, or overdueLoans in request body' },
         { status: 400 }
       );
     }

@@ -36,6 +36,7 @@ import {
   RefreshCw,
   Archive,
   Printer,
+  Bell,
 } from 'lucide-react';
 import SupplyRequisitionSlipModal from '@/components/supplies/SupplyRequisitionSlipModal';
 
@@ -95,6 +96,7 @@ export default function AdminSuppliesPage() {
   const [reqTicketId, setReqTicketId] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
+  const [sendingLineAlert, setSendingLineAlert] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [selectedRequisitionForSlip, setSelectedRequisitionForSlip] = useState<SupplyRequisition | null>(null);
@@ -326,6 +328,36 @@ export default function AdminSuppliesPage() {
     }
   };
 
+  // Send Low-Stock Summary Alert to LINE Group
+  const handleSendLowStockLineAlert = async () => {
+    setSendingLineAlert(true);
+    setErrorMsg(null);
+    try {
+      const lowStockItems = supplies.filter(
+        (s) => s.status === 'low_stock' || s.status === 'out_of_stock' || s.quantity <= s.min_quantity
+      );
+      if (lowStockItems.length === 0) {
+        setSuccessMsg('ไม่มีรายการพัสดุที่ใกล้หมดสต็อกในขณะนี้');
+        return;
+      }
+      const res = await fetch('/api/notify/line', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lowStockSummary: lowStockItems }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccessMsg(`ส่งการแจ้งเตือนสรุปพัสดุใกล้หมด (${lowStockItems.length} รายการ) เข้ากลุ่ม LINE เรียบร้อยแล้ว`);
+      } else {
+        setErrorMsg(data.error || 'เกิดข้อผิดพลาดในการส่งข้อความ LINE');
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้');
+    } finally {
+      setSendingLineAlert(false);
+    }
+  };
+
   // Open Requisition Modal
   const openRequisitionModal = (preselectedSupply?: SupplyItem) => {
     if (preselectedSupply) {
@@ -471,7 +503,19 @@ export default function AdminSuppliesPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {lowStockCount > 0 && (
+              <button
+                type="button"
+                onClick={handleSendLowStockLineAlert}
+                disabled={sendingLineAlert}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-950/40 hover:bg-amber-950/70 border border-amber-600/40 text-amber-300 font-medium text-xs transition shadow-sm"
+                title="ส่งสรุปพัสดุใกล้หมดสต็อกเข้ากลุ่ม LINE ไอที"
+              >
+                <Bell className={`w-3.5 h-3.5 text-amber-400 ${sendingLineAlert ? 'animate-bounce' : ''}`} />
+                {sendingLineAlert ? 'กำลังส่ง LINE...' : `แจ้งเตือน LINE (${lowStockCount})`}
+              </button>
+            )}
             <button
               onClick={() => openRequisitionModal()}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition shadow-lg shadow-emerald-950/40"
