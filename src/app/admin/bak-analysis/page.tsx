@@ -82,6 +82,7 @@ export default function BakAnalysisPage() {
   const [reportYearStart, setReportYearStart] = useState<string>('');
   const [reportYearEnd, setReportYearEnd] = useState<string>('');
   const [reportRowLimit, setReportRowLimit] = useState<string>('all');
+  const [reportExcludeWarehouse12, setReportExcludeWarehouse12] = useState<boolean>(true);
 
   // Pagination for Table
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -398,7 +399,7 @@ export default function BakAnalysisPage() {
     reportYearEnd,
   ]);
 
-  // Filtered Items for A4 Printable Report (excludes 'คลัง 12' when source is Excel, sorted oldest-first)
+  // Filtered Items for A4 Printable Report (sorted oldest-first, Warehouse 12 toggleable)
   const reportFilteredItems = useMemo(() => {
     if (!parseResult) return [];
 
@@ -409,7 +410,7 @@ export default function BakAnalysisPage() {
       yearStart: reportAgeFilterMode === 'yearRange' ? reportYearStart : undefined,
       yearEnd: reportAgeFilterMode === 'yearRange' ? reportYearEnd : undefined,
       isExcelSource,
-      excludeWarehouse12ForExcel: true,
+      excludeWarehouse12ForExcel: reportExcludeWarehouse12,
     });
   }, [
     parseResult,
@@ -420,6 +421,7 @@ export default function BakAnalysisPage() {
     reportAgeBracket,
     reportYearStart,
     reportYearEnd,
+    reportExcludeWarehouse12,
   ]);
 
   // Display items considering print row limit
@@ -1819,6 +1821,29 @@ export default function BakAnalysisPage() {
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-wrap">
+                      {isExcelSource && (
+                        <button
+                          type="button"
+                          onClick={() => setReportExcludeWarehouse12(!reportExcludeWarehouse12)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition border ${
+                            reportExcludeWarehouse12
+                              ? 'bg-rose-950/60 border-rose-700/80 text-rose-300 hover:bg-rose-900/60'
+                              : 'bg-emerald-950/60 border-emerald-700/80 text-emerald-300 hover:bg-emerald-900/60'
+                          }`}
+                          title="คลิกเพื่อสลับให้มีหรือไม่มีรายการคลัง 12 ในรายงาน"
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              reportExcludeWarehouse12 ? 'bg-rose-400' : 'bg-emerald-400'
+                            }`}
+                          />
+                          <span>
+                            {reportExcludeWarehouse12
+                              ? `คลัง 12: ไม่รวม (${warehouse12ExcludedCount})`
+                              : 'คลัง 12: รวมในรายงาน'}
+                          </span>
+                        </button>
+                      )}
                       <button
                         onClick={handleDownloadReportCsv}
                         disabled={reportFilteredItems.length === 0}
@@ -1981,9 +2006,27 @@ export default function BakAnalysisPage() {
                         {reportAgeFilterDescription}
                       </span>
                       {isExcelSource && (
-                        <span className="px-2 py-0.5 rounded-md bg-amber-950/80 text-amber-300 font-medium border border-amber-800">
-                          คลัง 12: ไม่รวมในรายงาน{warehouse12ExcludedCount > 0 ? ` (${warehouse12ExcludedCount} รายการ)` : ''}
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setReportExcludeWarehouse12(!reportExcludeWarehouse12)}
+                          className={`px-2 py-0.5 rounded-md font-medium border text-[11px] transition cursor-pointer flex items-center gap-1 ${
+                            reportExcludeWarehouse12
+                              ? 'bg-amber-950/80 text-amber-300 border-amber-800 hover:bg-amber-900/80'
+                              : 'bg-emerald-950/80 text-emerald-300 border-emerald-800 hover:bg-emerald-900/80'
+                          }`}
+                          title="คลิกเพื่อสลับระหว่าง 'ไม่รวมคลัง 12' หรือ 'รวมคลัง 12'"
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              reportExcludeWarehouse12 ? 'bg-amber-400' : 'bg-emerald-400'
+                            }`}
+                          />
+                          <span>
+                            {reportExcludeWarehouse12
+                              ? `คลัง 12: ไม่รวมในรายงาน${warehouse12ExcludedCount > 0 ? ` (${warehouse12ExcludedCount} รายการ)` : ''} (คลิกเพื่อรวม)`
+                              : `คลัง 12: รวมในรายงานทั้งหมด (คลิกเพื่อตัดออก)`}
+                          </span>
+                        </button>
                       )}
                     </div>
                     <div className="text-slate-400 font-mono">
@@ -2011,8 +2054,10 @@ export default function BakAnalysisPage() {
                       {isExcelSource && (
                         <>
                           <span>•</span>
-                          <span className="text-rose-700 font-semibold">
-                            * ไม่รวมรายการครุภัณฑ์ประจำคลัง 12{warehouse12ExcludedCount > 0 ? ` (จำนวน ${warehouse12ExcludedCount} รายการ)` : ''}
+                          <span className={reportExcludeWarehouse12 ? 'text-rose-700 font-semibold' : 'text-slate-600'}>
+                            {reportExcludeWarehouse12
+                              ? `* ไม่รวมรายการครุภัณฑ์ประจำคลัง 12${warehouse12ExcludedCount > 0 ? ` (จำนวน ${warehouse12ExcludedCount} รายการ)` : ''}`
+                              : `(รวมรายการประจำคลัง 12 จำนวน ${warehouse12ExcludedCount} รายการ)`}
                           </span>
                         </>
                       )}
@@ -2023,18 +2068,12 @@ export default function BakAnalysisPage() {
                     </p>
                   </div>
 
-                  {/* Executive Summary Metrics in Report */}
-                  <div className="grid grid-cols-4 gap-4 p-4 rounded-xl bg-slate-100 border border-slate-300 mb-6 text-center text-xs">
+                  {/* Executive Summary Metrics in Report (ไม่แสดงมูลค่า) */}
+                  <div className="grid grid-cols-3 gap-4 p-4 rounded-xl bg-slate-100 border border-slate-300 mb-6 text-center text-xs">
                     <div>
                       <p className="text-slate-500 font-medium">จำนวนครุภัณฑ์ในกลุ่มนี้</p>
                       <p className="text-lg font-bold text-slate-900 mt-0.5">
                         {reportSummary.totalCount.toLocaleString()} รายการ
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500 font-medium">มูลค่ารวมตามเอกสาร</p>
-                      <p className="text-lg font-bold text-emerald-700 mt-0.5">
-                        ฿{reportSummary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
@@ -2055,7 +2094,7 @@ export default function BakAnalysisPage() {
                     </div>
                   </div>
 
-                  {/* Section 1: Lifecycle Age Breakdown of Selected Scope */}
+                  {/* Section 1: Lifecycle Age Breakdown of Selected Scope (ไม่แสดงมูลค่า) */}
                   <div className="mb-6">
                     <div className="flex items-center justify-between mb-2 border-b border-slate-300 pb-1">
                       <h3 className="text-sm font-bold text-slate-900">
@@ -2073,7 +2112,6 @@ export default function BakAnalysisPage() {
                           <th className="border border-slate-300 p-2 text-left">เกณฑ์การประเมินสภาพ</th>
                           <th className="border border-slate-300 p-2 text-right w-28">จำนวน (รายการ)</th>
                           <th className="border border-slate-300 p-2 text-right w-24">สัดส่วน (%)</th>
-                          <th className="border border-slate-300 p-2 text-right w-36">มูลค่ารวม (บาท)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2086,11 +2124,6 @@ export default function BakAnalysisPage() {
                               {(a.count ?? 0).toLocaleString()}
                             </td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono">{a.percent ?? 0}%</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {(a.totalValue ?? 0) > 0
-                                ? `฿${(a.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`
-                                : '-'}
-                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -2101,15 +2134,12 @@ export default function BakAnalysisPage() {
                             {reportSummary.totalCount.toLocaleString()}
                           </td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">100.0%</td>
-                          <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            ฿{reportSummary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                          </td>
                         </tr>
                       </tfoot>
                     </table>
                   </div>
 
-                  {/* Section 2: Detailed Items List (Sorted Oldest First) */}
+                  {/* Section 2: Detailed Items List (Sorted Oldest First - ไม่แสดงมูลค่า) */}
                   <div className="mb-6">
                     <div className="flex items-center justify-between mb-2 border-b border-slate-300 pb-1">
                       <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -2140,8 +2170,7 @@ export default function BakAnalysisPage() {
                               <th className="border border-slate-300 p-2 text-left w-28">ประเภท</th>
                               <th className="border border-slate-300 p-2 text-center w-20">ปีงบฯ</th>
                               <th className="border border-slate-300 p-2 text-center w-24">อายุใช้งาน</th>
-                              <th className="border border-slate-300 p-2 text-right w-28">ราคา (บาท)</th>
-                              <th className="border border-slate-300 p-2 text-left w-40">หน่วยงาน / ที่ตั้ง</th>
+                              <th className="border border-slate-300 p-2 text-left w-44">หน่วยงาน / ที่ตั้ง</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2184,11 +2213,6 @@ export default function BakAnalysisPage() {
                                     <span className="text-slate-400 text-[10px]">-</span>
                                   )}
                                 </td>
-                                <td className="border border-slate-300 p-1.5 text-right font-mono text-[11px]">
-                                  {(item.price ?? 0) > 0
-                                    ? (item.price ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })
-                                    : '-'}
-                                </td>
                                 <td className="border border-slate-300 p-1.5 text-slate-600 text-[11px]">
                                   {item.deptName || '-'}
                                 </td>
@@ -2197,13 +2221,9 @@ export default function BakAnalysisPage() {
                           </tbody>
                           <tfoot>
                             <tr className="bg-slate-100 font-bold">
-                              <td colSpan={6} className="border border-slate-300 p-2 text-center">
+                              <td colSpan={7} className="border border-slate-300 p-2 text-center">
                                 รวมรายการที่แสดง ({reportDisplayItems.length.toLocaleString()} รายการ)
                               </td>
-                              <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                                ฿{reportDisplayItems.reduce((acc, it) => acc + (it.price || 0), 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                              </td>
-                              <td className="border border-slate-300 p-2"></td>
                             </tr>
                           </tfoot>
                         </table>
