@@ -123,29 +123,6 @@ export default function BakAnalysisPage() {
     }
   }, []);
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (user.role !== 'admin' && user.role !== 'superadmin') {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
-          <ShieldAlert className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-white mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
-          <p className="text-slate-400 text-sm mb-6">หน้านี้สงวนไว้สำหรับเจ้าหน้าที่ไอทีเท่านั้น</p>
-          <Link href="/portal" className="inline-block py-2.5 px-5 bg-blue-600 rounded-xl text-white text-xs font-semibold">
-            กลับหน้าหลัก
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   // Handle BAK file upload
   const handleProcessBakFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.bak')) {
@@ -577,6 +554,30 @@ export default function BakAnalysisPage() {
   const handlePrint = () => {
     window.print();
   };
+
+  // Auth Guards (Rendered after all hooks to strictly adhere to React Rules of Hooks)
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'admin' && user.role !== 'superadmin') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
+          <ShieldAlert className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-white mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
+          <p className="text-slate-400 text-sm mb-6">หน้านี้สงวนไว้สำหรับเจ้าหน้าที่ไอทีเท่านั้น</p>
+          <Link href="/portal" className="inline-block py-2.5 px-5 bg-blue-600 rounded-xl text-white text-xs font-semibold">
+            กลับหน้าหลัก
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
