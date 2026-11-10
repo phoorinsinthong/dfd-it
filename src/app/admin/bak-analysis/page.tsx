@@ -68,6 +68,15 @@ export default function BakAnalysisPage() {
   const [customAgeMin, setCustomAgeMin] = useState<string>('');
   const [customAgeMax, setCustomAgeMax] = useState<string>('');
 
+  // Report-Specific Custom Filters
+  const [reportCategory, setReportCategory] = useState<string>('all');
+  const [reportType, setReportType] = useState<string>('all');
+  const [reportAgeFilterMode, setReportAgeFilterMode] = useState<'bracket' | 'yearRange'>('bracket');
+  const [reportAgeBracket, setReportAgeBracket] = useState<string>('all');
+  const [reportYearStart, setReportYearStart] = useState<string>('');
+  const [reportYearEnd, setReportYearEnd] = useState<string>('');
+  const [reportRowLimit, setReportRowLimit] = useState<string>('all');
+
   // Pagination for Table
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 25;
@@ -363,6 +372,197 @@ export default function BakAnalysisPage() {
     link.click();
     document.body.removeChild(link);
   };
+
+  // Cascading Types for Report Category
+  const availableTypesForCategory = useMemo(() => {
+    if (!parseResult) return [];
+    if (reportCategory === 'all') return parseResult.availableTypes;
+    const typesInCat = new Set(
+      parseResult.items
+        .filter((item) => item.category === reportCategory)
+        .map((item) => item.type)
+    );
+    return Array.from(typesInCat).sort();
+  }, [parseResult, reportCategory]);
+
+  const handleReportCategoryChange = (cat: string) => {
+    setReportCategory(cat);
+    setReportType('all');
+  };
+
+  // Filtered Items for A4 Printable Report
+  const reportFilteredItems = useMemo(() => {
+    if (!parseResult) return [];
+
+    const list = parseResult.items.filter((item) => {
+      // Category
+      if (reportCategory !== 'all' && item.category !== reportCategory) return false;
+      // Type
+      if (reportType !== 'all' && item.type !== reportType) return false;
+
+      // Age / Year
+      if (reportAgeFilterMode === 'bracket') {
+        if (reportAgeBracket === '1-7' && item.ageBracket !== '1-7') return false;
+        if (reportAgeBracket === '7-14' && item.ageBracket !== '7-14') return false;
+        if (reportAgeBracket === '14+' && item.ageBracket !== '14+') return false;
+        if (reportAgeBracket === 'unknown' && item.ageBracket !== 'unknown') return false;
+      } else if (reportAgeFilterMode === 'yearRange') {
+        const yNum = parseInt(item.year, 10);
+        const yStart = parseInt(reportYearStart, 10);
+        const yEnd = parseInt(reportYearEnd, 10);
+        if (!isNaN(yStart) && (!yNum || yNum < yStart)) return false;
+        if (!isNaN(yEnd) && (!yNum || yNum > yEnd)) return false;
+      }
+
+      return true;
+    });
+
+    // SORT: Oldest First (Descending by ageYears)
+    list.sort((a, b) => {
+      const ageA = a.ageYears || 0;
+      const ageB = b.ageYears || 0;
+      if (ageB !== ageA) return ageB - ageA;
+      return (a.code || '').localeCompare(b.code || '');
+    });
+
+    return list;
+  }, [
+    parseResult,
+    reportCategory,
+    reportType,
+    reportAgeFilterMode,
+    reportAgeBracket,
+    reportYearStart,
+    reportYearEnd,
+  ]);
+
+  // Display items considering print row limit
+  const reportDisplayItems = useMemo(() => {
+    if (reportRowLimit === 'all') return reportFilteredItems;
+    const limit = parseInt(reportRowLimit, 10);
+    return isNaN(limit) ? reportFilteredItems : reportFilteredItems.slice(0, limit);
+  }, [reportFilteredItems, reportRowLimit]);
+
+  // Report Summary Metrics & Breakdown for Filtered Scope
+  const reportSummary = useMemo(() => {
+    const totalCount = reportFilteredItems.length;
+    let totalValue = 0;
+    let age1To7Count = 0;
+    let age1To7Value = 0;
+    let age7To14Count = 0;
+    let age7To14Value = 0;
+    let age14PlusCount = 0;
+    let age14PlusValue = 0;
+    let unknownAgeCount = 0;
+    let maxAge = 0;
+    let sumAge = 0;
+    let ageCountValid = 0;
+
+    for (const item of reportFilteredItems) {
+      totalValue += item.price || 0;
+      if (item.ageBracket === '1-7') {
+        age1To7Count++;
+        age1To7Value += item.price || 0;
+      } else if (item.ageBracket === '7-14') {
+        age7To14Count++;
+        age7To14Value += item.price || 0;
+      } else if (item.ageBracket === '14+') {
+        age14PlusCount++;
+        age14PlusValue += item.price || 0;
+      } else {
+        unknownAgeCount++;
+      }
+
+      if (item.ageYears > 0) {
+        if (item.ageYears > maxAge) maxAge = item.ageYears;
+        sumAge += item.ageYears;
+        ageCountValid++;
+      }
+    }
+
+    const avgAge = ageCountValid > 0 ? (sumAge / ageCountValid).toFixed(1) : '0';
+
+    const ageBreakdown = [
+      {
+        bracket: '1-7' as AgeBracket,
+        label: '1 - 7 ปี (ใช้งานปกติ 🟢)',
+        desc: 'อุปกรณ์อยู่ในเกณฑ์ปกติ มีประสิทธิภาพพร้อมใช้งาน',
+        count: age1To7Count,
+        percent: totalCount > 0 ? Math.round((age1To7Count / totalCount) * 1000) / 10 : 0,
+        totalValue: age1To7Value,
+      },
+      {
+        bracket: '7-14' as AgeBracket,
+        label: '7 - 14 ปี (เริ่มเสื่อมสภาพ 🟡)',
+        desc: 'อุปกรณ์เริ่มเสื่อมสภาพ ควรตรวจสอบและเตรียมแผนทดแทน',
+        count: age7To14Count,
+        percent: totalCount > 0 ? Math.round((age7To14Count / totalCount) * 1000) / 10 : 0,
+        totalValue: age7To14Value,
+      },
+      {
+        bracket: '14+' as AgeBracket,
+        label: '14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย 🔴)',
+        desc: 'เกินอายุมาตรฐานราชการ ควรพิจารณาจำหน่ายและจัดหาใหม่',
+        count: age14PlusCount,
+        percent: totalCount > 0 ? Math.round((age14PlusCount / totalCount) * 1000) / 10 : 0,
+        totalValue: age14PlusValue,
+      },
+    ];
+
+    if (unknownAgeCount > 0) {
+      ageBreakdown.push({
+        bracket: 'unknown' as AgeBracket,
+        label: 'ไม่ระบุปีงบประมาณ',
+        desc: 'ไม่พบข้อมูลปีที่จัดซื้อในเอกสารต้นทาง',
+        count: unknownAgeCount,
+        percent: totalCount > 0 ? Math.round((unknownAgeCount / totalCount) * 1000) / 10 : 0,
+        totalValue: 0,
+      });
+    }
+
+    return {
+      totalCount,
+      totalValue,
+      maxAge,
+      avgAge,
+      age1To7Count,
+      age7To14Count,
+      age14PlusCount,
+      unknownAgeCount,
+      ageBreakdown,
+    };
+  }, [reportFilteredItems]);
+
+  // Export CSV for Report Tab (Exact filtered and oldest-first sorted items)
+  const handleDownloadReportCsv = () => {
+    if (!reportFilteredItems || reportFilteredItems.length === 0) return;
+    const csvContent = generateBakCsvReport(reportFilteredItems);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const catSuffix = reportCategory !== 'all' ? `_${reportCategory}` : '';
+    const typeSuffix = reportType !== 'all' ? `_${reportType}` : '';
+    link.setAttribute('download', `DFD_Equipment_Report${catSuffix}${typeSuffix}_OldestFirst.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const reportAgeFilterDescription = useMemo(() => {
+    if (reportAgeFilterMode === 'bracket') {
+      if (reportAgeBracket === '1-7') return 'อายุ 1 - 7 ปี (ใช้งานปกติ 🟢)';
+      if (reportAgeBracket === '7-14') return 'อายุ 7 - 14 ปี (เริ่มเสื่อมสภาพ 🟡)';
+      if (reportAgeBracket === '14+') return 'อายุ 14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย 🔴)';
+      if (reportAgeBracket === 'unknown') return 'ไม่ระบุปีงบประมาณ';
+      return 'ทุกช่วงอายุ';
+    } else {
+      if (reportYearStart && reportYearEnd) return `ปีงบประมาณ พ.ศ. ${reportYearStart} - ${reportYearEnd}`;
+      if (reportYearStart) return `ตั้งแต่ปีงบประมาณ พ.ศ. ${reportYearStart} ขึ้นไป`;
+      if (reportYearEnd) return `ถึงปีงบประมาณ พ.ศ. ${reportYearEnd}`;
+      return 'ทุกปีงบประมาณ';
+    }
+  }, [reportAgeFilterMode, reportAgeBracket, reportYearStart, reportYearEnd]);
 
   // Trigger Print
   const handlePrint = () => {
@@ -1584,47 +1784,217 @@ export default function BakAnalysisPage() {
               </div>
             )}
 
-            {/* TAB 4: A4 PRINTABLE REPORT (พร้อมส่งออกและสั่งพิมพ์) */}
+            {/* TAB 4: A4 PRINTABLE REPORT (พร้อมตัวกรองหมวดหมู่ ประเภท ช่วงปี และเรียงลำดับอายุใช้งานมากสุดไปน้อยสุด) */}
             {activeTab === 'report' && (
               <div className="space-y-6">
-                {/* Print Control Toolbar (Hidden in print) */}
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-                  <div className="flex items-center gap-2">
-                    <Printer className="w-5 h-5 text-blue-400" />
-                    <div>
-                      <h4 className="text-sm font-bold text-white">มุมมองตัวอย่างพิมพ์รายงาน A4 แนวนอน</h4>
-                      <p className="text-xs text-slate-400">
-                        จัดรูปแบบเอกสารราชการมาตรฐาน จำแนกประเภทและอายุการใช้งาน พร้อมส่วนลงนาม
-                      </p>
+                {/* Print Control & Filter Toolbar (Hidden in print) */}
+                <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 no-print shadow-xl">
+                  {/* Top bar: title + actions */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                        <Printer className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>มุมมองและเครื่องมือพิมพ์รายงานราชการ A4 แนวนอน</span>
+                          <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800">
+                            เรียงตามอายุใช้งานมากสุดไปน้อยสุด
+                          </span>
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          เลือกหมวดหมู่ ประเภท และช่วงปี/อายุ เพื่อสร้างรายงานตารางสรุปสถานะอายุและรายละเอียดครุภัณฑ์เฉพาะกลุ่ม
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <button
+                        onClick={handleDownloadReportCsv}
+                        disabled={reportFilteredItems.length === 0}
+                        className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+                        title="ดาวน์โหลดไฟล์ CSV เฉพาะข้อมูลที่ผ่านการกรองและจัดเรียงอายุใช้งานมากสุดแล้ว"
+                      >
+                        <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                        <span>ส่งออก CSV ตามตัวกรอง ({reportFilteredItems.length})</span>
+                      </button>
+                      <button
+                        onClick={handlePrint}
+                        disabled={reportFilteredItems.length === 0}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-blue-950/40"
+                      >
+                        <Printer className="w-4 h-4" />
+                        <span>สั่งพิมพ์ A4 (Print)</span>
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      onClick={handleDownloadCsv}
-                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
-                    >
-                      <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                      <span>ดาวน์โหลด CSV</span>
-                    </button>
-                    <button
-                      onClick={handlePrint}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-blue-950/40"
-                    >
-                      <Printer className="w-4 h-4" />
-                      <span>สั่งพิมพ์ A4 ทันที (Print)</span>
-                    </button>
+                  {/* Filter Toolbar Controls */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    {/* 1. หมวดหมู่ (Category) */}
+                    <div>
+                      <label className="block text-slate-400 font-medium mb-1.5 flex items-center gap-1">
+                        <FolderArchive className="w-3.5 h-3.5 text-slate-400" />
+                        <span>หมวดหมู่ครุภัณฑ์</span>
+                      </label>
+                      <select
+                        value={reportCategory}
+                        onChange={(e) => handleReportCategoryChange(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition"
+                      >
+                        <option value="all">ทุกหมวดหมู่ ({parseResult.items.length})</option>
+                        {parseResult.availableCategories.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* 2. ประเภท (Type - Cascading) */}
+                    <div>
+                      <label className="block text-slate-400 font-medium mb-1.5 flex items-center gap-1">
+                        <Layers className="w-3.5 h-3.5 text-slate-400" />
+                        <span>ประเภทครุภัณฑ์</span>
+                      </label>
+                      <select
+                        value={reportType}
+                        onChange={(e) => setReportType(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition"
+                      >
+                        <option value="all">ทุกประเภทในหมวดนี้</option>
+                        {availableTypesForCategory.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* 3. โหมดช่วงอายุ/ช่วงปี พ.ศ. */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-slate-400 font-medium flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>เกณฑ์อายุ / ปีงบประมาณ</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setReportAgeFilterMode(reportAgeFilterMode === 'bracket' ? 'yearRange' : 'bracket')}
+                          className="text-[10px] text-blue-400 hover:text-blue-300 underline"
+                        >
+                          {reportAgeFilterMode === 'bracket' ? 'สลับเป็นระบุช่วงปี' : 'สลับเป็นช่วงอายุ'}
+                        </button>
+                      </div>
+
+                      {reportAgeFilterMode === 'bracket' ? (
+                        <select
+                          value={reportAgeBracket}
+                          onChange={(e) => setReportAgeBracket(e.target.value as any)}
+                          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition"
+                        >
+                          <option value="all">ทุกช่วงอายุ (1-7, 7-14, 14+ ปี)</option>
+                          <option value="1-7">1 - 7 ปี (ใช้งานปกติ 🟢)</option>
+                          <option value="7-14">7 - 14 ปี (เริ่มเสื่อมสภาพ 🟡)</option>
+                          <option value="14+">14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย 🔴)</option>
+                          <option value="unknown">ไม่ระบุปีงบประมาณ</option>
+                        </select>
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            placeholder="ปีเริ่ม เช่น 2540"
+                            value={reportYearStart}
+                            onChange={(e) => setReportYearStart(e.target.value)}
+                            className="w-1/2 px-2.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono text-xs"
+                          />
+                          <span className="text-slate-500">-</span>
+                          <input
+                            type="number"
+                            placeholder="ปีสิ้นสุด เช่น 2560"
+                            value={reportYearEnd}
+                            onChange={(e) => setReportYearEnd(e.target.value)}
+                            className="w-1/2 px-2.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 4. ขอบเขตการพิมพ์ / ล้างตัวกรอง */}
+                    <div>
+                      <label className="block text-slate-400 font-medium mb-1.5 flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
+                          <span>จำนวนรายการในเอกสาร</span>
+                        </span>
+                        {(reportCategory !== 'all' || reportType !== 'all' || reportAgeBracket !== 'all' || reportYearStart || reportYearEnd || reportRowLimit !== 'all') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReportCategory('all');
+                              setReportType('all');
+                              setReportAgeBracket('all');
+                              setReportYearStart('');
+                              setReportYearEnd('');
+                              setReportRowLimit('all');
+                            }}
+                            className="text-[10px] text-amber-400 hover:text-amber-300"
+                          >
+                            ล้างตัวกรอง
+                          </button>
+                        )}
+                      </label>
+                      <select
+                        value={reportRowLimit}
+                        onChange={(e) => setReportRowLimit(e.target.value as any)}
+                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition"
+                      >
+                        <option value="all">แสดงทั้งหมด ({reportFilteredItems.length} รายการ)</option>
+                        <option value="30">30 รายการแรกที่อายุมากที่สุด</option>
+                        <option value="50">50 รายการแรกที่อายุมากที่สุด</option>
+                        <option value="100">100 รายการแรกที่อายุมากที่สุด</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Summary Bar of Current Selection */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-[11px] text-slate-400 border-t border-slate-800/60">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-slate-500">เงื่อนไขรายงาน:</span>
+                      <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 font-medium border border-slate-700">
+                        หมวดหมู่: {reportCategory === 'all' ? 'ทั้งหมด' : reportCategory}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 font-medium border border-slate-700">
+                        ประเภท: {reportType === 'all' ? 'ทั้งหมด' : reportType}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 font-medium border border-slate-700">
+                        {reportAgeFilterDescription}
+                      </span>
+                    </div>
+                    <div className="text-slate-400 font-mono">
+                      พบ <strong className="text-blue-400 font-bold">{reportFilteredItems.length.toLocaleString()}</strong> รายการ
+                      {reportRowLimit !== 'all' && (
+                        <span> (แสดงในรายงานฉบับนี้ {reportDisplayItems.length.toLocaleString()} รายการ)</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Printable Document Sheet */}
+                {/* Printable Document Sheet (A4 Landscape Formatted) */}
                 <div className="print-report-container bg-white text-slate-900 p-8 sm:p-12 rounded-2xl shadow-2xl border border-slate-200 font-sans print:shadow-none print:border-none print:p-0">
                   {/* Document Header */}
                   <div className="text-center border-b-2 border-slate-900 pb-4 mb-6">
                     <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950">
                       รายงานสรุปการสำรวจและวิเคราะห์อายุครุภัณฑ์คอมพิวเตอร์และสารสนเทศ
                     </h2>
-                    <p className="text-xs text-slate-600 mt-1">
+                    <div className="mt-2 text-xs text-slate-700 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+                      <span><strong>หมวดหมู่:</strong> {reportCategory === 'all' ? 'ทุกหมวดหมู่' : reportCategory}</span>
+                      <span>•</span>
+                      <span><strong>ประเภท:</strong> {reportType === 'all' ? 'ทุกประเภท' : reportType}</span>
+                      <span>•</span>
+                      <span><strong>เงื่อนไขอายุ/ปี:</strong> {reportAgeFilterDescription}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1.5">
                       แหล่งข้อมูล: {parseResult.fileName} • เกณฑ์ปีงบประมาณ 2569 • ข้อมูล ณ วันที่{' '}
                       {new Date().toLocaleDateString('th-TH', { dateStyle: 'long' })}
                     </p>
@@ -1633,67 +2003,70 @@ export default function BakAnalysisPage() {
                   {/* Executive Summary Metrics in Report */}
                   <div className="grid grid-cols-4 gap-4 p-4 rounded-xl bg-slate-100 border border-slate-300 mb-6 text-center text-xs">
                     <div>
-                      <p className="text-slate-500">จำนวนครุภัณฑ์รวม</p>
+                      <p className="text-slate-500 font-medium">จำนวนครุภัณฑ์ในกลุ่มนี้</p>
                       <p className="text-lg font-bold text-slate-900 mt-0.5">
-                        {(parseResult.summary?.totalCount ?? 0).toLocaleString()} รายการ
+                        {reportSummary.totalCount.toLocaleString()} รายการ
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-500">มูลค่ารวมตามเอกสาร</p>
+                      <p className="text-slate-500 font-medium">มูลค่ารวมตามเอกสาร</p>
                       <p className="text-lg font-bold text-emerald-700 mt-0.5">
-                        ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                        ฿{reportSummary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-500">จำนวนประเภทครุภัณฑ์</p>
-                      <p className="text-lg font-bold text-slate-900 mt-0.5">
-                        {parseResult.summary?.uniqueTypesCount ?? 0} ประเภท
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500">ช่วงปีงบประมาณ</p>
+                      <p className="text-slate-500 font-medium">อายุใช้งานสูงสุด / เฉลี่ย</p>
                       <p className="text-lg font-bold text-amber-700 mt-0.5">
-                        ปี {parseResult.summary?.yearSpan || '-'}
+                        {reportSummary.maxAge > 0 ? `${reportSummary.maxAge} ปี (เฉลี่ย ${reportSummary.avgAge} ปี)` : '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 font-medium">สัดส่วนเกินเกณฑ์ (14 ปีขึ้นไป)</p>
+                      <p className="text-lg font-bold text-rose-700 mt-0.5">
+                        {reportSummary.age14PlusCount.toLocaleString()} รายการ (
+                        {reportSummary.totalCount > 0
+                          ? ((reportSummary.age14PlusCount / reportSummary.totalCount) * 100).toFixed(1)
+                          : '0.0'}
+                        %)
                       </p>
                     </div>
                   </div>
 
-                  {/* Section A: Lifecycle Age Breakdown */}
+                  {/* Section 1: Lifecycle Age Breakdown of Selected Scope */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-bold text-slate-900 mb-2 border-b border-slate-300 pb-1">
-                      1. สรุปสถานะอายุการใช้งานครุภัณฑ์ (Equipment Lifecycle Breakdown)
-                    </h3>
+                    <div className="flex items-center justify-between mb-2 border-b border-slate-300 pb-1">
+                      <h3 className="text-sm font-bold text-slate-900">
+                        1. สรุปสถานะอายุการใช้งานของกลุ่มครุภัณฑ์ที่เลือก (Lifecycle Age Summary)
+                      </h3>
+                      <span className="text-[11px] text-slate-500">
+                        รวมทั้งหมด {reportSummary.totalCount.toLocaleString()} รายการ
+                      </span>
+                    </div>
                     <table className="w-full text-xs border border-slate-300 border-collapse">
                       <thead>
                         <tr className="bg-slate-200 text-slate-800">
                           <th className="border border-slate-300 p-2 text-center w-12">ลำดับ</th>
                           <th className="border border-slate-300 p-2 text-left">ช่วงอายุการใช้งาน</th>
-                          <th className="border border-slate-300 p-2 text-left">เกณฑ์การประเมิน</th>
+                          <th className="border border-slate-300 p-2 text-left">เกณฑ์การประเมินสภาพ</th>
                           <th className="border border-slate-300 p-2 text-right w-28">จำนวน (รายการ)</th>
                           <th className="border border-slate-300 p-2 text-right w-24">สัดส่วน (%)</th>
                           <th className="border border-slate-300 p-2 text-right w-36">มูลค่ารวม (บาท)</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {(parseResult.byAge || []).map((a, idx) => (
+                        {reportSummary.ageBreakdown.map((a, idx) => (
                           <tr key={a.bracket} className="hover:bg-slate-50">
                             <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
                             <td className="border border-slate-300 p-1.5 font-bold">{a.label}</td>
-                            <td className="border border-slate-300 p-1.5 text-slate-600">
-                              {a.bracket === '1-7'
-                                ? 'อุปกรณ์อยู่ในเกณฑ์ปกติ มีประสิทธิภาพพร้อมใช้งาน'
-                                : a.bracket === '7-14'
-                                ? 'อุปกรณ์เริ่มเสื่อมสภาพ ควรตรวจสอบและเตรียมแผนทดแทน'
-                                : a.bracket === '14+'
-                                ? 'เกินอายุมาตรฐานราชการ ควรจำหน่ายและจัดหาใหม่'
-                                : 'ไม่สามารถระบุปีจัดซื้อได้'}
-                            </td>
+                            <td className="border border-slate-300 p-1.5 text-slate-600">{a.desc}</td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">
                               {(a.count ?? 0).toLocaleString()}
                             </td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono">{a.percent ?? 0}%</td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {(a.totalValue ?? 0) > 0 ? `฿${(a.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                              {(a.totalValue ?? 0) > 0
+                                ? `฿${(a.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`
+                                : '-'}
                             </td>
                           </tr>
                         ))}
@@ -1702,91 +2075,117 @@ export default function BakAnalysisPage() {
                         <tr className="bg-slate-100 font-bold">
                           <td colSpan={3} className="border border-slate-300 p-2 text-center">รวมทั้งสิ้น</td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            {(parseResult.summary?.totalCount ?? 0).toLocaleString()}
+                            {reportSummary.totalCount.toLocaleString()}
                           </td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">100.0%</td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                            ฿{reportSummary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
                       </tfoot>
                     </table>
                   </div>
 
-                  {/* Section B: Breakdown by Type */}
+                  {/* Section 2: Detailed Items List (Sorted Oldest First) */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-bold text-slate-900 mb-2 border-b border-slate-300 pb-1">
-                      2. สรุปจำแนกตามประเภทครุภัณฑ์
-                    </h3>
-                    <table className="w-full text-xs border border-slate-300 border-collapse">
-                      <thead>
-                        <tr className="bg-slate-200 text-slate-800">
-                          <th className="border border-slate-300 p-2 text-center w-12">ลำดับ</th>
-                          <th className="border border-slate-300 p-2 text-left">ประเภทครุภัณฑ์</th>
-                          <th className="border border-slate-300 p-2 text-left">หมวดหมู่</th>
-                          <th className="border border-slate-300 p-2 text-right w-24">จำนวน (ชิ้น)</th>
-                          <th className="border border-slate-300 p-2 text-right w-24">สัดส่วน (%)</th>
-                          <th className="border border-slate-300 p-2 text-right w-36">มูลค่ารวม (บาท)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(parseResult.byType || []).map((t, idx) => (
-                          <tr key={t.type} className="hover:bg-slate-50">
-                            <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
-                            <td className="border border-slate-300 p-1.5 font-semibold">{t.type}</td>
-                            <td className="border border-slate-300 p-1.5 text-slate-600">{t.category}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">{t.count ?? 0}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono">{t.percent ?? 0}%</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {(t.totalValue ?? 0) > 0 ? `฿${(t.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr className="bg-slate-100 font-bold">
-                          <td colSpan={3} className="border border-slate-300 p-2 text-center">รวมทั้งสิ้น</td>
-                          <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            {(parseResult.summary?.totalCount ?? 0).toLocaleString()}
-                          </td>
-                          <td className="border border-slate-300 p-2 text-right font-mono font-bold">100.0%</td>
-                          <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
+                    <div className="flex items-center justify-between mb-2 border-b border-slate-300 pb-1">
+                      <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <span>2. รายละเอียดรายการครุภัณฑ์ (Itemized Equipment Details)</span>
+                        <span className="text-[11px] font-normal text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                          เรียงจากอายุใช้งานมากที่สุดไปหาน้อยที่สุด
+                        </span>
+                      </h3>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {reportDisplayItems.length === reportFilteredItems.length
+                          ? `แสดงครบทั้ง ${reportDisplayItems.length.toLocaleString()} รายการ`
+                          : `แสดง ${reportDisplayItems.length.toLocaleString()} จากทั้งหมด ${reportFilteredItems.length.toLocaleString()} รายการ`}
+                      </span>
+                    </div>
 
-                  {/* Section C: Breakdown by Year */}
-                  <div className="mb-6">
-                    <h3 className="text-sm font-bold text-slate-900 mb-2 border-b border-slate-300 pb-1">
-                      3. สรุปจำแนกตามปีงบประมาณ
-                    </h3>
-                    <table className="w-full text-xs border border-slate-300 border-collapse">
-                      <thead>
-                        <tr className="bg-slate-200 text-slate-800">
-                          <th className="border border-slate-300 p-2 text-center w-12">ลำดับ</th>
-                          <th className="border border-slate-300 p-2 text-left">ปีงบประมาณ</th>
-                          <th className="border border-slate-300 p-2 text-right w-28">จำนวน (รายการ)</th>
-                          <th className="border border-slate-300 p-2 text-right w-24">สัดส่วน (%)</th>
-                          <th className="border border-slate-300 p-2 text-right w-36">มูลค่ารวม (บาท)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(parseResult.byYear || []).map((y, idx) => (
-                          <tr key={y.year} className="hover:bg-slate-50">
-                            <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
-                            <td className="border border-slate-300 p-1.5 font-bold">ปี {y.year}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">{y.count ?? 0}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono">{y.percent ?? 0}%</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {(y.totalValue ?? 0) > 0 ? `฿${(y.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    {reportDisplayItems.length === 0 ? (
+                      <div className="p-8 text-center border border-dashed border-slate-300 rounded-xl text-slate-500 text-xs">
+                        ไม่พบรายการครุภัณฑ์ที่ตรงกับเงื่อนไขตัวกรองที่เลือก
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border border-slate-300 border-collapse">
+                          <thead>
+                            <tr className="bg-slate-200 text-slate-800">
+                              <th className="border border-slate-300 p-2 text-center w-10">ลำดับ</th>
+                              <th className="border border-slate-300 p-2 text-left w-36">รหัสครุภัณฑ์</th>
+                              <th className="border border-slate-300 p-2 text-left">ชื่อรายการครุภัณฑ์ / รุ่น / รายละเอียด</th>
+                              <th className="border border-slate-300 p-2 text-left w-28">ประเภท</th>
+                              <th className="border border-slate-300 p-2 text-center w-20">ปีงบฯ</th>
+                              <th className="border border-slate-300 p-2 text-center w-24">อายุใช้งาน</th>
+                              <th className="border border-slate-300 p-2 text-right w-28">ราคา (บาท)</th>
+                              <th className="border border-slate-300 p-2 text-left w-40">หน่วยงาน / ที่ตั้ง</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {reportDisplayItems.map((item, idx) => (
+                              <tr key={`${item.code}-${idx}`} className="hover:bg-slate-50">
+                                <td className="border border-slate-300 p-1.5 text-center font-mono text-[11px]">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 font-mono font-medium text-slate-900 text-[11px]">
+                                  {item.code || '-'}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 font-semibold text-slate-900">
+                                  {item.name}
+                                  {item.serial && (
+                                    <span className="block text-[10px] text-slate-500 font-normal">
+                                      S/N: {item.serial}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 text-slate-700 text-[11px]">
+                                  {item.type}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 text-center font-mono text-[11px]">
+                                  {item.year || '-'}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 text-center">
+                                  {item.ageYears > 0 ? (
+                                    <span
+                                      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold font-mono ${
+                                        item.ageBracket === '14+'
+                                          ? 'bg-rose-100 text-rose-800'
+                                          : item.ageBracket === '7-14'
+                                          ? 'bg-amber-100 text-amber-800'
+                                          : 'bg-emerald-100 text-emerald-800'
+                                      }`}
+                                    >
+                                      {item.ageYears} ปี
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400 text-[10px]">-</span>
+                                  )}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 text-right font-mono text-[11px]">
+                                  {(item.price ?? 0) > 0
+                                    ? (item.price ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })
+                                    : '-'}
+                                </td>
+                                <td className="border border-slate-300 p-1.5 text-slate-600 text-[11px]">
+                                  {item.deptName || '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-slate-100 font-bold">
+                              <td colSpan={6} className="border border-slate-300 p-2 text-center">
+                                รวมรายการที่แสดง ({reportDisplayItems.length.toLocaleString()} รายการ)
+                              </td>
+                              <td className="border border-slate-300 p-2 text-right font-mono font-bold">
+                                ฿{reportDisplayItems.reduce((acc, it) => acc + (it.price || 0), 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="border border-slate-300 p-2"></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
                   {/* Signatures Block */}

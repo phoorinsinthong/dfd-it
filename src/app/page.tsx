@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
-import { Wrench, ShieldCheck, User, Lock, AlertCircle, ArrowRight, Laptop, Calendar, CheckSquare } from 'lucide-react';
+import { Wrench, ShieldCheck, User, Lock, AlertCircle, ArrowRight, Laptop, Calendar, CheckSquare, Clock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -103,7 +103,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-center gap-4 mt-4 text-xs text-slate-400">
             <span className="flex items-center gap-1"><Wrench className="w-3.5 h-3.5 text-blue-400" /> แจ้งซ่อม</span>
             <span>•</span>
-            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-emerald-400" /> จองห้องประชุม</span>
+            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-emerald-400" /> ติดตามสถานะงาน</span>
             <span>•</span>
             <span className="flex items-center gap-1"><Laptop className="w-3.5 h-3.5 text-amber-400" /> ยืมอุปกรณ์</span>
           </div>

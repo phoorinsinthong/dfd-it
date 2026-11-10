@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import { useAuth } from '@/lib/auth/auth-context';
 import {
@@ -41,7 +42,13 @@ const EQUIPMENT_OPTIONS = [
 ];
 
 export default function PortalBookingsPage() {
+  const router = useRouter();
   const { user } = useAuth();
+
+  // Redirect user portal bookings to main portal
+  useEffect(() => {
+    router.replace('/portal');
+  }, [router]);
 
   const [rooms, setRooms] = useState<Room[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);

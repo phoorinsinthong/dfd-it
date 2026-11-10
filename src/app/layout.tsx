@@ -5,7 +5,7 @@ import PwaProvider from "@/components/pwa/PwaProvider";
 
 export const metadata: Metadata = {
   title: "ระบบบริหารจัดการแผนกสนับสนุนทางเทคนิค | IT Support & Resource Management",
-  description: "ระบบแจ้งซ่อม จองห้องประชุม ยืม-คืนอุปกรณ์ และงานบำรุงรักษาเชิงป้องกัน แผนกสนับสนุนเทคนิค",
+  description: "ระบบแจ้งซ่อม ติดตามสถานะงานซ่อม ยืม-คืนอุปกรณ์ และงานบำรุงรักษาเชิงป้องกัน แผนกสนับสนุนเทคนิค",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

@@ -122,7 +122,7 @@ export default function UserPortalPage() {
               ยินดีต้อนรับ, {user.name}
             </h1>
             <p className="text-slate-300 text-sm max-w-xl">
-              ระบบศูนย์กลางฝ่ายสนับสนุนเทคนิค แจ้งปัญหาการใช้งาน จองห้องประชุม และติดตามสถานะงานของคุณได้ทันทีตลอด 24 ชั่วโมง
+              ระบบศูนย์กลางฝ่ายสนับสนุนเทคนิค แจ้งปัญหาอุปกรณ์คอมพิวเตอร์และระบบเครือข่าย ติดตามสถานะงานซ่อมได้ทันทีตลอด 24 ชั่วโมง
             </p>
           </div>
         </div>
@@ -163,33 +163,39 @@ export default function UserPortalPage() {
             </div>
           </Link>
 
-          {/* Action 2: จองห้องประชุม */}
-          <Link
-            href="/portal/bookings"
-            className="group bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition-all duration-200 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
+          {/* Action 2: ติดตามประวัติและสถานะงาน */}
+          <div
+            onClick={() => {
+              const el = document.getElementById('user-tickets-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="group bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition-all duration-200 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between cursor-pointer"
           >
             <div>
               <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                <Calendar className="w-6 h-6" />
+                <Clock className="w-6 h-6" />
               </div>
               <h2 className="text-lg font-semibold text-white mb-1 group-hover:text-emerald-400 transition flex items-center justify-between">
-                <span>จองห้องประชุม & บัญชีออนไลน์</span>
+                <span>ติดตามประวัติและสถานะงาน</span>
                 <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
               </h2>
               <p className="text-xs sm:text-sm text-slate-400">
-                ตรวจสอบปฏิทินเวลาว่าง จองห้องประชุมในบริษัท หรือขอใช้บัญชี Zoom/Teams กลางพร้อมรับลิงก์ทันที
+                ตรวจสอบสถานะงานแจ้งซ่อมแบบเรียลไทม์ (รอดำเนินการ, กำลังแก้ไข, รออะไหล่, เสร็จสิ้น) พร้อมประวัติงานทั้งหมด
               </p>
             </div>
-            <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400">
-              <Calendar className="w-4 h-4" />
-              <span>เปิดดูปฏิทินและจองห้อง</span>
+            <div className="mt-5 flex items-center justify-between text-xs">
+              <span className="inline-flex items-center gap-1.5 font-medium text-emerald-400">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>งานของคุณทั้งหมด: {tickets.length} รายการ</span>
+              </span>
+              <span className="text-slate-500 group-hover:text-emerald-400 transition">เลื่อนดูรายการ ↓</span>
             </div>
-          </Link>
+          </div>
 
         </div>
 
         {/* User Active Tickets List */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+        <div id="user-tickets-section" className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white text-base flex items-center gap-2">
               <Clock className="w-4 h-4 text-blue-400" />
