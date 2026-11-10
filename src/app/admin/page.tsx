@@ -29,7 +29,8 @@ import {
   Sparkles,
   RefreshCw,
   Layers,
-  ShoppingBag
+  ShoppingBag,
+  Database
 } from 'lucide-react';
 import { getAllTickets } from '@/lib/services/ticket-service';
 import { getAllBookings } from '@/lib/services/booking-service';
@@ -265,6 +266,13 @@ export default function AdminDashboardPage() {
               <RefreshCw className={`w-3.5 h-3.5 ${loadingData ? 'animate-spin' : ''}`} />
               <span>รีเฟรช</span>
             </button>
+            <Link
+              href="/admin/bak-analysis"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-600/30 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2 transition"
+            >
+              <Database className="w-4 h-4 text-amber-400" />
+              <span>วิเคราะห์ .bak</span>
+            </Link>
             <Link
               href="/admin/reports"
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2 transition"
@@ -999,6 +1007,27 @@ export default function AdminDashboardPage() {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-semibold transition shrink-0"
                   >
                     <span>เปิดผังตู้แร็ค 3D</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <Database className="w-3.5 h-3.5 text-amber-400" />
+                      <span>6. วิเคราะห์ครุภัณฑ์จากไฟล์สำรอง .bak (Legacy BAK Analytics)</span>
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      อัปโหลดไฟล์ฐานข้อมูลสำรอง .bak สร้างแดชบอร์ดจำแนกตามประเภท จำนวน ปีงบประมาณ พร้อมพิมพ์/ดาวน์โหลดรายงาน
+                    </p>
+                  </div>
+                  <Link
+                    href="/admin/bak-analysis"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-semibold transition shrink-0"
+                  >
+                    <span>เปิดแดชบอร์ด .bak</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
