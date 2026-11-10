@@ -3,6 +3,11 @@
   "fileSize": 9936896,
   "totalPagesScanned": 1213,
   "equipmentDataPages": 636,
+  "sourceType": "bak",
+  "sourceFilesCount": 1,
+  "sourceFileNames": [
+    "DFDEquipment-20261109.bak"
+  ],
   "items": [
     {
       "id": 117,
@@ -18,7 +23,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 118,
@@ -34,7 +44,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 119,
@@ -50,7 +65,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 120,
@@ -66,7 +86,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 121,
@@ -82,7 +107,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 122,
@@ -98,7 +128,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 123,
@@ -114,7 +149,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 124,
@@ -130,7 +170,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 125,
@@ -146,7 +191,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 126,
@@ -162,7 +212,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 127,
@@ -178,7 +233,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 128,
@@ -194,7 +254,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 136,
@@ -210,7 +275,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 137,
@@ -226,7 +296,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 138,
@@ -242,7 +317,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 139,
@@ -258,7 +338,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 140,
@@ -274,7 +359,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 24,
@@ -290,7 +380,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 25,
@@ -306,7 +401,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 26,
@@ -322,7 +422,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 27,
@@ -338,7 +443,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 28,
@@ -354,7 +464,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 29,
@@ -370,7 +485,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 32,
@@ -386,7 +506,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 34,
@@ -402,7 +527,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 35,
@@ -418,7 +548,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 36,
@@ -434,7 +569,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 39,
@@ -450,7 +590,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 22,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 41,
@@ -466,7 +611,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 42,
@@ -482,7 +632,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 43,
@@ -498,7 +653,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 44,
@@ -514,7 +674,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 45,
@@ -530,7 +695,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 46,
@@ -546,7 +716,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 165,
@@ -562,7 +737,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 166,
@@ -578,7 +758,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 168,
@@ -594,7 +779,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 169,
@@ -610,7 +800,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 177,
@@ -626,7 +821,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 178,
@@ -642,7 +842,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 179,
@@ -658,7 +863,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 180,
@@ -674,7 +884,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 181,
@@ -690,7 +905,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 182,
@@ -706,7 +926,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 183,
@@ -722,7 +947,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 184,
@@ -738,7 +968,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 185,
@@ -754,7 +989,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 186,
@@ -770,7 +1010,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 187,
@@ -786,7 +1031,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 302,
@@ -802,7 +1052,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 303,
@@ -818,7 +1073,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 305,
@@ -834,7 +1094,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 307,
@@ -850,7 +1115,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 308,
@@ -866,7 +1136,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 314,
@@ -882,7 +1157,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 91,
@@ -898,7 +1178,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 435,
@@ -914,7 +1199,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 436,
@@ -930,7 +1220,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 437,
@@ -946,7 +1241,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 439,
@@ -962,7 +1262,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 440,
@@ -978,7 +1283,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 446,
@@ -993,8 +1303,13 @@
       "price": 7900,
       "statusId": 2,
       "deptId": 1,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 447,
@@ -1009,8 +1324,13 @@
       "price": 7900,
       "statusId": 2,
       "deptId": 29,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 448,
@@ -1025,8 +1345,13 @@
       "price": 7900,
       "statusId": 2,
       "deptId": 5,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 449,
@@ -1041,8 +1366,13 @@
       "price": 7900,
       "statusId": 2,
       "deptId": 28,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 450,
@@ -1057,8 +1387,13 @@
       "price": 7900,
       "statusId": 2,
       "deptId": 5,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 343,
@@ -1074,7 +1409,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 347,
@@ -1089,8 +1429,13 @@
       "price": 636650,
       "statusId": 2,
       "deptId": 7,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์ความเร็วสูง (Line Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 348,
@@ -1105,8 +1450,13 @@
       "price": 449400,
       "statusId": 2,
       "deptId": 7,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์ความเร็วสูง (Line Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 15,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 634,
@@ -1122,7 +1472,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 635,
@@ -1138,7 +1493,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 636,
@@ -1154,7 +1514,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 637,
@@ -1170,7 +1535,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 0,
+      "ageBracket": "unknown",
+      "ageStatusLabel": "ไม่ระบุปี",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 638,
@@ -1186,7 +1556,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 0,
+      "ageBracket": "unknown",
+      "ageStatusLabel": "ไม่ระบุปี",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 639,
@@ -1202,7 +1577,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 0,
+      "ageBracket": "unknown",
+      "ageStatusLabel": "ไม่ระบุปี",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 640,
@@ -1218,7 +1598,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 0,
+      "ageBracket": "unknown",
+      "ageStatusLabel": "ไม่ระบุปี",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 641,
@@ -1234,7 +1619,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 0,
+      "ageBracket": "unknown",
+      "ageStatusLabel": "ไม่ระบุปี",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 643,
@@ -1250,7 +1640,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 27,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 644,
@@ -1266,7 +1661,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 645,
@@ -1282,7 +1682,12 @@
       "statusId": 2,
       "deptId": 10,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 646,
@@ -1298,7 +1703,12 @@
       "statusId": 2,
       "deptId": 10,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 647,
@@ -1314,7 +1724,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "อุปกรณ์เครือข่าย (Network & Switch)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 648,
@@ -1330,7 +1745,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "อุปกรณ์เครือข่าย (Network & Switch)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 649,
@@ -1346,7 +1766,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "อุปกรณ์เครือข่าย (Network & Switch)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 651,
@@ -1362,7 +1787,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 652,
@@ -1378,7 +1808,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 24,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 653,
@@ -1394,7 +1829,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 654,
@@ -1410,7 +1850,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 655,
@@ -1426,7 +1871,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องสแกนเนอร์ (Scanner)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 21,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 656,
@@ -1442,7 +1892,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องสแกนเนอร์ (Scanner)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 21,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 657,
@@ -1458,7 +1913,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 658,
@@ -1474,7 +1934,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 659,
@@ -1490,7 +1955,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 660,
@@ -1506,7 +1976,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 661,
@@ -1522,7 +1997,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 662,
@@ -1538,7 +2018,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 663,
@@ -1554,7 +2039,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 664,
@@ -1570,7 +2060,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 665,
@@ -1586,7 +2081,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 666,
@@ -1602,7 +2102,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 667,
@@ -1618,7 +2123,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 668,
@@ -1634,7 +2144,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 669,
@@ -1650,7 +2165,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 670,
@@ -1666,7 +2186,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 671,
@@ -1682,7 +2207,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 672,
@@ -1698,7 +2228,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 673,
@@ -1714,7 +2249,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
-      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ"
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 674,
@@ -1730,7 +2270,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 675,
@@ -1746,7 +2291,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 676,
@@ -1762,7 +2312,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 677,
@@ -1778,7 +2333,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 678,
@@ -1794,7 +2354,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 679,
@@ -1810,7 +2375,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 680,
@@ -1826,7 +2396,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 681,
@@ -1842,7 +2417,12 @@
       "statusId": 2,
       "deptId": 18,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 479,
@@ -1858,7 +2438,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 480,
@@ -1874,7 +2459,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 481,
@@ -1890,7 +2480,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 482,
@@ -1906,7 +2501,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 483,
@@ -1922,7 +2522,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 485,
@@ -1938,7 +2543,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 616,
@@ -1954,7 +2564,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 617,
@@ -1970,7 +2585,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 22,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 618,
@@ -1986,7 +2606,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 619,
@@ -2002,7 +2627,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 620,
@@ -2018,7 +2648,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
-      "category": "ครุภัณฑ์โฆษณาและเผยแพร่"
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 621,
@@ -2034,7 +2669,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 622,
@@ -2049,8 +2689,13 @@
       "price": 3210,
       "statusId": 2,
       "deptId": 29,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์อิงค์เจ็ท (Inkjet)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 4,
@@ -2066,7 +2711,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 5,
@@ -2082,7 +2732,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 6,
@@ -2098,7 +2753,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 7,
@@ -2114,7 +2774,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 8,
@@ -2130,7 +2795,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 9,
@@ -2146,7 +2816,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 10,
@@ -2162,7 +2837,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 11,
@@ -2178,7 +2858,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 13,
@@ -2194,7 +2879,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 14,
@@ -2210,7 +2900,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 15,
@@ -2226,7 +2921,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 16,
@@ -2242,7 +2942,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 17,
@@ -2258,7 +2963,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 18,
@@ -2274,7 +2984,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 19,
@@ -2290,7 +3005,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 20,
@@ -2306,7 +3026,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 21,
@@ -2322,7 +3047,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 22,
@@ -2338,7 +3068,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 23,
@@ -2354,7 +3089,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 48,
@@ -2370,7 +3110,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 50,
@@ -2386,7 +3131,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 53,
@@ -2402,7 +3152,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 62,
@@ -2418,7 +3173,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 64,
@@ -2434,7 +3194,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 65,
@@ -2450,7 +3215,12 @@
       "statusId": 2,
       "deptId": 14,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 67,
@@ -2466,7 +3236,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 68,
@@ -2482,7 +3257,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 69,
@@ -2498,7 +3278,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 92,
@@ -2514,7 +3299,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 93,
@@ -2530,7 +3320,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 94,
@@ -2546,7 +3341,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 95,
@@ -2562,7 +3362,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 96,
@@ -2578,7 +3383,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 97,
@@ -2594,7 +3404,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 98,
@@ -2610,7 +3425,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 99,
@@ -2626,7 +3446,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 100,
@@ -2642,7 +3467,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 107,
@@ -2658,7 +3488,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 108,
@@ -2674,7 +3509,12 @@
       "statusId": 2,
       "deptId": 10,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 115,
@@ -2690,7 +3530,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 116,
@@ -2706,7 +3551,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 141,
@@ -2722,7 +3572,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 142,
@@ -2738,7 +3593,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 143,
@@ -2754,7 +3614,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 144,
@@ -2770,7 +3635,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 145,
@@ -2786,7 +3656,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 147,
@@ -2802,7 +3677,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 148,
@@ -2818,7 +3698,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 152,
@@ -2834,7 +3719,12 @@
       "statusId": 2,
       "deptId": 14,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 153,
@@ -2850,7 +3740,12 @@
       "statusId": 2,
       "deptId": 10,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 154,
@@ -2866,7 +3761,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 155,
@@ -2882,7 +3782,12 @@
       "statusId": 2,
       "deptId": 10,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 158,
@@ -2898,7 +3803,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 162,
@@ -2914,7 +3824,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 163,
@@ -2930,7 +3845,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 164,
@@ -2946,7 +3866,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 188,
@@ -2962,7 +3887,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 189,
@@ -2978,7 +3908,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 190,
@@ -2994,7 +3929,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 191,
@@ -3010,7 +3950,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 192,
@@ -3026,7 +3971,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 193,
@@ -3042,7 +3992,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 194,
@@ -3058,7 +4013,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 195,
@@ -3074,7 +4034,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 196,
@@ -3090,7 +4055,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 202,
@@ -3106,7 +4076,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 203,
@@ -3122,7 +4097,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 204,
@@ -3138,7 +4118,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 205,
@@ -3154,7 +4139,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 206,
@@ -3170,7 +4160,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 207,
@@ -3186,7 +4181,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 208,
@@ -3202,7 +4202,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 209,
@@ -3218,7 +4223,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 232,
@@ -3234,7 +4244,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 21,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 234,
@@ -3250,7 +4265,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 235,
@@ -3266,7 +4286,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 237,
@@ -3282,7 +4307,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 238,
@@ -3298,7 +4328,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 240,
@@ -3314,7 +4349,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 247,
@@ -3330,7 +4370,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 248,
@@ -3346,7 +4391,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 249,
@@ -3362,7 +4412,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 250,
@@ -3378,7 +4433,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 251,
@@ -3394,7 +4454,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 252,
@@ -3410,7 +4475,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 253,
@@ -3426,7 +4496,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 277,
@@ -3442,7 +4517,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 278,
@@ -3458,7 +4538,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 279,
@@ -3474,7 +4559,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 280,
@@ -3490,7 +4580,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 282,
@@ -3506,7 +4601,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 283,
@@ -3522,7 +4622,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 284,
@@ -3538,7 +4643,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 285,
@@ -3554,7 +4664,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 286,
@@ -3570,7 +4685,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 290,
@@ -3586,7 +4706,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 291,
@@ -3602,7 +4727,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 292,
@@ -3618,7 +4748,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 293,
@@ -3634,7 +4769,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 294,
@@ -3650,7 +4790,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 295,
@@ -3666,7 +4811,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 296,
@@ -3682,7 +4832,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 321,
@@ -3698,7 +4853,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 327,
@@ -3714,7 +4874,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 337,
@@ -3730,7 +4895,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 339,
@@ -3746,7 +4916,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 254,
@@ -3762,7 +4937,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 255,
@@ -3778,7 +4958,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 256,
@@ -3794,7 +4979,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 257,
@@ -3810,7 +5000,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 258,
@@ -3826,7 +5021,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 259,
@@ -3842,7 +5042,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 260,
@@ -3858,7 +5063,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 261,
@@ -3874,7 +5084,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 8,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 262,
@@ -3890,7 +5105,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 263,
@@ -3906,7 +5126,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 264,
@@ -3922,7 +5147,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 265,
@@ -3938,7 +5168,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 266,
@@ -3954,7 +5189,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 267,
@@ -3970,7 +5210,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 268,
@@ -3986,7 +5231,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 269,
@@ -4002,7 +5252,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 270,
@@ -4018,7 +5273,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 272,
@@ -4034,7 +5294,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 273,
@@ -4050,7 +5315,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 274,
@@ -4066,7 +5336,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 275,
@@ -4082,7 +5357,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 276,
@@ -4098,7 +5378,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 210,
@@ -4113,8 +5398,13 @@
       "price": 5500,
       "statusId": 2,
       "deptId": 29,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 211,
@@ -4130,7 +5420,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 214,
@@ -4146,7 +5441,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 215,
@@ -4162,7 +5462,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 18,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 217,
@@ -4178,7 +5483,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 222,
@@ -4194,7 +5504,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 223,
@@ -4210,7 +5525,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 224,
@@ -4226,7 +5546,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 13,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 225,
@@ -4242,7 +5567,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 230,
@@ -4257,8 +5587,13 @@
       "price": 3210,
       "statusId": 2,
       "deptId": 29,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์อิงค์เจ็ท (Inkjet)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 231,
@@ -4274,7 +5609,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 21,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 541,
@@ -4290,7 +5630,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 542,
@@ -4306,7 +5651,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 543,
@@ -4322,7 +5672,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 544,
@@ -4338,7 +5693,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 545,
@@ -4354,7 +5714,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 546,
@@ -4370,7 +5735,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 547,
@@ -4386,7 +5756,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 548,
@@ -4402,7 +5777,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 549,
@@ -4418,7 +5798,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 550,
@@ -4434,7 +5819,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 551,
@@ -4450,7 +5840,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 552,
@@ -4466,7 +5861,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 553,
@@ -4482,7 +5882,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 554,
@@ -4498,7 +5903,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 555,
@@ -4514,7 +5924,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 556,
@@ -4530,7 +5945,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 557,
@@ -4546,7 +5966,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 407,
@@ -4562,7 +5987,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 413,
@@ -4578,7 +6008,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 414,
@@ -4594,7 +6029,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 415,
@@ -4610,7 +6050,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 416,
@@ -4626,7 +6071,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 417,
@@ -4642,7 +6092,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 418,
@@ -4658,7 +6113,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 419,
@@ -4674,7 +6134,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 420,
@@ -4690,7 +6155,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 421,
@@ -4706,7 +6176,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 422,
@@ -4722,7 +6197,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 14,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 426,
@@ -4738,7 +6218,12 @@
       "statusId": 2,
       "deptId": 28,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 451,
@@ -4753,8 +6238,13 @@
       "price": 7900,
       "statusId": 2,
       "deptId": 28,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 453,
@@ -4770,7 +6260,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 455,
@@ -4786,7 +6281,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 457,
@@ -4802,7 +6302,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 17,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 458,
@@ -4818,7 +6323,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 465,
@@ -4834,7 +6344,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 16,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 467,
@@ -4850,7 +6365,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 468,
@@ -4866,7 +6386,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 469,
@@ -4882,7 +6407,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 496,
@@ -4898,7 +6428,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 497,
@@ -4914,7 +6449,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 498,
@@ -4930,7 +6470,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 499,
@@ -4946,7 +6491,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 500,
@@ -4962,7 +6512,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 506,
@@ -4978,7 +6533,12 @@
       "statusId": 2,
       "deptId": 28,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 507,
@@ -4994,7 +6554,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 508,
@@ -5010,7 +6575,12 @@
       "statusId": 2,
       "deptId": 28,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 509,
@@ -5026,7 +6596,12 @@
       "statusId": 2,
       "deptId": 28,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 583,
@@ -5042,7 +6617,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 584,
@@ -5058,7 +6638,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 585,
@@ -5074,7 +6659,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 592,
@@ -5090,7 +6680,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 593,
@@ -5106,7 +6701,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 594,
@@ -5122,7 +6722,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 595,
@@ -5138,7 +6743,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 386,
@@ -5154,7 +6764,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 388,
@@ -5170,7 +6785,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 389,
@@ -5186,7 +6806,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 19,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 397,
@@ -5202,7 +6827,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 399,
@@ -5218,7 +6848,12 @@
       "statusId": 2,
       "deptId": 13,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 400,
@@ -5234,7 +6869,12 @@
       "statusId": 2,
       "deptId": 29,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 401,
@@ -5250,7 +6890,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 402,
@@ -5266,7 +6911,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 403,
@@ -5282,7 +6932,12 @@
       "statusId": 2,
       "deptId": 10,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 9,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 513,
@@ -5298,7 +6953,12 @@
       "statusId": 2,
       "deptId": 18,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 7,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 520,
@@ -5314,7 +6974,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 521,
@@ -5330,7 +6995,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 525,
@@ -5346,7 +7016,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 12,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 526,
@@ -5362,7 +7037,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 6,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 530,
@@ -5378,7 +7058,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 558,
@@ -5394,7 +7079,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 559,
@@ -5410,7 +7100,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 560,
@@ -5426,7 +7121,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 561,
@@ -5442,7 +7142,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 562,
@@ -5458,7 +7163,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 563,
@@ -5474,7 +7184,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 564,
@@ -5490,7 +7205,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 565,
@@ -5506,7 +7226,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 566,
@@ -5522,7 +7247,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 567,
@@ -5538,7 +7268,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 568,
@@ -5554,7 +7289,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 569,
@@ -5570,7 +7310,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 570,
@@ -5586,7 +7331,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 571,
@@ -5602,7 +7352,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 572,
@@ -5618,7 +7373,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 573,
@@ -5634,7 +7394,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 574,
@@ -5650,7 +7415,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 575,
@@ -5666,7 +7436,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 576,
@@ -5682,7 +7457,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 577,
@@ -5698,7 +7478,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 578,
@@ -5714,7 +7499,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 579,
@@ -5730,7 +7520,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 580,
@@ -5746,7 +7541,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 581,
@@ -5762,7 +7562,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 582,
@@ -5778,7 +7583,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์สำนักงาน",
-      "category": "ครุภัณฑ์สำนักงาน"
+      "category": "ครุภัณฑ์สำนักงาน",
+      "ageYears": 26,
+      "ageBracket": "14+",
+      "ageStatusLabel": "เกินเกณฑ์/รอจำหน่าย",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 806,
@@ -5794,7 +7604,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "ครุภัณฑ์อื่นๆ",
-      "category": "ครุภัณฑ์อื่นๆ"
+      "category": "ครุภัณฑ์อื่นๆ",
+      "ageYears": 10,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 811,
@@ -5810,7 +7625,12 @@
       "statusId": 2,
       "deptId": 24,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 11,
+      "ageBracket": "7-14",
+      "ageStatusLabel": "เริ่มเสื่อมสภาพ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 862,
@@ -5826,7 +7646,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 3,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 943,
@@ -5842,7 +7667,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 2,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 944,
@@ -5858,7 +7688,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 2,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 974,
@@ -5874,7 +7709,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 975,
@@ -5890,7 +7730,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 976,
@@ -5906,7 +7751,12 @@
       "statusId": 2,
       "deptId": 1,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 977,
@@ -5922,7 +7772,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 978,
@@ -5938,7 +7793,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 979,
@@ -5954,7 +7814,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 980,
@@ -5970,7 +7835,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 981,
@@ -5986,7 +7856,12 @@
       "statusId": 2,
       "deptId": 2,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 982,
@@ -6002,7 +7877,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 983,
@@ -6018,7 +7898,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 984,
@@ -6034,7 +7919,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 985,
@@ -6050,7 +7940,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 988,
@@ -6066,7 +7961,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 1,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 989,
@@ -6082,7 +7982,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 990,
@@ -6098,7 +8003,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 991,
@@ -6114,7 +8024,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 992,
@@ -6130,7 +8045,12 @@
       "statusId": 2,
       "deptId": 6,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 993,
@@ -6146,7 +8066,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 994,
@@ -6162,7 +8087,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 995,
@@ -6178,7 +8108,12 @@
       "statusId": 2,
       "deptId": 8,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 996,
@@ -6194,7 +8129,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1005,
@@ -6210,7 +8150,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1006,
@@ -6226,7 +8171,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1008,
@@ -6242,7 +8192,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1009,
@@ -6258,7 +8213,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1010,
@@ -6273,8 +8233,13 @@
       "price": 0,
       "statusId": 2,
       "deptId": 3,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์ Ink Tank Printer",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1011,
@@ -6289,8 +8254,13 @@
       "price": 0,
       "statusId": 2,
       "deptId": 3,
-      "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "type": "เครื่องพิมพ์ Ink Tank Printer",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1012,
@@ -6306,7 +8276,12 @@
       "statusId": 2,
       "deptId": 3,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 997,
@@ -6322,7 +8297,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 998,
@@ -6338,7 +8318,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 999,
@@ -6354,7 +8339,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1000,
@@ -6370,7 +8360,12 @@
       "statusId": 2,
       "deptId": 5,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1001,
@@ -6386,7 +8381,12 @@
       "statusId": 2,
       "deptId": 7,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1002,
@@ -6402,7 +8402,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "คอมพิวเตอร์ (PC / All-in-one)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1003,
@@ -6418,7 +8423,12 @@
       "statusId": 2,
       "deptId": 4,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     },
     {
       "id": 1004,
@@ -6434,17 +8444,29 @@
       "statusId": 2,
       "deptId": 4,
       "type": "เครื่องพิมพ์ (Printer)",
-      "category": "ครุภัณฑ์คอมพิวเตอร์"
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "ageYears": 0,
+      "ageBracket": "1-7",
+      "ageStatusLabel": "ใช้งานปกติ",
+      "sourceFile": "DFDEquipment-20261109.bak",
+      "sourceType": "bak"
     }
   ],
   "summary": {
     "totalCount": 402,
     "totalValue": 11496202.32,
-    "uniqueTypesCount": 8,
+    "uniqueTypesCount": 12,
     "uniqueCategoriesCount": 5,
     "yearSpan": "2542 - 2569",
     "yearMin": "2542",
-    "yearMax": "2569"
+    "yearMax": "2569",
+    "age1To7Count": 60,
+    "age1To7Value": 1792900,
+    "age7To14Count": 183,
+    "age7To14Value": 6641982.6,
+    "age14PlusCount": 154,
+    "age14PlusValue": 3016519.72,
+    "unknownAgeCount": 5
   },
   "byType": [
     {
@@ -6457,9 +8479,9 @@
     {
       "type": "เครื่องพิมพ์ (Printer)",
       "category": "ครุภัณฑ์คอมพิวเตอร์",
-      "count": 96,
-      "totalValue": 1925924.4,
-      "percent": 23.9
+      "count": 83,
+      "totalValue": 780554.4,
+      "percent": 20.6
     },
     {
       "type": "ครุภัณฑ์สำนักงาน",
@@ -6490,6 +8512,13 @@
       "percent": 2.7
     },
     {
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "count": 7,
+      "totalValue": 52900,
+      "percent": 1.7
+    },
+    {
       "type": "อุปกรณ์เครือข่าย (Network & Switch)",
       "category": "ครุภัณฑ์คอมพิวเตอร์",
       "count": 3,
@@ -6497,10 +8526,31 @@
       "percent": 0.7
     },
     {
+      "type": "เครื่องพิมพ์ความเร็วสูง (Line Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "count": 2,
+      "totalValue": 1086050,
+      "percent": 0.5
+    },
+    {
       "type": "เครื่องสแกนเนอร์ (Scanner)",
       "category": "ครุภัณฑ์คอมพิวเตอร์",
       "count": 2,
       "totalValue": 13399.98,
+      "percent": 0.5
+    },
+    {
+      "type": "เครื่องพิมพ์อิงค์เจ็ท (Inkjet)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "count": 2,
+      "totalValue": 6420,
+      "percent": 0.5
+    },
+    {
+      "type": "เครื่องพิมพ์ Ink Tank Printer",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "count": 2,
+      "totalValue": 0,
       "percent": 0.5
     }
   ],
@@ -6682,6 +8732,40 @@
       "percent": 2.7
     }
   ],
+  "byAge": [
+    {
+      "bracket": "1-7",
+      "label": "1 - 7 ปี (ใช้งานปกติ)",
+      "count": 60,
+      "totalValue": 1792900,
+      "percent": 14.9,
+      "color": "emerald"
+    },
+    {
+      "bracket": "7-14",
+      "label": "7 - 14 ปี (เริ่มเสื่อมสภาพ)",
+      "count": 183,
+      "totalValue": 6641982.6,
+      "percent": 45.5,
+      "color": "amber"
+    },
+    {
+      "bracket": "14+",
+      "label": "14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย)",
+      "count": 154,
+      "totalValue": 3016519.72,
+      "percent": 38.3,
+      "color": "red"
+    },
+    {
+      "bracket": "unknown",
+      "label": "ไม่ระบุปีงบประมาณ",
+      "count": 5,
+      "totalValue": 0,
+      "percent": 1.2,
+      "color": "slate"
+    }
+  ],
   "crossTab": [
     {
       "year": "2542",
@@ -6743,9 +8827,10 @@
       "year": "2552",
       "total": 25,
       "byType": {
-        "เครื่องพิมพ์ (Printer)": 9,
+        "เครื่องพิมพ์ (Printer)": 7,
         "คอมพิวเตอร์ (PC / All-in-one)": 15,
-        "ครุภัณฑ์อื่นๆ": 1
+        "ครุภัณฑ์อื่นๆ": 1,
+        "เครื่องพิมพ์อิงค์เจ็ท (Inkjet)": 2
       }
     },
     {
@@ -6761,7 +8846,7 @@
       "year": "2554",
       "total": 1,
       "byType": {
-        "เครื่องพิมพ์ (Printer)": 1
+        "เครื่องพิมพ์ความเร็วสูง (Line Printer)": 1
       }
     },
     {
@@ -6777,7 +8862,8 @@
       "total": 55,
       "byType": {
         "คอมพิวเตอร์ (PC / All-in-one)": 38,
-        "เครื่องพิมพ์ (Printer)": 15,
+        "เครื่องพิมพ์ (Printer)": 14,
+        "เครื่องพิมพ์ความเร็วสูง (Line Printer)": 1,
         "อุปกรณ์โสตทัศน์/โปรเจคเตอร์": 1,
         "ครุภัณฑ์อื่นๆ": 1
       }
@@ -6796,8 +8882,9 @@
       "total": 29,
       "byType": {
         "คอมพิวเตอร์ (PC / All-in-one)": 14,
-        "เครื่องพิมพ์ (Printer)": 14,
-        "ครุภัณฑ์อื่นๆ": 1
+        "เครื่องพิมพ์ (Printer)": 13,
+        "ครุภัณฑ์อื่นๆ": 1,
+        "เครื่องพิมพ์เลเซอร์ (Laser Printer)": 1
       }
     },
     {
@@ -6813,7 +8900,8 @@
       "total": 37,
       "byType": {
         "คอมพิวเตอร์ (PC / All-in-one)": 18,
-        "เครื่องพิมพ์ (Printer)": 16,
+        "เครื่องพิมพ์ (Printer)": 10,
+        "เครื่องพิมพ์เลเซอร์ (Laser Printer)": 6,
         "อุปกรณ์โสตทัศน์/โปรเจคเตอร์": 1,
         "อุปกรณ์เครือข่าย (Network & Switch)": 2
       }
@@ -6870,7 +8958,8 @@
       "total": 23,
       "byType": {
         "คอมพิวเตอร์ (PC / All-in-one)": 10,
-        "เครื่องพิมพ์ (Printer)": 13
+        "เครื่องพิมพ์ (Printer)": 11,
+        "เครื่องพิมพ์ Ink Tank Printer": 2
       }
     },
     {
@@ -6881,6 +8970,116 @@
       }
     }
   ],
+  "crossTabAge": [
+    {
+      "type": "คอมพิวเตอร์ (PC / All-in-one)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 216,
+      "age1To7": 43,
+      "age7To14": 125,
+      "age14Plus": 48,
+      "unknownAge": 0
+    },
+    {
+      "type": "เครื่องพิมพ์ (Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 83,
+      "age1To7": 12,
+      "age7To14": 39,
+      "age14Plus": 32,
+      "unknownAge": 0
+    },
+    {
+      "type": "ครุภัณฑ์สำนักงาน",
+      "category": "ครุภัณฑ์สำนักงาน",
+      "total": 45,
+      "age1To7": 0,
+      "age7To14": 0,
+      "age14Plus": 45,
+      "unknownAge": 0
+    },
+    {
+      "type": "อุปกรณ์ไฟฟ้าและวิทยุ",
+      "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
+      "total": 15,
+      "age1To7": 0,
+      "age7To14": 0,
+      "age14Plus": 15,
+      "unknownAge": 0
+    },
+    {
+      "type": "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
+      "category": "ครุภัณฑ์โฆษณาและเผยแพร่",
+      "total": 14,
+      "age1To7": 1,
+      "age7To14": 2,
+      "age14Plus": 6,
+      "unknownAge": 5
+    },
+    {
+      "type": "ครุภัณฑ์อื่นๆ",
+      "category": "ครุภัณฑ์อื่นๆ",
+      "total": 11,
+      "age1To7": 2,
+      "age7To14": 6,
+      "age14Plus": 3,
+      "unknownAge": 0
+    },
+    {
+      "type": "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 7,
+      "age1To7": 0,
+      "age7To14": 7,
+      "age14Plus": 0,
+      "unknownAge": 0
+    },
+    {
+      "type": "อุปกรณ์เครือข่าย (Network & Switch)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 3,
+      "age1To7": 0,
+      "age7To14": 3,
+      "age14Plus": 0,
+      "unknownAge": 0
+    },
+    {
+      "type": "เครื่องพิมพ์ความเร็วสูง (Line Printer)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 2,
+      "age1To7": 0,
+      "age7To14": 1,
+      "age14Plus": 1,
+      "unknownAge": 0
+    },
+    {
+      "type": "เครื่องสแกนเนอร์ (Scanner)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 2,
+      "age1To7": 0,
+      "age7To14": 0,
+      "age14Plus": 2,
+      "unknownAge": 0
+    },
+    {
+      "type": "เครื่องพิมพ์อิงค์เจ็ท (Inkjet)",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 2,
+      "age1To7": 0,
+      "age7To14": 0,
+      "age14Plus": 2,
+      "unknownAge": 0
+    },
+    {
+      "type": "เครื่องพิมพ์ Ink Tank Printer",
+      "category": "ครุภัณฑ์คอมพิวเตอร์",
+      "total": 2,
+      "age1To7": 2,
+      "age7To14": 0,
+      "age14Plus": 0,
+      "unknownAge": 0
+    }
+  ],
   "availableTypes": [
     "คอมพิวเตอร์ (PC / All-in-one)",
     "เครื่องพิมพ์ (Printer)",
@@ -6888,8 +9087,12 @@
     "อุปกรณ์ไฟฟ้าและวิทยุ",
     "อุปกรณ์โสตทัศน์/โปรเจคเตอร์",
     "ครุภัณฑ์อื่นๆ",
+    "เครื่องพิมพ์เลเซอร์ (Laser Printer)",
     "อุปกรณ์เครือข่าย (Network & Switch)",
-    "เครื่องสแกนเนอร์ (Scanner)"
+    "เครื่องพิมพ์ความเร็วสูง (Line Printer)",
+    "เครื่องสแกนเนอร์ (Scanner)",
+    "เครื่องพิมพ์อิงค์เจ็ท (Inkjet)",
+    "เครื่องพิมพ์ Ink Tank Printer"
   ],
   "availableYears": [
     "2542",
@@ -6923,5 +9126,8 @@
     "ครุภัณฑ์ไฟฟ้าและวิทยุ",
     "ครุภัณฑ์โฆษณาและเผยแพร่",
     "ครุภัณฑ์อื่นๆ"
+  ],
+  "availableFiles": [
+    "DFDEquipment-20261109.bak"
   ]
 }

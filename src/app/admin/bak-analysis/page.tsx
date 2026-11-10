@@ -91,7 +91,20 @@ export default function BakAnalysisPage() {
   // Load sample on mount if no data loaded yet
   useEffect(() => {
     if (sampleBakData && sampleBakData.items && sampleBakData.items.length > 0) {
-      setParseResult(sampleBakData as unknown as BakParseResult);
+      const data = { ...(sampleBakData as unknown as BakParseResult) };
+      data.byAge = data.byAge || [];
+      data.crossTabAge = data.crossTabAge || [];
+      data.summary = {
+        ...data.summary,
+        age1To7Count: data.summary?.age1To7Count ?? 0,
+        age1To7Value: data.summary?.age1To7Value ?? 0,
+        age7To14Count: data.summary?.age7To14Count ?? 0,
+        age7To14Value: data.summary?.age7To14Value ?? 0,
+        age14PlusCount: data.summary?.age14PlusCount ?? 0,
+        age14PlusValue: data.summary?.age14PlusValue ?? 0,
+        unknownAgeCount: data.summary?.unknownAgeCount ?? 0,
+      };
+      setParseResult(data);
     }
   }, []);
 
@@ -612,7 +625,7 @@ export default function BakAnalysisPage() {
                 <p className="text-xs text-slate-400 mb-1">จำนวนครุภัณฑ์รวม</p>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl font-bold text-white">
-                    {parseResult.summary.totalCount.toLocaleString()}
+                    {(parseResult.summary?.totalCount ?? 0).toLocaleString()}
                   </span>
                   <span className="text-xs text-slate-500">ชิ้น</span>
                 </div>
@@ -631,7 +644,7 @@ export default function BakAnalysisPage() {
                 <p className="text-xs text-slate-400 mb-1">มูลค่ารวมตามเอกสาร</p>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-xl font-bold text-emerald-400">
-                    ฿{parseResult.summary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </span>
                 </div>
               </div>
@@ -649,7 +662,7 @@ export default function BakAnalysisPage() {
                 <p className="text-xs text-slate-400 mb-1">จำแนกประเภท</p>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl font-bold text-white">
-                    {parseResult.summary.uniqueTypesCount}
+                    {parseResult.summary?.uniqueTypesCount ?? 0}
                   </span>
                   <span className="text-xs text-slate-500">ประเภท</span>
                 </div>
@@ -674,16 +687,16 @@ export default function BakAnalysisPage() {
                 <p className="text-xs text-emerald-300/80 mb-1">ใช้งานปกติ (🟢)</p>
                 <div className="flex items-baseline justify-between">
                   <span className="text-2xl font-bold text-emerald-400">
-                    {parseResult.summary.age1To7Count.toLocaleString()}
+                    {(parseResult.summary?.age1To7Count ?? 0).toLocaleString()}
                   </span>
                   <span className="text-[11px] text-emerald-400/80 font-mono">
-                    {parseResult.summary.totalCount > 0
-                      ? `${Math.round((parseResult.summary.age1To7Count / parseResult.summary.totalCount) * 100)}%`
+                    {(parseResult.summary?.totalCount ?? 0) > 0
+                      ? `${Math.round(((parseResult.summary?.age1To7Count ?? 0) / parseResult.summary.totalCount) * 100)}%`
                       : '0%'}
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 truncate">
-                  ฿{parseResult.summary.age1To7Value.toLocaleString('th-TH')}
+                  ฿{(parseResult.summary?.age1To7Value ?? 0).toLocaleString('th-TH')}
                 </p>
               </div>
 
@@ -706,16 +719,16 @@ export default function BakAnalysisPage() {
                 <p className="text-xs text-amber-300/80 mb-1">เริ่มเสื่อมสภาพ (🟡)</p>
                 <div className="flex items-baseline justify-between">
                   <span className="text-2xl font-bold text-amber-400">
-                    {parseResult.summary.age7To14Count.toLocaleString()}
+                    {(parseResult.summary?.age7To14Count ?? 0).toLocaleString()}
                   </span>
                   <span className="text-[11px] text-amber-400/80 font-mono">
-                    {parseResult.summary.totalCount > 0
-                      ? `${Math.round((parseResult.summary.age7To14Count / parseResult.summary.totalCount) * 100)}%`
+                    {(parseResult.summary?.totalCount ?? 0) > 0
+                      ? `${Math.round(((parseResult.summary?.age7To14Count ?? 0) / parseResult.summary.totalCount) * 100)}%`
                       : '0%'}
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 truncate">
-                  ฿{parseResult.summary.age7To14Value.toLocaleString('th-TH')}
+                  ฿{(parseResult.summary?.age7To14Value ?? 0).toLocaleString('th-TH')}
                 </p>
               </div>
 
@@ -738,16 +751,16 @@ export default function BakAnalysisPage() {
                 <p className="text-xs text-red-300/80 mb-1">เกินเกณฑ์/รอจำหน่าย (🔴)</p>
                 <div className="flex items-baseline justify-between">
                   <span className="text-2xl font-bold text-red-400">
-                    {parseResult.summary.age14PlusCount.toLocaleString()}
+                    {(parseResult.summary?.age14PlusCount ?? 0).toLocaleString()}
                   </span>
                   <span className="text-[11px] text-red-400/80 font-mono">
-                    {parseResult.summary.totalCount > 0
-                      ? `${Math.round((parseResult.summary.age14PlusCount / parseResult.summary.totalCount) * 100)}%`
+                    {(parseResult.summary?.totalCount ?? 0) > 0
+                      ? `${Math.round(((parseResult.summary?.age14PlusCount ?? 0) / parseResult.summary.totalCount) * 100)}%`
                       : '0%'}
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 truncate">
-                  ฿{parseResult.summary.age14PlusValue.toLocaleString('th-TH')}
+                  ฿{(parseResult.summary?.age14PlusValue ?? 0).toLocaleString('th-TH')}
                 </p>
               </div>
             </div>
@@ -771,7 +784,7 @@ export default function BakAnalysisPage() {
                       : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
                   }`}
                 >
-                  ทุกช่วงอายุ ({parseResult.summary.totalCount})
+                  ทุกช่วงอายุ ({parseResult.summary?.totalCount ?? 0})
                 </button>
 
                 <button
@@ -786,7 +799,7 @@ export default function BakAnalysisPage() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span>1 - 7 ปี ({parseResult.summary.age1To7Count})</span>
+                  <span>1 - 7 ปี ({parseResult.summary?.age1To7Count ?? 0})</span>
                 </button>
 
                 <button
@@ -801,7 +814,7 @@ export default function BakAnalysisPage() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                  <span>7 - 14 ปี ({parseResult.summary.age7To14Count})</span>
+                  <span>7 - 14 ปี ({parseResult.summary?.age7To14Count ?? 0})</span>
                 </button>
 
                 <button
@@ -816,7 +829,7 @@ export default function BakAnalysisPage() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-red-400"></span>
-                  <span>14 ปีขึ้นไป ({parseResult.summary.age14PlusCount})</span>
+                  <span>14 ปีขึ้นไป ({parseResult.summary?.age14PlusCount ?? 0})</span>
                 </button>
 
                 <button
@@ -942,7 +955,7 @@ export default function BakAnalysisPage() {
                     </div>
 
                     <div className="space-y-4">
-                      {parseResult.byType.map((t, idx) => (
+                      {(parseResult.byType || []).map((t, idx) => (
                         <div
                           key={t.type}
                           onClick={() => {
@@ -960,10 +973,10 @@ export default function BakAnalysisPage() {
                             </span>
                             <div className="flex items-center gap-3">
                               <span className="font-mono text-slate-400">
-                                {t.totalValue > 0 ? `฿${t.totalValue.toLocaleString('th-TH')}` : '-'}
+                                {(t.totalValue ?? 0) > 0 ? `฿${(t.totalValue ?? 0).toLocaleString('th-TH')}` : '-'}
                               </span>
                               <span className="font-bold text-white bg-slate-800 px-2 py-0.5 rounded-lg min-w-16 text-right">
-                                {t.count} ({t.percent}%)
+                                {t.count ?? 0} ({t.percent ?? 0}%)
                               </span>
                             </div>
                           </div>
@@ -996,7 +1009,7 @@ export default function BakAnalysisPage() {
                     </div>
 
                     <div className="space-y-4">
-                      {parseResult.byAge.map((a) => {
+                      {(parseResult.byAge || []).map((a) => {
                         const is1To7 = a.bracket === '1-7';
                         const is7To14 = a.bracket === '7-14';
                         const is14Plus = a.bracket === '14+';
@@ -1030,10 +1043,10 @@ export default function BakAnalysisPage() {
                               </span>
                               <div className="flex items-center gap-3">
                                 <span className="font-mono text-slate-400">
-                                  {a.totalValue > 0 ? `฿${a.totalValue.toLocaleString('th-TH')}` : '-'}
+                                  {(a.totalValue ?? 0) > 0 ? `฿${(a.totalValue ?? 0).toLocaleString('th-TH')}` : '-'}
                                 </span>
                                 <span className="font-bold text-white bg-slate-800 px-2 py-0.5 rounded-lg min-w-16 text-right">
-                                  {a.count} ({a.percent}%)
+                                  {a.count ?? 0} ({a.percent ?? 0}%)
                                 </span>
                               </div>
                             </div>
@@ -1115,7 +1128,7 @@ export default function BakAnalysisPage() {
                           <div className="flex items-center justify-between text-[11px] text-slate-400">
                             <span>สัดส่วน: {y.percent}%</span>
                             <span className="font-mono">
-                              {y.totalValue > 0 ? `฿${y.totalValue.toLocaleString('th-TH')}` : ''}
+                              {(y.totalValue ?? 0) > 0 ? `฿${(y.totalValue ?? 0).toLocaleString('th-TH')}` : ''}
                             </span>
                           </div>
                         </div>
@@ -1190,7 +1203,7 @@ export default function BakAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
-                        {parseResult.crossTabAge.map((row) => (
+                        {(parseResult.crossTabAge || []).map((row) => (
                           <tr key={row.type} className="hover:bg-slate-800/40 transition">
                             <td className="py-2.5 px-3 font-bold text-white sticky left-0 bg-slate-900 z-10">
                               {row.type}
@@ -1220,19 +1233,19 @@ export default function BakAnalysisPage() {
                             รวมทุกประเภท
                           </td>
                           <td className="py-3 px-3 text-right text-amber-400 font-mono">
-                            {parseResult.summary.totalCount}
+                            {parseResult.summary?.totalCount ?? 0}
                           </td>
                           <td className="py-3 px-3 text-right text-emerald-400 font-mono">
-                            {parseResult.summary.age1To7Count}
+                            {parseResult.summary?.age1To7Count ?? 0}
                           </td>
                           <td className="py-3 px-3 text-right text-amber-400 font-mono">
-                            {parseResult.summary.age7To14Count}
+                            {parseResult.summary?.age7To14Count ?? 0}
                           </td>
                           <td className="py-3 px-3 text-right text-red-400 font-mono">
-                            {parseResult.summary.age14PlusCount}
+                            {parseResult.summary?.age14PlusCount ?? 0}
                           </td>
                           <td className="py-3 px-3 text-right text-slate-500 font-mono">
-                            {parseResult.summary.unknownAgeCount}
+                            {parseResult.summary?.unknownAgeCount ?? 0}
                           </td>
                         </tr>
                       </tfoot>
@@ -1523,7 +1536,7 @@ export default function BakAnalysisPage() {
                                 {item.deptName || '-'}
                               </td>
                               <td className="py-2.5 px-3 text-right font-mono text-emerald-400">
-                                {item.price > 0 ? `฿${item.price.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                                {(item.price ?? 0) > 0 ? `฿${(item.price ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
                               </td>
                               <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px]">
                                 {item.docNo || '-'}
@@ -1622,25 +1635,25 @@ export default function BakAnalysisPage() {
                     <div>
                       <p className="text-slate-500">จำนวนครุภัณฑ์รวม</p>
                       <p className="text-lg font-bold text-slate-900 mt-0.5">
-                        {parseResult.summary.totalCount.toLocaleString()} รายการ
+                        {(parseResult.summary?.totalCount ?? 0).toLocaleString()} รายการ
                       </p>
                     </div>
                     <div>
                       <p className="text-slate-500">มูลค่ารวมตามเอกสาร</p>
                       <p className="text-lg font-bold text-emerald-700 mt-0.5">
-                        ฿{parseResult.summary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                        ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
                       <p className="text-slate-500">จำนวนประเภทครุภัณฑ์</p>
                       <p className="text-lg font-bold text-slate-900 mt-0.5">
-                        {parseResult.summary.uniqueTypesCount} ประเภท
+                        {parseResult.summary?.uniqueTypesCount ?? 0} ประเภท
                       </p>
                     </div>
                     <div>
                       <p className="text-slate-500">ช่วงปีงบประมาณ</p>
                       <p className="text-lg font-bold text-amber-700 mt-0.5">
-                        ปี {parseResult.summary.yearSpan}
+                        ปี {parseResult.summary?.yearSpan || '-'}
                       </p>
                     </div>
                   </div>
@@ -1662,7 +1675,7 @@ export default function BakAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {parseResult.byAge.map((a, idx) => (
+                        {(parseResult.byAge || []).map((a, idx) => (
                           <tr key={a.bracket} className="hover:bg-slate-50">
                             <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
                             <td className="border border-slate-300 p-1.5 font-bold">{a.label}</td>
@@ -1676,11 +1689,11 @@ export default function BakAnalysisPage() {
                                 : 'ไม่สามารถระบุปีจัดซื้อได้'}
                             </td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">
-                              {a.count.toLocaleString()}
+                              {(a.count ?? 0).toLocaleString()}
                             </td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono">{a.percent}%</td>
+                            <td className="border border-slate-300 p-1.5 text-right font-mono">{a.percent ?? 0}%</td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {a.totalValue > 0 ? `฿${a.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                              {(a.totalValue ?? 0) > 0 ? `฿${(a.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
                             </td>
                           </tr>
                         ))}
@@ -1689,11 +1702,11 @@ export default function BakAnalysisPage() {
                         <tr className="bg-slate-100 font-bold">
                           <td colSpan={3} className="border border-slate-300 p-2 text-center">รวมทั้งสิ้น</td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            {parseResult.summary.totalCount.toLocaleString()}
+                            {(parseResult.summary?.totalCount ?? 0).toLocaleString()}
                           </td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">100.0%</td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            ฿{parseResult.summary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                            ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
                       </tfoot>
@@ -1717,15 +1730,15 @@ export default function BakAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {parseResult.byType.map((t, idx) => (
+                        {(parseResult.byType || []).map((t, idx) => (
                           <tr key={t.type} className="hover:bg-slate-50">
                             <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
                             <td className="border border-slate-300 p-1.5 font-semibold">{t.type}</td>
                             <td className="border border-slate-300 p-1.5 text-slate-600">{t.category}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">{t.count}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono">{t.percent}%</td>
+                            <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">{t.count ?? 0}</td>
+                            <td className="border border-slate-300 p-1.5 text-right font-mono">{t.percent ?? 0}%</td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {t.totalValue > 0 ? `฿${t.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                              {(t.totalValue ?? 0) > 0 ? `฿${(t.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
                             </td>
                           </tr>
                         ))}
@@ -1734,11 +1747,11 @@ export default function BakAnalysisPage() {
                         <tr className="bg-slate-100 font-bold">
                           <td colSpan={3} className="border border-slate-300 p-2 text-center">รวมทั้งสิ้น</td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            {parseResult.summary.totalCount}
+                            {(parseResult.summary?.totalCount ?? 0).toLocaleString()}
                           </td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">100.0%</td>
                           <td className="border border-slate-300 p-2 text-right font-mono font-bold">
-                            ฿{parseResult.summary.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                            ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
                       </tfoot>
@@ -1761,14 +1774,14 @@ export default function BakAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {parseResult.byYear.map((y, idx) => (
+                        {(parseResult.byYear || []).map((y, idx) => (
                           <tr key={y.year} className="hover:bg-slate-50">
                             <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
                             <td className="border border-slate-300 p-1.5 font-bold">ปี {y.year}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">{y.count}</td>
-                            <td className="border border-slate-300 p-1.5 text-right font-mono">{y.percent}%</td>
+                            <td className="border border-slate-300 p-1.5 text-right font-mono font-bold">{y.count ?? 0}</td>
+                            <td className="border border-slate-300 p-1.5 text-right font-mono">{y.percent ?? 0}%</td>
                             <td className="border border-slate-300 p-1.5 text-right font-mono font-semibold">
-                              {y.totalValue > 0 ? `฿${y.totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                              {(y.totalValue ?? 0) > 0 ? `฿${(y.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
                             </td>
                           </tr>
                         ))}

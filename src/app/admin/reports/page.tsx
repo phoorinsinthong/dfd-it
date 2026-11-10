@@ -1076,7 +1076,7 @@ export default function AdminReportsPage() {
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 print:border-slate-300 col-span-2 sm:col-span-1">
                     <span className="text-xs text-slate-500 font-semibold block">มูลค่าประเมินรวม</span>
                     <div className="text-2xl font-black text-blue-700 mt-1">
-                      ฿{suppliesBalance.reduce((acc, s) => acc + (s.unit_price || 0) * s.quantity, 0).toLocaleString()}
+                      ฿{(suppliesBalance || []).reduce((acc, s) => acc + (s.unit_price || 0) * (s.quantity || 0), 0).toLocaleString()}
                     </div>
                   </div>
                 </div>

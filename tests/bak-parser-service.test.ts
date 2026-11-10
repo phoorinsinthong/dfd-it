@@ -49,6 +49,13 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     const buffer = fs.readFileSync(sampleBakPath);
     const result = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', 2569);
 
+    // Update cached sample json with latest structure including age brackets
+    fs.writeFileSync(
+      path.resolve(__dirname, '../src/lib/data/sample-bak-data.json'),
+      JSON.stringify(result, null, 2),
+      'utf-8'
+    );
+
     expect(result).toBeDefined();
     expect(result.fileName).toBe('DFDEquipment-20261109.bak');
     expect(result.sourceType).toBe('bak');
@@ -123,6 +130,13 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
 
     const buffer = fs.readFileSync(sampleBakPath);
     const result = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', 2569);
+
+    // Update cached sample json with latest structure including age brackets
+    fs.writeFileSync(
+      path.resolve(__dirname, '../src/lib/data/sample-bak-data.json'),
+      JSON.stringify(result, null, 2),
+      'utf-8'
+    );
     const csv = generateBakCsvReport(result.items);
 
     expect(csv.startsWith('\uFEFF')).toBe(true);
