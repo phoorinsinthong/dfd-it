@@ -62,10 +62,17 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     expect(result).toBeDefined();
     expect(result.fileName).toBe('DFDEquipment-20261109.bak');
     expect(result.sourceType).toBe('bak');
-    expect(result.items.length).toBe(402);
+    expect(result.items.length).toBe(905);
+
+    // Status and Procurement extraction checks
+    expect(result.items.some((i) => i.statusId === 1 && i.statusName === 'ใช้งานปกติ')).toBe(true);
+    expect(result.items.some((i) => i.statusId === 2 && i.statusName === 'ส่งซ่อม')).toBe(true);
+    expect(result.items.some((i) => i.procurementName === 'กง.กห.')).toBe(true);
+    expect(result.items.some((i) => i.procurementName === 'ทสอ.ฯ')).toBe(true);
+    expect(result.items.some((i) => i.procurementName === 'สม.')).toBe(true);
 
     // Summary checks
-    expect(result.summary.totalCount).toBe(402);
+    expect(result.summary.totalCount).toBe(905);
     expect(result.summary.totalValue).toBeGreaterThan(0);
     expect(result.summary.age1To7Count).toBeGreaterThan(0);
     expect(result.summary.age7To14Count).toBeGreaterThan(0);
@@ -257,6 +264,147 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
 
     const whCountBak = countWarehouse12Excluded([mockItems[2]], { isExcelSource: false });
     expect(whCountBak).toBe(0);
+  });
+
+  it('filters .bak report exclusively for items with status "ใช้งานปกติ" and procurement "กง.กห."', () => {
+    // 1. Mock items test
+    const mockBakItems = [
+      {
+        id: 1,
+        code: '7440.001.0001',
+        name: 'คอมพิวเตอร์ A (กง.กห. ใช้งานปกติ)',
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2560',
+        ageYears: 9,
+        ageBracket: '7-14' as const,
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        deptName: 'การเงิน กง.กห.',
+        statusId: 1,
+        statusName: 'ใช้งานปกติ',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        sourceType: 'bak' as const,
+        price: 20000,
+        serial: 'SN01',
+        docNo: '1/60',
+        remark: '',
+        unit: 'เครื่อง',
+        deptId: 1,
+      },
+      {
+        id: 2,
+        code: '7440.001.0002',
+        name: 'คอมพิวเตอร์ B (กง.กห. ส่งซ่อม)',
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2560',
+        ageYears: 9,
+        ageBracket: '7-14' as const,
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        deptName: 'การเงิน กง.กห.',
+        statusId: 2,
+        statusName: 'ส่งซ่อม',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        sourceType: 'bak' as const,
+        price: 20000,
+        serial: 'SN02',
+        docNo: '2/60',
+        remark: '',
+        unit: 'เครื่อง',
+        deptId: 1,
+      },
+      {
+        id: 3,
+        code: '7440.001.0003',
+        name: 'คอมพิวเตอร์ C (ทสอ. ใช้งานปกติ แต่หน่วยงาน กง.กห.)',
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2562',
+        ageYears: 7,
+        ageBracket: '1-7' as const,
+        ageStatusLabel: 'ใช้งานปกติ',
+        deptName: 'สารบรรณ กง.กห.',
+        statusId: 1,
+        statusName: 'ใช้งานปกติ',
+        procurementId: 1,
+        procurementName: 'ทสอ.ฯ',
+        sourceType: 'bak' as const,
+        price: 25000,
+        serial: 'SN03',
+        docNo: '3/62',
+        remark: '',
+        unit: 'เครื่อง',
+        deptId: 2,
+      },
+      {
+        id: 4,
+        code: '7440.001.0004',
+        name: 'คอมพิวเตอร์ D (สม. ใช้งานปกติ ไม่ใช่ กง.กห.)',
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2563',
+        ageYears: 6,
+        ageBracket: '1-7' as const,
+        ageStatusLabel: 'ใช้งานปกติ',
+        deptName: 'ส่งคืน ทสอ.กห.',
+        statusId: 1,
+        statusName: 'ใช้งานปกติ',
+        procurementId: 3,
+        procurementName: 'สม.',
+        sourceType: 'bak' as const,
+        price: 28000,
+        serial: 'SN04',
+        docNo: '4/63',
+        remark: '',
+        unit: 'เครื่อง',
+        deptId: 3,
+      },
+    ];
+
+    // Filter with default .bak options: status 'ใช้งานปกติ', procurement 'กง.กห.'
+    // When bakIncludeDeptMatch is true: Item 1 and Item 3 match
+    const resultWithDept = filterReportItems(mockBakItems, {
+      isExcelSource: false,
+      bakStatusFilter: 'ใช้งานปกติ',
+      bakProcurementFilter: 'กง.กห.',
+      bakIncludeDeptMatch: true,
+    });
+    expect(resultWithDept.length).toBe(2);
+    expect(resultWithDept.map((i) => i.code)).toEqual(['7440.001.0001', '7440.001.0003']);
+
+    // When bakIncludeDeptMatch is false: ONLY Item 1 matches (strict procurementId = 2)
+    const resultStrict = filterReportItems(mockBakItems, {
+      isExcelSource: false,
+      bakStatusFilter: 'ใช้งานปกติ',
+      bakProcurementFilter: 'กง.กห.',
+      bakIncludeDeptMatch: false,
+    });
+    expect(resultStrict.length).toBe(1);
+    expect(resultStrict[0].code).toBe('7440.001.0001');
+
+    // 2. Live .bak file testing
+    if (fs.existsSync(sampleBakPath)) {
+      const buffer = fs.readFileSync(sampleBakPath);
+      const parsed = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', 2569);
+
+      // Filter live .bak with default options
+      const liveFiltered = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'กง.กห.',
+        bakIncludeDeptMatch: true,
+      });
+
+      expect(liveFiltered.length).toBe(35);
+      expect(liveFiltered.every((i) => i.statusId === 1 && i.statusName === 'ใช้งานปกติ')).toBe(true);
+      expect(
+        liveFiltered.every(
+          (i) => i.procurementName === 'กง.กห.' || i.procurementId === 2 || i.deptName?.includes('กง.กห.')
+        )
+      ).toBe(true);
+    }
   });
 });
 

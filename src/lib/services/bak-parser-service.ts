@@ -557,6 +557,8 @@ function buildAggregatedResult(
     availableYears: byYear.map((y) => y.year),
     availableCategories: byCategory.map((c) => c.category),
     availableFiles,
+    availableStatuses: Array.from(new Set(items.map((i) => i.statusName).filter(Boolean) as string[])),
+    availableProcurements: Array.from(new Set(items.map((i) => i.procurementName).filter(Boolean) as string[])),
   };
 }
 
@@ -612,7 +614,7 @@ export function parseBakBuffer(
       const nullBytes = Math.ceil(31 / 8);
       const varOff = recOffset + fixedLen + 2 + nullBytes;
       const numVar = readUInt16LE(bytes, varOff);
-      if (numVar !== 14) continue;
+      if (numVar < 4) continue;
 
       // Read variable column offsets
       const varOffsets: number[] = [];
@@ -639,6 +641,21 @@ export function parseBakBuffer(
       const price = rawPrice >= 0 && rawPrice < 10000000 ? Math.round(rawPrice * 100) / 100 : 0;
       const statusId = readInt32LE(bytes, recOffset + 24);
       const deptId = readInt32LE(bytes, recOffset + 28);
+      const procId = readInt32LE(bytes, recOffset + 57);
+
+      const statusMap: Record<number, string> = {
+        1: 'ใช้งานปกติ',
+        2: 'ส่งซ่อม',
+        3: 'ส่งคืน',
+      };
+      const statusName = statusMap[statusId] || `สถานะ ${statusId}`;
+
+      const procMap: Record<number, string> = {
+        1: 'ทสอ.ฯ',
+        2: 'กง.กห.',
+        3: 'สม.',
+      };
+      const procurementName = procMap[procId] || (procId > 0 ? `หน่วย ${procId}` : 'ไม่ระบุ');
 
       const code = (varVals[0] || '').trim();
       const name = (varVals[1] || '').trim();
@@ -667,6 +684,9 @@ export function parseBakBuffer(
           unit,
           price,
           statusId,
+          statusName,
+          procurementId: procId,
+          procurementName,
           deptId,
           type,
           category,
@@ -848,6 +868,9 @@ export function parseExcelFiles(
               unit: 'เครื่อง',
               price,
               statusId: 1,
+              statusName: 'ใช้งานปกติ',
+              procurementId: 2,
+              procurementName: 'กง.กห.',
               deptId: 0,
               type,
               category,
@@ -892,6 +915,8 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
     'ปีงบประมาณ',
     'อายุใช้งาน (ปี)',
     'สถานะอายุ',
+    'สถานะการใช้งาน',
+    'หน่วยจัดซื้อ',
     'หน่วยงาน/แผนกที่ครอบครอง',
     'หมายเลขเครื่อง/Serial',
     'ราคาต่อหน่วย (บาท)',
@@ -911,6 +936,8 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
       `"${(item.year || '').replace(/"/g, '""')}"`,
       item.ageYears > 0 ? item.ageYears : '-',
       `"${item.ageStatusLabel}"`,
+      `"${item.statusName || 'ใช้งานปกติ'}"`,
+      `"${item.procurementName || 'กง.กห.'}"`,
       `"${(item.deptName || '').replace(/"/g, '""')}"`,
       `"${(item.serial || '').replace(/"/g, '""')}"`,
       item.price.toFixed(2),
@@ -941,12 +968,17 @@ export interface ReportFilterOptions {
   yearEnd?: string | number;
   excludeWarehouse12ForExcel?: boolean;
   isExcelSource?: boolean;
+  // Specific filters for Microsoft SQL Server .bak data source
+  bakStatusFilter?: string; // e.g. 'ใช้งานปกติ' (default for .bak) or 'all'
+  bakProcurementFilter?: string; // e.g. 'กง.กห.' (default for .bak) or 'all'
+  bakIncludeDeptMatch?: boolean; // default: true (when filtering กง.กห., also matches if deptName includes กง.กห.)
 }
 
 /**
  * Filter items for the official printable report.
- * If source is Excel, items located in "คลัง 12" are excluded by requirement.
- * Also sorts items by oldest-first (descending by ageYears).
+ * - If source is Excel, items located in "คลัง 12" are excluded by default (toggleable).
+ * - If source is .bak, filter items by status (default: 'ใช้งานปกติ') and procurement unit (default: 'กง.กห.').
+ * - Also sorts items by oldest-first (descending by ageYears).
  */
 export function filterReportItems(
   items: BakEquipmentItem[],
@@ -961,22 +993,53 @@ export function filterReportItems(
       return false;
     }
 
-    // 2. Category
+    // 2. Filter for .bak source: สถานะ ใช้งานปกติ และ หน่วยจัดซื้อ กง.กห.
+    if (!isExcel && (item.sourceType === 'bak' || !item.sourceType)) {
+      // 2.1 Status Filter (default: 'ใช้งานปกติ' / statusId: 1)
+      if (options?.bakStatusFilter && options.bakStatusFilter !== 'all') {
+        const targetStatus = options.bakStatusFilter;
+        const matchesStatus =
+          item.statusName === targetStatus ||
+          (targetStatus === 'ใช้งานปกติ' && (item.statusId === 1 || !item.statusId)) ||
+          (targetStatus === 'ส่งซ่อม' && item.statusId === 2) ||
+          (targetStatus === 'ส่งคืน' && item.statusId === 3);
+        if (!matchesStatus) return false;
+      }
+
+      // 2.2 Procurement Filter (default: 'กง.กห.')
+      if (options?.bakProcurementFilter && options.bakProcurementFilter !== 'all') {
+        const targetProc = options.bakProcurementFilter;
+        if (targetProc === 'กง.กห.') {
+          const isProcKongKoh = item.procurementName === 'กง.กห.' || item.procurementId === 2;
+          const isDeptKongKoh = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('กง.กห.') ?? false);
+          if (!isProcKongKoh && !isDeptKongKoh) {
+            return false;
+          }
+        } else {
+          // If specific procurement like 'ทสอ.ฯ' or 'สม.'
+          if (item.procurementName !== targetProc && item.procurementId?.toString() !== targetProc) {
+            return false;
+          }
+        }
+      }
+    }
+
+    // 3. Category
     if (options?.category && options.category !== 'all' && item.category !== options.category) {
       return false;
     }
 
-    // 3. Type
+    // 4. Type
     if (options?.type && options.type !== 'all' && item.type !== options.type) {
       return false;
     }
 
-    // 4. Age Bracket
+    // 5. Age Bracket
     if (options?.ageBracket && options.ageBracket !== 'all' && item.ageBracket !== options.ageBracket) {
       return false;
     }
 
-    // 5. Year Range
+    // 6. Year Range
     const yNum = parseInt(item.year, 10);
     if (options?.yearStart) {
       const yStart = typeof options.yearStart === 'number' ? options.yearStart : parseInt(options.yearStart, 10);

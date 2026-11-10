@@ -12,6 +12,9 @@ export interface BakEquipmentItem {
   unit: string;
   price: number;
   statusId: number;
+  statusName?: string; // 'ใช้งานปกติ' | 'ส่งซ่อม' | 'ส่งคืน'
+  procurementId?: number; // 1 (ทสอ.ฯ) | 2 (กง.กห.) | 3 (สม.)
+  procurementName?: string; // 'ทสอ.ฯ' | 'กง.กห.' | 'สม.'
   deptId: number;
   type: string;
   category: string;
@@ -108,4 +111,6 @@ export interface BakParseResult {
   availableYears: string[];
   availableCategories: string[];
   availableFiles?: string[];
+  availableStatuses?: string[];
+  availableProcurements?: string[];
 }
