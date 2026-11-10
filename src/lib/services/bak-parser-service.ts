@@ -924,3 +924,120 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
   // UTF-8 BOM \uFEFF ensures Excel displays Thai characters properly without mojibake
   return '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
 }
+
+/**
+ * Checks if a department / location name corresponds to "คลัง 12" (Warehouse 12)
+ */
+export function isWarehouse12(deptName?: string | null): boolean {
+  if (!deptName) return false;
+  return /คลัง\s*12/i.test(deptName.trim());
+}
+
+export interface ReportFilterOptions {
+  category?: string;
+  type?: string;
+  ageBracket?: string;
+  yearStart?: string | number;
+  yearEnd?: string | number;
+  excludeWarehouse12ForExcel?: boolean;
+  isExcelSource?: boolean;
+}
+
+/**
+ * Filter items for the official printable report.
+ * If source is Excel, items located in "คลัง 12" are excluded by requirement.
+ * Also sorts items by oldest-first (descending by ageYears).
+ */
+export function filterReportItems(
+  items: BakEquipmentItem[],
+  options?: ReportFilterOptions
+): BakEquipmentItem[] {
+  const excludeWh12 = options?.excludeWarehouse12ForExcel !== false;
+  const isExcel = options?.isExcelSource ?? false;
+
+  const filtered = items.filter((item) => {
+    // 1. Exclude Warehouse 12 if source is Excel
+    if (excludeWh12 && (isExcel || item.sourceType === 'excel') && isWarehouse12(item.deptName)) {
+      return false;
+    }
+
+    // 2. Category
+    if (options?.category && options.category !== 'all' && item.category !== options.category) {
+      return false;
+    }
+
+    // 3. Type
+    if (options?.type && options.type !== 'all' && item.type !== options.type) {
+      return false;
+    }
+
+    // 4. Age Bracket
+    if (options?.ageBracket && options.ageBracket !== 'all' && item.ageBracket !== options.ageBracket) {
+      return false;
+    }
+
+    // 5. Year Range
+    const yNum = parseInt(item.year, 10);
+    if (options?.yearStart) {
+      const yStart = typeof options.yearStart === 'number' ? options.yearStart : parseInt(options.yearStart, 10);
+      if (!isNaN(yStart) && (!yNum || yNum < yStart)) return false;
+    }
+    if (options?.yearEnd) {
+      const yEnd = typeof options.yearEnd === 'number' ? options.yearEnd : parseInt(options.yearEnd, 10);
+      if (!isNaN(yEnd) && (!yNum || yNum > yEnd)) return false;
+    }
+
+    return true;
+  });
+
+  // Sort: Oldest First (Descending by ageYears)
+  filtered.sort((a, b) => {
+    const ageA = a.ageYears || 0;
+    const ageB = b.ageYears || 0;
+    if (ageB !== ageA) return ageB - ageA;
+    return (a.code || '').localeCompare(b.code || '');
+  });
+
+  return filtered;
+}
+
+/**
+ * Counts items in "คลัง 12" that match the given filter scope and were excluded
+ */
+export function countWarehouse12Excluded(
+  items: BakEquipmentItem[],
+  options?: Omit<ReportFilterOptions, 'excludeWarehouse12ForExcel'>
+): number {
+  const isExcel = options?.isExcelSource ?? false;
+  return items.filter((item) => {
+    // Must be Excel source
+    if (!isExcel && item.sourceType !== 'excel') return false;
+    // Must be Warehouse 12
+    if (!isWarehouse12(item.deptName)) return false;
+
+    // Must match category if specified
+    if (options?.category && options.category !== 'all' && item.category !== options.category) {
+      return false;
+    }
+    // Must match type if specified
+    if (options?.type && options.type !== 'all' && item.type !== options.type) {
+      return false;
+    }
+    // Must match age bracket if specified
+    if (options?.ageBracket && options.ageBracket !== 'all' && item.ageBracket !== options.ageBracket) {
+      return false;
+    }
+    // Must match year range if specified
+    const yNum = parseInt(item.year, 10);
+    if (options?.yearStart) {
+      const yStart = typeof options.yearStart === 'number' ? options.yearStart : parseInt(options.yearStart, 10);
+      if (!isNaN(yStart) && (!yNum || yNum < yStart)) return false;
+    }
+    if (options?.yearEnd) {
+      const yEnd = typeof options.yearEnd === 'number' ? options.yearEnd : parseInt(options.yearEnd, 10);
+      if (!isNaN(yEnd) && (!yNum || yNum > yEnd)) return false;
+    }
+
+    return true;
+  }).length;
+}

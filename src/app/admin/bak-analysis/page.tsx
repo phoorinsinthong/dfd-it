@@ -38,7 +38,13 @@ import {
   FolderArchive
 } from 'lucide-react';
 import { BakParseResult, BakEquipmentItem, AgeBracket } from '@/types/bak-equipment';
-import { parseBakBuffer, generateBakCsvReport } from '@/lib/services/bak-parser-service';
+import {
+  parseBakBuffer,
+  generateBakCsvReport,
+  isWarehouse12,
+  filterReportItems,
+  countWarehouse12Excluded,
+} from '@/lib/services/bak-parser-service';
 import sampleBakData from '@/lib/data/sample-bak-data.json';
 
 export default function BakAnalysisPage() {
@@ -390,44 +396,47 @@ export default function BakAnalysisPage() {
     setReportType('all');
   };
 
-  // Filtered Items for A4 Printable Report
+  // Whether the current active dataset is from Excel
+  const isExcelSource = parseResult?.sourceType === 'excel';
+
+  // Count of items located in "คลัง 12" that are excluded from Excel reports under current filters
+  const warehouse12ExcludedCount = useMemo(() => {
+    if (!parseResult || !isExcelSource) return 0;
+    return countWarehouse12Excluded(parseResult.items, {
+      category: reportCategory,
+      type: reportType,
+      ageBracket: reportAgeFilterMode === 'bracket' ? reportAgeBracket : undefined,
+      yearStart: reportAgeFilterMode === 'yearRange' ? reportYearStart : undefined,
+      yearEnd: reportAgeFilterMode === 'yearRange' ? reportYearEnd : undefined,
+      isExcelSource,
+    });
+  }, [
+    parseResult,
+    isExcelSource,
+    reportCategory,
+    reportType,
+    reportAgeFilterMode,
+    reportAgeBracket,
+    reportYearStart,
+    reportYearEnd,
+  ]);
+
+  // Filtered Items for A4 Printable Report (excludes 'คลัง 12' when source is Excel, sorted oldest-first)
   const reportFilteredItems = useMemo(() => {
     if (!parseResult) return [];
 
-    const list = parseResult.items.filter((item) => {
-      // Category
-      if (reportCategory !== 'all' && item.category !== reportCategory) return false;
-      // Type
-      if (reportType !== 'all' && item.type !== reportType) return false;
-
-      // Age / Year
-      if (reportAgeFilterMode === 'bracket') {
-        if (reportAgeBracket === '1-7' && item.ageBracket !== '1-7') return false;
-        if (reportAgeBracket === '7-14' && item.ageBracket !== '7-14') return false;
-        if (reportAgeBracket === '14+' && item.ageBracket !== '14+') return false;
-        if (reportAgeBracket === 'unknown' && item.ageBracket !== 'unknown') return false;
-      } else if (reportAgeFilterMode === 'yearRange') {
-        const yNum = parseInt(item.year, 10);
-        const yStart = parseInt(reportYearStart, 10);
-        const yEnd = parseInt(reportYearEnd, 10);
-        if (!isNaN(yStart) && (!yNum || yNum < yStart)) return false;
-        if (!isNaN(yEnd) && (!yNum || yNum > yEnd)) return false;
-      }
-
-      return true;
+    return filterReportItems(parseResult.items, {
+      category: reportCategory,
+      type: reportType,
+      ageBracket: reportAgeFilterMode === 'bracket' ? reportAgeBracket : undefined,
+      yearStart: reportAgeFilterMode === 'yearRange' ? reportYearStart : undefined,
+      yearEnd: reportAgeFilterMode === 'yearRange' ? reportYearEnd : undefined,
+      isExcelSource,
+      excludeWarehouse12ForExcel: true,
     });
-
-    // SORT: Oldest First (Descending by ageYears)
-    list.sort((a, b) => {
-      const ageA = a.ageYears || 0;
-      const ageB = b.ageYears || 0;
-      if (ageB !== ageA) return ageB - ageA;
-      return (a.code || '').localeCompare(b.code || '');
-    });
-
-    return list;
   }, [
     parseResult,
+    isExcelSource,
     reportCategory,
     reportType,
     reportAgeFilterMode,
@@ -1970,6 +1979,11 @@ export default function BakAnalysisPage() {
                       <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 font-medium border border-slate-700">
                         {reportAgeFilterDescription}
                       </span>
+                      {isExcelSource && (
+                        <span className="px-2 py-0.5 rounded-md bg-amber-950/80 text-amber-300 font-medium border border-amber-800">
+                          คลัง 12: ไม่รวมในรายงาน{warehouse12ExcludedCount > 0 ? ` (${warehouse12ExcludedCount} รายการ)` : ''}
+                        </span>
+                      )}
                     </div>
                     <div className="text-slate-400 font-mono">
                       พบ <strong className="text-blue-400 font-bold">{reportFilteredItems.length.toLocaleString()}</strong> รายการ
@@ -1993,6 +2007,14 @@ export default function BakAnalysisPage() {
                       <span><strong>ประเภท:</strong> {reportType === 'all' ? 'ทุกประเภท' : reportType}</span>
                       <span>•</span>
                       <span><strong>เงื่อนไขอายุ/ปี:</strong> {reportAgeFilterDescription}</span>
+                      {isExcelSource && (
+                        <>
+                          <span>•</span>
+                          <span className="text-rose-700 font-semibold">
+                            * ไม่รวมรายการครุภัณฑ์ประจำคลัง 12{warehouse12ExcludedCount > 0 ? ` (จำนวน ${warehouse12ExcludedCount} รายการ)` : ''}
+                          </span>
+                        </>
+                      )}
                     </div>
                     <p className="text-[11px] text-slate-500 mt-1.5">
                       แหล่งข้อมูล: {parseResult.fileName} • เกณฑ์ปีงบประมาณ 2569 • ข้อมูล ณ วันที่{' '}

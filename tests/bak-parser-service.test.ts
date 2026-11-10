@@ -6,6 +6,9 @@ import {
   parseExcelFiles,
   generateBakCsvReport,
   calculateEquipmentAge,
+  isWarehouse12,
+  filterReportItems,
+  countWarehouse12Excluded,
 } from '../src/lib/services/bak-parser-service';
 
 describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Extraction', () => {
@@ -145,6 +148,115 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     expect(csv).toContain('อายุใช้งาน (ปี)');
     expect(csv).toContain('สถานะอายุ');
     expect(csv).toContain('ไฟล์ต้นทาง');
+  });
+
+  it('correctly detects "คลัง 12" and excludes it when filtering reports for Excel sources', () => {
+    // 1. isWarehouse12 unit check
+    expect(isWarehouse12('คลัง 12')).toBe(true);
+    expect(isWarehouse12('คลัง12')).toBe(true);
+    expect(isWarehouse12('คลัง  12')).toBe(true);
+    expect(isWarehouse12('ประจำแผนก คลัง 12')).toBe(true);
+    expect(isWarehouse12('คลัง 1')).toBe(false);
+    expect(isWarehouse12('คลังพัสดุ')).toBe(false);
+    expect(isWarehouse12('กองการเงิน')).toBe(false);
+    expect(isWarehouse12(null)).toBe(false);
+    expect(isWarehouse12(undefined)).toBe(false);
+
+    // 2. filterReportItems exclusion check
+    const mockItems = [
+      {
+        id: 1,
+        code: '7440.001.0001',
+        name: 'PC Alpha',
+        type: 'คอมพิวเตอร์ (PC/All-in-One)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2550',
+        ageYears: 19,
+        ageBracket: '14+' as const,
+        ageStatusLabel: 'เกินเกณฑ์/รอจำหน่าย',
+        deptName: 'คลัง 12',
+        sourceType: 'excel' as const,
+        sourceFile: 'คอมพิวเตอร์ ๑.xls',
+        price: 25000,
+        serial: 'SN001',
+        docNo: '1/50',
+        remark: '',
+        unit: 'เครื่อง',
+        statusId: 1,
+        deptId: 0,
+      },
+      {
+        id: 2,
+        code: '7440.001.0002',
+        name: 'PC Beta',
+        type: 'คอมพิวเตอร์ (PC/All-in-One)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2560',
+        ageYears: 9,
+        ageBracket: '7-14' as const,
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        deptName: 'แผนกสนับสนุนเทคนิค',
+        sourceType: 'excel' as const,
+        sourceFile: 'คอมพิวเตอร์ ๑.xls',
+        price: 20000,
+        serial: 'SN002',
+        docNo: '2/60',
+        remark: '',
+        unit: 'เครื่อง',
+        statusId: 1,
+        deptId: 0,
+      },
+      {
+        id: 3,
+        code: '7440.001.0003',
+        name: 'PC Gamma',
+        type: 'คอมพิวเตอร์ (PC/All-in-One)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2552',
+        ageYears: 17,
+        ageBracket: '14+' as const,
+        ageStatusLabel: 'เกินเกณฑ์/รอจำหน่าย',
+        deptName: 'คลัง 12',
+        sourceType: 'bak' as const,
+        sourceFile: 'DFDEquipment-20261109.bak',
+        price: 30000,
+        serial: 'SN003',
+        docNo: '3/52',
+        remark: '',
+        unit: 'เครื่อง',
+        statusId: 1,
+        deptId: 0,
+      },
+    ];
+
+    // For Excel items: item 1 (คลัง 12) must be excluded, item 2 must remain
+    const filteredExcel = filterReportItems(mockItems.slice(0, 2), { isExcelSource: true });
+    expect(filteredExcel.length).toBe(1);
+    expect(filteredExcel[0].code).toBe('7440.001.0002');
+    expect(filteredExcel[0].deptName).toBe('แผนกสนับสนุนเทคนิค');
+
+    // For BAK items: item 3 (คลัง 12) should NOT be excluded because sourceType is bak
+    const filteredBak = filterReportItems([mockItems[2]], { isExcelSource: false });
+    expect(filteredBak.length).toBe(1);
+    expect(filteredBak[0].code).toBe('7440.001.0003');
+
+    // Check oldest-first sorting: oldest age (17 years) should precede 9 years
+    const mixedList = filterReportItems([mockItems[1], mockItems[2]], { isExcelSource: false });
+    expect(mixedList[0].ageYears).toBe(17);
+    expect(mixedList[1].ageYears).toBe(9);
+
+    // 3. countWarehouse12Excluded check with scope filters
+    const whCountAll = countWarehouse12Excluded(mockItems.slice(0, 2), { isExcelSource: true });
+    expect(whCountAll).toBe(1);
+
+    const whCountWithDiffCat = countWarehouse12Excluded(mockItems.slice(0, 2), {
+      isExcelSource: true,
+      category: 'ครุภัณฑ์สำนักงาน',
+    });
+    expect(whCountWithDiffCat).toBe(0);
+
+    const whCountBak = countWarehouse12Excluded([mockItems[2]], { isExcelSource: false });
+    expect(whCountBak).toBe(0);
   });
 });
 
