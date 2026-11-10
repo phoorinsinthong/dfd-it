@@ -1,19 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { parseBakBuffer } from '@/lib/services/bak-parser-service';
+import { parseBakBuffer, parseExcelFiles } from '@/lib/services/bak-parser-service';
 import sampleBakData from '@/lib/data/sample-bak-data.json';
+
+const SAMPLE_EXCEL_PATHS = [
+  '/Users/superman/Downloads/คอมพิวเตอร์ ๑.xls',
+  '/Users/superman/Downloads/เครื่องพิมพ์เลเซอร์ ธ่ค 57.xls',
+  '/Users/superman/Downloads/INKJET.xls',
+  '/Users/superman/Downloads/เครื่องพิมพ์ Ink Tank Printer.xls',
+  '/Users/superman/Downloads/เครื่องพิมพ์ LINE PRINTER.xls',
+  '/Users/superman/Downloads/เครื่องพิมพ์แบบดอทเมตริก.xls',
+];
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const isSample = searchParams.get('sample') === 'true';
+  const sampleParam = searchParams.get('sample');
+  const fiscalYearParam = parseInt(searchParams.get('year') || '2569', 10);
+  const currentYear = isNaN(fiscalYearParam) ? 2569 : fiscalYearParam;
 
-  if (isSample) {
+  if (sampleParam === 'excel') {
+    try {
+      const existingFiles = SAMPLE_EXCEL_PATHS.filter((p) =>
+        fs.existsSync(/*turbopackIgnore: true*/ p)
+      );
+      if (existingFiles.length > 0) {
+        const filePayloads = existingFiles.map((p) => ({
+          name: path.basename(p),
+          buffer: fs.readFileSync(/*turbopackIgnore: true*/ p),
+        }));
+        const result = parseExcelFiles(filePayloads, currentYear);
+        return NextResponse.json({ success: true, data: result });
+      }
+    } catch (err: any) {
+      console.warn('Failed to load sample Excel files:', err);
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'ไม่พบไฟล์ Excel ตัวอย่างในระบบ' },
+      { status: 404 }
+    );
+  }
+
+  if (sampleParam === 'true' || sampleParam === 'bak') {
     const desktopPath = '/Users/superman/Desktop/DFDEquipment-20261109.bak';
-    if (fs.existsSync(desktopPath)) {
+    if (fs.existsSync(/*turbopackIgnore: true*/ desktopPath)) {
       try {
-        const buffer = fs.readFileSync(desktopPath);
-        const result = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak');
+        const buffer = fs.readFileSync(/*turbopackIgnore: true*/ desktopPath);
+        const result = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', currentYear);
         return NextResponse.json({ success: true, data: result });
       } catch (err: any) {
         console.warn('Failed to parse desktop .bak, falling back to cached sample JSON:', err);
@@ -25,30 +59,71 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    message: 'BAK Parser API Ready. Send a POST request with multipart/form-data containing .bak file.',
+    message: 'BAK & Excel Parser API Ready. Send a POST request with .bak or .xls/.xlsx files.',
   });
 }
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    const fiscalYearParam = parseInt((formData.get('year') as string) || '2569', 10);
+    const currentYear = isNaN(fiscalYearParam) ? 2569 : fiscalYearParam;
 
-    if (!file) {
+    // Support both multiple files ('files') and single file ('file')
+    const filesList = formData.getAll('files') as File[];
+    const singleFile = formData.get('file') as File | null;
+
+    const allFiles = filesList.length > 0 ? filesList : singleFile ? [singleFile] : [];
+
+    if (allFiles.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'ไม่พบไฟล์ .bak กรุณาเลือกไฟล์ที่ต้องการอัปโหลด' },
+        { success: false, error: 'ไม่พบไฟล์ กรุณาเลือกไฟล์ .bak หรือไฟล์ Excel (.xls, .xlsx)' },
         { status: 400 }
       );
     }
 
-    if (!file.name.toLowerCase().endsWith('.bak')) {
+    // Check if uploaded files are Excel
+    const excelFiles = allFiles.filter((f) => {
+      const lower = f.name.toLowerCase();
+      return lower.endsWith('.xls') || lower.endsWith('.xlsx');
+    });
+
+    if (excelFiles.length > 0) {
+      const filePayloads = await Promise.all(
+        excelFiles.map(async (f) => ({
+          name: f.name,
+          buffer: Buffer.from(await f.arrayBuffer()),
+        }))
+      );
+
+      const result = parseExcelFiles(filePayloads, currentYear);
+
+      if (result.items.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'ไม่พบแถวข้อมูลครุภัณฑ์ที่ถูกต้องในไฟล์ Excel ที่อัปโหลด กรุณาตรวจสอบหัวตารางและเนื้อหา',
+          },
+          { status: 422 }
+        );
+      }
+
+      return NextResponse.json({ success: true, data: result });
+    }
+
+    // Otherwise check for .bak file
+    const bakFile = allFiles.find((f) => f.name.toLowerCase().endsWith('.bak'));
+    if (!bakFile) {
       return NextResponse.json(
-        { success: false, error: 'รูปแบบไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์นามสกุล .bak เท่านั้น' },
+        {
+          success: false,
+          error: 'รูปแบบไฟล์ไม่ถูกต้อง รองรับเฉพาะไฟล์นามสกุล .bak และ .xls / .xlsx เท่านั้น',
+        },
         { status: 400 }
       );
     }
 
-    const arrayBuffer = await file.arrayBuffer();
+    const arrayBuffer = await bakFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     if (buffer.length < 8192) {
@@ -58,7 +133,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = parseBakBuffer(buffer, file.name);
+    const result = parseBakBuffer(buffer, bakFile.name, currentYear);
 
     if (result.items.length === 0) {
       return NextResponse.json(
@@ -74,7 +149,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Error in POST /api/bak-parser:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์ .bak' },
+      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์' },
       { status: 500 }
     );
   }
