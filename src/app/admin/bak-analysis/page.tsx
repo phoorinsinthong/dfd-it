@@ -20,7 +20,6 @@ import {
   Layers,
   Calendar,
   DollarSign,
-  ChevronRight,
   ShieldAlert,
   Sparkles,
   ArrowRight,
@@ -35,15 +34,28 @@ import {
   AlertCircle,
   FileText,
   SlidersHorizontal,
-  FolderArchive
+  FolderArchive,
+  Scale,
+  ArrowLeftRight,
 } from 'lucide-react';
-import { BakParseResult, BakEquipmentItem, AgeBracket } from '@/types/bak-equipment';
+import {
+  BakParseResult,
+  BakEquipmentItem,
+  AgeBracket,
+  ReconciliationStatus,
+  ReconciliationResult,
+  ReconciliationItem,
+} from '@/types/bak-equipment';
 import {
   parseBakBuffer,
+  parseExcelFiles,
   generateBakCsvReport,
   isWarehouse12,
   filterReportItems,
   countWarehouse12Excluded,
+  normalizeEquipmentCode,
+  reconcileEquipmentData,
+  generateReconciliationCsv,
 } from '@/lib/services/bak-parser-service';
 import sampleBakData from '@/lib/data/sample-bak-data.json';
 
@@ -57,8 +69,16 @@ export default function BakAnalysisPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // Source Type Selector: .bak vs Excel
-  const [sourceMode, setSourceMode] = useState<'bak' | 'excel'>('bak');
+  // Source Type Selector: .bak vs Excel vs Compare (Reconciliation)
+  const [sourceMode, setSourceMode] = useState<'bak' | 'excel' | 'compare'>('bak');
+  const [bakParseResult, setBakParseResult] = useState<BakParseResult | null>(null);
+  const [excelParseResult, setExcelParseResult] = useState<BakParseResult | null>(null);
+
+  // Reconciliation Filters & Pagination (.bak vs Excel)
+  const [reconcileFilter, setReconcileFilter] = useState<'all' | 'matched' | 'discrepancy' | 'only_bak' | 'only_excel'>('all');
+  const [reconcileSearch, setReconcileSearch] = useState<string>('');
+  const [reconcilePage, setReconcilePage] = useState<number>(1);
+  const reconcilePageSize = 25;
 
   // Active View Tab
   const [activeTab, setActiveTab] = useState<'dashboard' | 'table' | 'crosstab' | 'report'>('dashboard');
@@ -83,9 +103,9 @@ export default function BakAnalysisPage() {
   const [reportYearEnd, setReportYearEnd] = useState<string>('');
   const [reportRowLimit, setReportRowLimit] = useState<string>('all');
   const [reportExcludeWarehouse12, setReportExcludeWarehouse12] = useState<boolean>(true);
-  // .bak Specific Report Filters: Status = "ใช้งานปกติ", Procurement = "กง.กห."
-  const [reportBakStatus, setReportBakStatus] = useState<string>('ใช้งานปกติ');
-  const [reportBakProcurement, setReportBakProcurement] = useState<string>('กง.กห.');
+  // .bak Specific Report Filters: Status = "ปกติ", Procurement = "all" (Default)
+  const [reportBakStatus, setReportBakStatus] = useState<string>('ปกติ');
+  const [reportBakProcurement, setReportBakProcurement] = useState<string>('all');
   const [reportBakIncludeDeptMatch, setReportBakIncludeDeptMatch] = useState<boolean>(true);
 
   // Search Table Filters for Status & Procurement (.bak)
@@ -128,6 +148,7 @@ export default function BakAnalysisPage() {
         age14PlusValue: data.summary?.age14PlusValue ?? 0,
         unknownAgeCount: data.summary?.unknownAgeCount ?? 0,
       };
+      setBakParseResult(data);
       setParseResult(data);
     }
   }, []);
@@ -156,13 +177,19 @@ export default function BakAnalysisPage() {
         });
         const json = await res.json();
         if (json.success && json.data) {
-          setParseResult(json.data);
+          setBakParseResult(json.data);
+          if (sourceMode === 'bak' || sourceMode === 'compare') {
+            setParseResult(json.data);
+          }
           setSuccessMsg(`ประมวลผลไฟล์ "${file.name}" สำเร็จ พบครุภัณฑ์ ${json.data.items.length} รายการ`);
         } else {
           setErrorMsg(json.error || 'ไม่พบโครงสร้างข้อมูลครุภัณฑ์ที่รองรับในไฟล์ .bak นี้');
         }
       } else {
-        setParseResult(result);
+        setBakParseResult(result);
+        if (sourceMode === 'bak' || sourceMode === 'compare') {
+          setParseResult(result);
+        }
         setSuccessMsg(`ประมวลผลไฟล์ "${file.name}" สำเร็จ พบครุภัณฑ์ ${result.items.length} รายการ (สแกน ${result.totalPagesScanned} เพจ)`);
       }
       setCurrentPage(1);
@@ -204,7 +231,10 @@ export default function BakAnalysisPage() {
       const json = await res.json();
 
       if (json.success && json.data) {
-        setParseResult(json.data);
+        setExcelParseResult(json.data);
+        if (sourceMode === 'excel') {
+          setParseResult(json.data);
+        }
         setSuccessMsg(
           `ประมวลผลไฟล์ Excel ${fileArray.length} ไฟล์สำเร็จ พบข้อมูลครุภัณฑ์รวม ${json.data.items.length} รายการ`
         );
@@ -229,15 +259,22 @@ export default function BakAnalysisPage() {
       const res = await fetch('/api/bak-parser?sample=bak');
       const json = await res.json();
       if (json.success && json.data) {
-        setParseResult(json.data);
+        setBakParseResult(json.data);
+        if (sourceMode === 'bak' || sourceMode === 'compare') {
+          setParseResult(json.data);
+        }
         setSuccessMsg(`โหลดข้อมูลตัวอย่าง .bak "${json.data.fileName}" สำเร็จ (${json.data.items.length} รายการ)`);
       } else {
-        setParseResult(sampleBakData as unknown as BakParseResult);
+        const fallback = sampleBakData as unknown as BakParseResult;
+        setBakParseResult(fallback);
+        if (sourceMode === 'bak' || sourceMode === 'compare') setParseResult(fallback);
         setSuccessMsg('โหลดข้อมูลตัวอย่าง .bak จาก Cache สำเร็จ');
       }
       setCurrentPage(1);
     } catch {
-      setParseResult(sampleBakData as unknown as BakParseResult);
+      const fallback = sampleBakData as unknown as BakParseResult;
+      setBakParseResult(fallback);
+      if (sourceMode === 'bak' || sourceMode === 'compare') setParseResult(fallback);
       setSuccessMsg('โหลดข้อมูลตัวอย่างสำเร็จ');
     } finally {
       setLoading(false);
@@ -253,7 +290,10 @@ export default function BakAnalysisPage() {
       const res = await fetch('/api/bak-parser?sample=excel');
       const json = await res.json();
       if (json.success && json.data) {
-        setParseResult(json.data);
+        setExcelParseResult(json.data);
+        if (sourceMode === 'excel') {
+          setParseResult(json.data);
+        }
         setSuccessMsg(`โหลดชุดไฟล์ Excel ทะเบียนครุภัณฑ์ 6 ไฟล์สำเร็จ (รวม ${json.data.items.length} รายการ)`);
       } else {
         setErrorMsg(json.error || 'ไม่สามารถโหลดไฟล์ตัวอย่าง Excel ได้');
@@ -263,6 +303,64 @@ export default function BakAnalysisPage() {
       setErrorMsg('เกิดข้อผิดพลาดในการโหลดตัวอย่าง Excel: ' + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load Sample for Comparison Mode (both .bak and Excel)
+  const handleLoadCompareSample = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const res = await fetch('/api/bak-parser?sample=compare');
+      const json = await res.json();
+      if (json.success && json.data) {
+        if (json.data.bak) {
+          setBakParseResult(json.data.bak);
+          if (sourceMode === 'bak') setParseResult(json.data.bak);
+        }
+        if (json.data.excel) {
+          setExcelParseResult(json.data.excel);
+          if (sourceMode === 'excel') setParseResult(json.data.excel);
+        }
+        setSuccessMsg(
+          `โหลดข้อมูลตัวอย่างกระทบยอด 2 แหล่งสำเร็จ (.bak ${json.data.bak?.items?.length || 0} รายการ, Excel ${json.data.excel?.items?.length || 0} รายการ)`
+        );
+      } else {
+        // Fallback: load both individually
+        await handleLoadSampleBak();
+        await handleLoadSampleExcel();
+      }
+      setReconcilePage(1);
+    } catch (err: any) {
+      setErrorMsg('เกิดข้อผิดพลาดในการโหลดตัวอย่างเปรียบเทียบ: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Switch Data Source Mode
+  const handleSwitchSourceMode = (mode: 'bak' | 'excel' | 'compare') => {
+    setSourceMode(mode);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (mode === 'bak') {
+      if (bakParseResult) {
+        setParseResult(bakParseResult);
+      }
+    } else if (mode === 'excel') {
+      if (excelParseResult) {
+        setParseResult(excelParseResult);
+      } else {
+        handleLoadSampleExcel();
+      }
+    } else if (mode === 'compare') {
+      if (!excelParseResult) {
+        handleLoadSampleExcel();
+      }
+      if (!bakParseResult) {
+        handleLoadSampleBak();
+      }
     }
   };
 
@@ -304,17 +402,23 @@ export default function BakAnalysisPage() {
       if (selectedSourceFile !== 'all' && item.sourceFile !== selectedSourceFile) return false;
 
       // Status Filter (.bak)
-      if (selectedStatus !== 'all' && item.statusName !== selectedStatus) return false;
+      if (selectedStatus !== 'all') {
+        const matchesStatus =
+          item.statusName === selectedStatus ||
+          (selectedStatus === 'ปกติ' && (item.statusId === 1 || item.statusName === 'ใช้งานปกติ')) ||
+          (selectedStatus === 'ส่งซ่อม' && item.statusId === 2) ||
+          (selectedStatus === 'ส่งคืน' && item.statusId === 3);
+        if (!matchesStatus) return false;
+      }
 
       // Procurement Filter (.bak)
       if (selectedProcurement !== 'all') {
-        if (selectedProcurement === 'กง.กห.') {
-          const isProc = item.procurementName === 'กง.กห.' || item.procurementId === 2;
-          const isDept = item.deptName?.includes('กง.กห.');
-          if (!isProc && !isDept) return false;
-        } else if (item.procurementName !== selectedProcurement) {
-          return false;
-        }
+        const matchesProc =
+          item.procurementName === selectedProcurement ||
+          (selectedProcurement === 'ทสอ.' && (item.procurementId === 1 || item.procurementName?.startsWith('ทสอ'))) ||
+          (selectedProcurement === 'กง.กห.' && (item.procurementId === 2 || item.procurementName === 'กง.กห.' || item.deptName?.includes('กง.กห.'))) ||
+          (selectedProcurement === 'สม.' && (item.procurementId === 3 || item.procurementName === 'สม.'));
+        if (!matchesProc) return false;
       }
 
       // Age Bracket Filter
@@ -544,12 +648,129 @@ export default function BakAnalysisPage() {
       maxAge,
       avgAge,
       age1To7Count,
+      age1To7Value,
       age7To14Count,
+      age7To14Value,
       age14PlusCount,
+      age14PlusValue,
       unknownAgeCount,
       ageBreakdown,
     };
   }, [reportFilteredItems]);
+
+  // Dynamic Dashboard Breakdowns (Synchronized 100% with Report Filters)
+  const dashboardByType = useMemo(() => {
+    const typeMap = new Map<string, { count: number; totalValue: number; category: string }>();
+    for (const item of reportFilteredItems) {
+      const t = item.type || 'ไม่ระบุประเภท';
+      const existing = typeMap.get(t) || { count: 0, totalValue: 0, category: item.category };
+      existing.count += 1;
+      existing.totalValue += item.price || 0;
+      typeMap.set(t, existing);
+    }
+    const total = reportFilteredItems.length;
+    return Array.from(typeMap.entries())
+      .map(([type, data]) => ({
+        type,
+        category: data.category,
+        count: data.count,
+        totalValue: data.totalValue,
+        percent: total > 0 ? Math.round((data.count / total) * 1000) / 10 : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [reportFilteredItems]);
+
+  const dashboardByCategory = useMemo(() => {
+    const catMap = new Map<string, { count: number; totalValue: number }>();
+    for (const item of reportFilteredItems) {
+      const c = item.category || 'ไม่ระบุหมวดหมู่';
+      const existing = catMap.get(c) || { count: 0, totalValue: 0 };
+      existing.count += 1;
+      existing.totalValue += item.price || 0;
+      catMap.set(c, existing);
+    }
+    const total = reportFilteredItems.length;
+    return Array.from(catMap.entries())
+      .map(([category, data]) => ({
+        category,
+        count: data.count,
+        totalValue: data.totalValue,
+        percent: total > 0 ? Math.round((data.count / total) * 1000) / 10 : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [reportFilteredItems]);
+
+  const dashboardByYear = useMemo(() => {
+    const yearMap = new Map<string, { count: number; totalValue: number }>();
+    for (const item of reportFilteredItems) {
+      const y = item.year || 'ไม่ระบุปี';
+      const existing = yearMap.get(y) || { count: 0, totalValue: 0 };
+      existing.count += 1;
+      existing.totalValue += item.price || 0;
+      yearMap.set(y, existing);
+    }
+    const total = reportFilteredItems.length;
+    return Array.from(yearMap.entries())
+      .map(([year, data]) => ({
+        year,
+        count: data.count,
+        totalValue: data.totalValue,
+        percent: total > 0 ? Math.round((data.count / total) * 1000) / 10 : 0,
+      }))
+      .sort((a, b) => {
+        const nA = parseInt(a.year, 10) || 0;
+        const nB = parseInt(b.year, 10) || 0;
+        return nB - nA;
+      });
+  }, [reportFilteredItems]);
+
+  // Reconciliation between .bak and Excel Data Sources
+  const reconciliationResult = useMemo<ReconciliationResult>(() => {
+    const bakItems = bakParseResult?.items || [];
+    const excelItems = excelParseResult?.items || [];
+    return reconcileEquipmentData(bakItems, excelItems);
+  }, [bakParseResult, excelParseResult]);
+
+  // Filtered Reconciliation Items
+  const filteredReconciliationItems = useMemo(() => {
+    return reconciliationResult.items.filter((item) => {
+      if (reconcileFilter !== 'all' && item.status !== reconcileFilter) return false;
+      if (reconcileSearch.trim()) {
+        const q = reconcileSearch.toLowerCase().trim();
+        const matchCode = item.code.toLowerCase().includes(q) || item.normalizedCode.toLowerCase().includes(q);
+        const matchName = item.name.toLowerCase().includes(q);
+        const matchType = (item.type || '').toLowerCase().includes(q);
+        const matchDeptBak = (item.bakItem?.deptName || '').toLowerCase().includes(q);
+        const matchDeptExcel = (item.excelItem?.deptName || '').toLowerCase().includes(q);
+        const matchSerialBak = (item.bakItem?.serial || '').toLowerCase().includes(q);
+        const matchSerialExcel = (item.excelItem?.serial || '').toLowerCase().includes(q);
+        return matchCode || matchName || matchType || matchDeptBak || matchDeptExcel || matchSerialBak || matchSerialExcel;
+      }
+      return true;
+    });
+  }, [reconciliationResult, reconcileFilter, reconcileSearch]);
+
+  // Paginated Reconciliation Items
+  const paginatedReconciliationItems = useMemo(() => {
+    const start = (reconcilePage - 1) * reconcilePageSize;
+    return filteredReconciliationItems.slice(start, start + reconcilePageSize);
+  }, [filteredReconciliationItems, reconcilePage, reconcilePageSize]);
+
+  const reconcileTotalPages = Math.ceil(filteredReconciliationItems.length / reconcilePageSize) || 1;
+
+  // Export CSV for Reconciliation
+  const handleDownloadReconciliationCsv = () => {
+    if (!reconciliationResult || reconciliationResult.items.length === 0) return;
+    const csvContent = generateReconciliationCsv(reconciliationResult);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'DFD_Equipment_Reconciliation_Bak_vs_Excel.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Export CSV for Report Tab (Exact filtered and oldest-first sorted items)
   const handleDownloadReportCsv = () => {
@@ -694,10 +915,10 @@ export default function BakAnalysisPage() {
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               เลือกแหล่งข้อมูล:
             </span>
-            <div className="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
+            <div className="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800 flex-wrap">
               <button
                 type="button"
-                onClick={() => setSourceMode('bak')}
+                onClick={() => handleSwitchSourceMode('bak')}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
                   sourceMode === 'bak'
                     ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
@@ -710,7 +931,7 @@ export default function BakAnalysisPage() {
 
               <button
                 type="button"
-                onClick={() => setSourceMode('excel')}
+                onClick={() => handleSwitchSourceMode('excel')}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
                   sourceMode === 'excel'
                     ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
@@ -719,6 +940,22 @@ export default function BakAnalysisPage() {
               >
                 <FileSpreadsheet className="w-4 h-4" />
                 <span>ไฟล์ทะเบียน Excel (รวมหลายไฟล์ .xls, .xlsx)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSwitchSourceMode('compare')}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                  sourceMode === 'compare'
+                    ? 'bg-purple-500 text-slate-950 shadow-md shadow-purple-500/20'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Scale className="w-4 h-4" />
+                <span>แบบรวม / ตรวจสอบความตรงกัน (.bak vs Excel)</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800">
+                  Reconciliation
+                </span>
               </button>
             </div>
           </div>
@@ -730,11 +967,160 @@ export default function BakAnalysisPage() {
             onDrop={onDrop}
             className={`p-6 sm:p-8 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center text-center ${
               isDragging
-                ? 'border-amber-400 bg-amber-950/20 scale-[1.01]'
+                ? 'border-purple-400 bg-purple-950/20 scale-[1.01]'
                 : 'border-slate-800 hover:border-slate-700 bg-slate-950/40'
             }`}
           >
-            {sourceMode === 'bak' ? (
+            {sourceMode === 'compare' ? (
+              <div className="w-full space-y-4">
+                {/* One-click Load Both Sample Banner */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/40 to-blue-950/40 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
+                      <Scale className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>โหมดตรวจสอบและกระทบยอดบัญชีครุภัณฑ์ (.bak vs Excel)</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-normal">
+                          Dual-Source Audit
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-300">
+                        จับคู่รหัสครุภัณฑ์ (EquipmentCode) ตรวจสอบความตรงกันและชี้เป้าความขัดแย้งของข้อมูลอัตโนมัติ
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLoadCompareSample}
+                    disabled={loading}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 shrink-0"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>⚡ โหลดชุดตัวอย่างทั้ง .bak + Excel ทันที</span>
+                  </button>
+                </div>
+
+                {/* Dual Ingestion Grid: Left = .bak, Right = Excel */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                  {/* Left: .bak Source */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                          <Database className="w-4 h-4" />
+                          <span>แหล่งที่ 1: ไฟล์สำรอง .bak (SQL Server)</span>
+                        </span>
+                        {bakParseResult ? (
+                          <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>โหลดแล้ว ({bakParseResult.items.length} รายการ)</span>
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-amber-400/80 bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                            ยังไม่โหลด
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400 mb-3 truncate">
+                        {bakParseResult ? `ไฟล์: ${bakParseResult.fileName}` : 'ลากไฟล์ .bak มาวาง หรือกดเลือกไฟล์จากเครื่อง'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        ref={bakFileInputRef}
+                        accept=".bak"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            handleProcessBakFile(e.target.files[0]);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => bakFileInputRef.current?.click()}
+                        disabled={loading}
+                        className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold transition"
+                      >
+                        {bakParseResult ? 'เปลี่ยนไฟล์ .bak' : 'เลือกไฟล์ .bak'}
+                      </button>
+                      {!bakParseResult && (
+                        <button
+                          type="button"
+                          onClick={handleLoadSampleBak}
+                          disabled={loading}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+                        >
+                          ใช้ตัวอย่าง .bak
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Excel Source */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                          <FileSpreadsheet className="w-4 h-4" />
+                          <span>แหล่งที่ 2: ทะเบียนพัสดุ Excel (.xls, .xlsx)</span>
+                        </span>
+                        {excelParseResult ? (
+                          <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>โหลดแล้ว ({excelParseResult.items.length} รายการ)</span>
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-emerald-400/80 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                            ยังไม่โหลด
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400 mb-3 truncate">
+                        {excelParseResult
+                          ? `รวม ${excelParseResult.availableFiles?.length || 1} ไฟล์ Excel (${excelParseResult.items.length} รายการ)`
+                          : 'เลือกไฟล์ Excel ได้หลายไฟล์พร้อมกัน'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        ref={excelFileInputRef}
+                        accept=".xls,.xlsx"
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleProcessExcelFiles(e.target.files);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => excelFileInputRef.current?.click()}
+                        disabled={loading}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition"
+                      >
+                        {excelParseResult ? 'เปลี่ยนไฟล์ Excel' : 'เลือกไฟล์ Excel'}
+                      </button>
+                      {!excelParseResult && (
+                        <button
+                          type="button"
+                          onClick={handleLoadSampleExcel}
+                          disabled={loading}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+                        >
+                          ใช้ตัวอย่าง Excel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : sourceMode === 'bak' ? (
               <>
                 <input
                   type="file"
@@ -852,163 +1238,823 @@ export default function BakAnalysisPage() {
 
         {parseResult && (
           <>
-            {/* KPI Cards: Total, Value, Types & 3 Lifecycle Age Brackets (Hidden in print) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5 mb-8 no-print">
-              {/* KPI 1: ครุภัณฑ์ทั้งหมด */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                    <Package className="w-4 h-4" />
+            {/* KPI Cards: Either Reconciliation KPIs (compare mode) or Synchronized Lifecycle KPIs (standard mode) */}
+            {sourceMode === 'compare' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5 mb-8 no-print">
+                {/* Compare KPI 1: ครุภัณฑ์ทั้งหมด */}
+                <div
+                  onClick={() => {
+                    setReconcileFilter('all');
+                    setReconcilePage(1);
+                  }}
+                  className={`rounded-2xl p-4 border transition cursor-pointer group ${
+                    reconcileFilter === 'all'
+                      ? 'bg-purple-950/40 border-purple-500 shadow-md shadow-purple-500/20'
+                      : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                      <Package className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                      Total
+                    </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    Total
-                  </span>
+                  <p className="text-xs text-slate-400 mb-1">รหัสครุภัณฑ์รวม (2 แหล่ง)</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold text-white">
+                      {reconciliationResult.totalUnique.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-slate-500">รหัส</span>
+                  </div>
+                  <p className="text-[10px] text-purple-300 mt-1 truncate">
+                    .bak: {bakParseResult?.items?.length || 0} | Excel: {excelParseResult?.items?.length || 0}
+                  </p>
                 </div>
-                <p className="text-xs text-slate-400 mb-1">จำนวนครุภัณฑ์รวม</p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-white">
-                    {(parseResult.summary?.totalCount ?? 0).toLocaleString()}
-                  </span>
-                  <span className="text-xs text-slate-500">ชิ้น</span>
+
+                {/* Compare KPI 2: ตรงกันทั้ง 2 แหล่ง 🟢 */}
+                <div
+                  onClick={() => {
+                    setReconcileFilter('matched');
+                    setReconcilePage(1);
+                  }}
+                  className={`rounded-2xl p-4 border transition cursor-pointer group ${
+                    reconcileFilter === 'matched'
+                      ? 'bg-emerald-950/40 border-emerald-500 shadow-md shadow-emerald-500/20'
+                      : 'bg-emerald-950/20 border-emerald-500/30 hover:border-emerald-500/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ตรงกัน 🟢
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-300/80 mb-1">ตรงกันทั้ง 2 แหล่ง</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-emerald-400">
+                      {reconciliationResult.matchedCount.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-emerald-400/80 font-mono">
+                      {reconciliationResult.totalUnique > 0
+                        ? `${Math.round((reconciliationResult.matchedCount / reconciliationResult.totalUnique) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">ข้อมูลหลักตรงกันสมบูรณ์</p>
+                </div>
+
+                {/* Compare KPI 3: ข้อมูลขัดแย้ง 🟡 */}
+                <div
+                  onClick={() => {
+                    setReconcileFilter('discrepancy');
+                    setReconcilePage(1);
+                  }}
+                  className={`rounded-2xl p-4 border transition cursor-pointer group ${
+                    reconcileFilter === 'discrepancy'
+                      ? 'bg-amber-950/40 border-amber-500 shadow-md shadow-amber-500/20'
+                      : 'bg-amber-950/20 border-amber-500/30 hover:border-amber-500/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      ขัดแย้ง 🟡
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-300/80 mb-1">ข้อมูลไม่ตรงกัน</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-amber-400">
+                      {reconciliationResult.discrepancyCount.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-amber-400/80 font-mono">
+                      {reconciliationResult.totalUnique > 0
+                        ? `${Math.round((reconciliationResult.discrepancyCount / reconciliationResult.totalUnique) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">รหัสตรงแต่รายละเอียดต่าง</p>
+                </div>
+
+                {/* Compare KPI 4: มีเฉพาะใน .bak 🔵 */}
+                <div
+                  onClick={() => {
+                    setReconcileFilter('only_bak');
+                    setReconcilePage(1);
+                  }}
+                  className={`rounded-2xl p-4 border transition cursor-pointer group ${
+                    reconcileFilter === 'only_bak'
+                      ? 'bg-blue-950/40 border-blue-500 shadow-md shadow-blue-500/20'
+                      : 'bg-blue-950/20 border-blue-500/30 hover:border-blue-500/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      เฉพาะ .bak 🔵
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-300/80 mb-1">มีเฉพาะในฐาน .bak</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-blue-400">
+                      {reconciliationResult.onlyBakCount.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-blue-400/80 font-mono">
+                      {reconciliationResult.totalUnique > 0
+                        ? `${Math.round((reconciliationResult.onlyBakCount / reconciliationResult.totalUnique) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">ไม่พบในไฟล์ Excel</p>
+                </div>
+
+                {/* Compare KPI 5: มีเฉพาะใน Excel 🟣 */}
+                <div
+                  onClick={() => {
+                    setReconcileFilter('only_excel');
+                    setReconcilePage(1);
+                  }}
+                  className={`rounded-2xl p-4 border transition cursor-pointer group ${
+                    reconcileFilter === 'only_excel'
+                      ? 'bg-purple-950/40 border-purple-500 shadow-md shadow-purple-500/20'
+                      : 'bg-purple-950/20 border-purple-500/30 hover:border-purple-500/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                      <FileSpreadsheet className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      เฉพาะ Excel 🟣
+                    </span>
+                  </div>
+                  <p className="text-xs text-purple-300/80 mb-1">มีเฉพาะใน Excel</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-purple-400">
+                      {reconciliationResult.onlyExcelCount.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-purple-400/80 font-mono">
+                      {reconciliationResult.totalUnique > 0
+                        ? `${Math.round((reconciliationResult.onlyExcelCount / reconciliationResult.totalUnique) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">ไม่พบในฐาน .bak</p>
+                </div>
+
+                {/* Compare KPI 6: อัตราความสอดคล้อง 📈 */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      Rate
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-1">อัตราความสอดคล้อง</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold text-white">
+                      {reconciliationResult.reconciliationRate}%
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden mt-2">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full"
+                      style={{ width: `${Math.min(100, reconciliationResult.reconciliationRate)}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
-
-              {/* KPI 2: มูลค่ารวม */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                    <DollarSign className="w-4 h-4" />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5 mb-8 no-print">
+                {/* KPI 1: ครุภัณฑ์ทั้งหมด (Synchronized with Report Filter) */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                      <Package className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      Total
+                    </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    Value
-                  </span>
+                  <p className="text-xs text-slate-400 mb-1">จำนวนครุภัณฑ์รวม</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold text-white">
+                      {(reportSummary?.totalCount ?? 0).toLocaleString()}
+                    </span>
+                    <span className="text-xs text-slate-500">ชิ้น</span>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-400 mb-1">มูลค่ารวมตามเอกสาร</p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-xl font-bold text-emerald-400">
-                    ฿{(parseResult.summary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                  </span>
+
+                {/* KPI 2: มูลค่ารวม */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                      <DollarSign className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Value
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-1">มูลค่ารวมตามเอกสาร</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-xl font-bold text-emerald-400">
+                      ฿{(reportSummary?.totalValue ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* KPI 3: จำแนกประเภท */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                      <Layers className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                      Types
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-1">จำแนกประเภท</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold text-white">
+                      {dashboardByType.length}
+                    </span>
+                    <span className="text-xs text-slate-500">ประเภท</span>
+                  </div>
+                </div>
+
+                {/* KPI 4: 🟢 อายุ 1 - 7 ปี (ใช้งานปกติ) */}
+                <div
+                  onClick={() => {
+                    setSelectedAgeBracket('1-7');
+                    setActiveTab('table');
+                  }}
+                  className="bg-emerald-950/20 border border-emerald-500/30 hover:border-emerald-500/60 transition cursor-pointer rounded-2xl p-4 group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      1 - 7 ปี
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-300/80 mb-1">ใช้งานปกติ (🟢)</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-emerald-400">
+                      {(reportSummary?.age1To7Count ?? 0).toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-emerald-400/80 font-mono">
+                      {(reportSummary?.totalCount ?? 0) > 0
+                        ? `${Math.round(((reportSummary?.age1To7Count ?? 0) / reportSummary.totalCount) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">
+                    ฿{(reportSummary?.age1To7Value ?? 0).toLocaleString('th-TH')}
+                  </p>
+                </div>
+
+                {/* KPI 5: 🟡 อายุ 7 - 14 ปี (เริ่มเสื่อมสภาพ) */}
+                <div
+                  onClick={() => {
+                    setSelectedAgeBracket('7-14');
+                    setActiveTab('table');
+                  }}
+                  className="bg-amber-950/20 border border-amber-500/30 hover:border-amber-500/60 transition cursor-pointer rounded-2xl p-4 group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      7 - 14 ปี
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-300/80 mb-1">เริ่มเสื่อมสภาพ (🟡)</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-amber-400">
+                      {(reportSummary?.age7To14Count ?? 0).toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-amber-400/80 font-mono">
+                      {(reportSummary?.totalCount ?? 0) > 0
+                        ? `${Math.round(((reportSummary?.age7To14Count ?? 0) / reportSummary.totalCount) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">
+                    ฿{(reportSummary?.age7To14Value ?? 0).toLocaleString('th-TH')}
+                  </p>
+                </div>
+
+                {/* KPI 6: 🔴 อายุ 14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย) */}
+                <div
+                  onClick={() => {
+                    setSelectedAgeBracket('14+');
+                    setActiveTab('table');
+                  }}
+                  className="bg-red-950/20 border border-red-500/30 hover:border-red-500/60 transition cursor-pointer rounded-2xl p-4 group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center">
+                      <AlertCircle className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                      14+ ปี
+                    </span>
+                  </div>
+                  <p className="text-xs text-red-300/80 mb-1">เกินเกณฑ์/รอจำหน่าย (🔴)</p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold text-red-400">
+                      {(reportSummary?.age14PlusCount ?? 0).toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-red-400/80 font-mono">
+                      {(reportSummary?.totalCount ?? 0) > 0
+                        ? `${Math.round(((reportSummary?.age14PlusCount ?? 0) / reportSummary.totalCount) * 100)}%`
+                        : '0%'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">
+                    ฿{(reportSummary?.age14PlusValue ?? 0).toLocaleString('th-TH')}
+                  </p>
                 </div>
               </div>
+            )}
 
-              {/* KPI 3: จำแนกประเภท */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-                    <Layers className="w-4 h-4" />
+            {/* MAIN CONTENT: Either Reconciliation Mode (.bak vs Excel) or Standard 4-Tabs View */}
+            {sourceMode === 'compare' ? (
+              <div className="space-y-6">
+                {/* Reconciliation Toolbar (Hidden in print) */}
+                <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 no-print shadow-xl">
+                  {/* Title and Action Buttons */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                        <Scale className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>ตารางตรวจสอบความตรงกันและกระทบยอดบัญชีครุภัณฑ์ (.bak vs Excel)</span>
+                          <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800">
+                            จับคู่ตามรหัสครุภัณฑ์ (Normalized Code)
+                          </span>
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          เปรียบเทียบข้อมูลระหว่างฐานข้อมูลสำรอง .bak กับ ทะเบียนพัสดุ Excel แยกเป็น 4 กลุ่ม: ตรงกัน, ขัดแย้ง, เฉพาะ .bak, เฉพาะ Excel
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <button
+                        onClick={handleDownloadReconciliationCsv}
+                        disabled={reconciliationResult.items.length === 0}
+                        className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition"
+                        title="ดาวน์โหลดไฟล์ CSV ผลการตรวจกระทบยอดพัสดุ (UTF-8 BOM)"
+                      >
+                        <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                        <span>ส่งออก CSV กระทบยอด ({filteredReconciliationItems.length})</span>
+                      </button>
+                      <button
+                        onClick={handlePrint}
+                        disabled={reconciliationResult.items.length === 0}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-purple-950/40"
+                      >
+                        <Printer className="w-4 h-4" />
+                        <span>สั่งพิมพ์รายงานกระทบยอด (Print A4)</span>
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                    Types
-                  </span>
+
+                  {/* Filter Pills & Search Input */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    {/* Status Filter Tabs */}
+                    <div className="flex items-center gap-2 flex-wrap text-xs">
+                      <span className="text-slate-400 font-semibold mr-1">สถานะกระทบยอด:</span>
+                      <button
+                        onClick={() => {
+                          setReconcileFilter('all');
+                          setReconcilePage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition ${
+                          reconcileFilter === 'all'
+                            ? 'bg-purple-500 text-slate-950 shadow-md shadow-purple-500/20'
+                            : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                        }`}
+                      >
+                        ทั้งหมด ({reconciliationResult.totalUnique})
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReconcileFilter('matched');
+                          setReconcilePage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+                          reconcileFilter === 'matched'
+                            ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                            : 'bg-slate-950 text-emerald-400 hover:bg-emerald-950/30 border border-emerald-500/30'
+                        }`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span>ตรงกันทั้ง 2 แหล่ง 🟢 ({reconciliationResult.matchedCount})</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReconcileFilter('discrepancy');
+                          setReconcilePage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+                          reconcileFilter === 'discrepancy'
+                            ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                            : 'bg-slate-950 text-amber-400 hover:bg-amber-950/30 border border-amber-500/30'
+                        }`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                        <span>ข้อมูลขัดแย้ง 🟡 ({reconciliationResult.discrepancyCount})</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReconcileFilter('only_bak');
+                          setReconcilePage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+                          reconcileFilter === 'only_bak'
+                            ? 'bg-blue-500 text-slate-950 shadow-md shadow-blue-500/20'
+                            : 'bg-slate-950 text-blue-400 hover:bg-blue-950/30 border border-blue-500/30'
+                        }`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                        <span>มีเฉพาะใน .bak 🔵 ({reconciliationResult.onlyBakCount})</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReconcileFilter('only_excel');
+                          setReconcilePage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+                          reconcileFilter === 'only_excel'
+                            ? 'bg-purple-500 text-white shadow-md shadow-purple-500/20'
+                            : 'bg-slate-950 text-purple-400 hover:bg-purple-950/30 border border-purple-500/30'
+                        }`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                        <span>มีเฉพาะใน Excel 🟣 ({reconciliationResult.onlyExcelCount})</span>
+                      </button>
+                    </div>
+
+                    {/* Search Input */}
+                    <div className="relative min-w-64">
+                      <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="ค้นหารหัส, ชื่อ, หน่วยงาน, S/N..."
+                        value={reconcileSearch}
+                        onChange={(e) => {
+                          setReconcileSearch(e.target.value);
+                          setReconcilePage(1);
+                        }}
+                        className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-400 mb-1">จำแนกประเภท</p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-white">
-                    {parseResult.summary?.uniqueTypesCount ?? 0}
-                  </span>
-                  <span className="text-xs text-slate-500">ประเภท</span>
+
+                {/* Side-by-Side Comparison Table (Screen Display) */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-2xl no-print overflow-hidden">
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                    <div className="flex items-center gap-2">
+                      <ArrowLeftRight className="w-4 h-4 text-purple-400" />
+                      <h3 className="text-sm font-bold text-white">
+                        รายการเปรียบเทียบเคียงข้าง (Side-by-Side Comparison)
+                      </h3>
+                      <span className="text-xs text-slate-400 font-mono">
+                        (แสดง {paginatedReconciliationItems.length} จาก {filteredReconciliationItems.length} รายการ)
+                      </span>
+                    </div>
+
+                    {/* Pagination Top Controls */}
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        onClick={() => setReconcilePage((p) => Math.max(1, p - 1))}
+                        disabled={reconcilePage === 1}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 transition"
+                      >
+                        ก่อนหน้า
+                      </button>
+                      <span className="text-slate-400 font-mono">
+                        {reconcilePage} / {reconcileTotalPages}
+                      </span>
+                      <button
+                        onClick={() => setReconcilePage((p) => Math.min(reconcileTotalPages, p + 1))}
+                        disabled={reconcilePage === reconcileTotalPages}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 transition"
+                      >
+                        ถัดไป
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-950/60">
+                          <th className="py-3 px-3 text-center w-12">ลำดับ</th>
+                          <th className="py-3 px-3 min-w-44">หมายเลขครุภัณฑ์</th>
+                          <th className="py-3 px-3 min-w-52">ชื่อครุภัณฑ์ / ประเภท</th>
+                          <th className="py-3 px-3 text-center min-w-36">สถานะการตรวจ</th>
+                          <th className="py-3 px-3 min-w-36">ปีงบประมาณ (.bak vs Excel)</th>
+                          <th className="py-3 px-3 min-w-56">หน่วยงาน / ที่ตั้ง</th>
+                          <th className="py-3 px-3 text-center min-w-36">สถานะการใช้งาน</th>
+                          <th className="py-3 px-3 min-w-52">ข้อแตกต่างที่พบ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60">
+                        {paginatedReconciliationItems.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="py-12 text-center text-slate-500">
+                              ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedReconciliationItems.map((item, idx) => {
+                            const rowNo = (reconcilePage - 1) * reconcilePageSize + idx + 1;
+                            const isMatched = item.status === 'matched';
+                            const isDiscrepancy = item.status === 'discrepancy';
+                            const isOnlyBak = item.status === 'only_bak';
+                            const isOnlyExcel = item.status === 'only_excel';
+
+                            return (
+                              <tr
+                                key={item.id}
+                                className={`hover:bg-slate-800/40 transition ${
+                                  isDiscrepancy
+                                    ? 'bg-amber-950/10'
+                                    : isOnlyBak
+                                    ? 'bg-blue-950/10'
+                                    : isOnlyExcel
+                                    ? 'bg-purple-950/10'
+                                    : ''
+                                }`}
+                              >
+                                <td className="py-3 px-3 text-center font-mono text-slate-400">
+                                  {rowNo}
+                                </td>
+                                <td className="py-3 px-3 font-mono font-medium text-white">
+                                  <div className="flex flex-col">
+                                    <span>{item.code}</span>
+                                    {item.bakItem?.code && item.excelItem?.code && item.bakItem.code !== item.excelItem.code && (
+                                      <span className="text-[10px] text-amber-400">
+                                        (bak: {item.bakItem.code} | xls: {item.excelItem.code})
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3">
+                                  <div className="font-semibold text-slate-200">{item.name}</div>
+                                  <div className="text-[10px] text-slate-400">{item.type}</div>
+                                </td>
+                                <td className="py-3 px-3 text-center">
+                                  {isMatched && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      <span>ตรงกัน 🟢</span>
+                                    </span>
+                                  )}
+                                  {isDiscrepancy && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                      <AlertTriangle className="w-3 h-3" />
+                                      <span>ข้อมูลขัดแย้ง 🟡</span>
+                                    </span>
+                                  )}
+                                  {isOnlyBak && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                      <Database className="w-3 h-3" />
+                                      <span>เฉพาะ .bak 🔵</span>
+                                    </span>
+                                  )}
+                                  {isOnlyExcel && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                      <FileSpreadsheet className="w-3 h-3" />
+                                      <span>เฉพาะ Excel 🟣</span>
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-3 px-3 font-mono text-[11px]">
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[10px] text-amber-400">.bak:</span>
+                                      <span className={item.bakItem?.year ? 'text-slate-200' : 'text-slate-600'}>
+                                        {item.bakItem?.year || '-'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[10px] text-emerald-400">Excel:</span>
+                                      <span className={item.excelItem?.year ? 'text-slate-200' : 'text-slate-600'}>
+                                        {item.excelItem?.year || '-'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3 text-[11px]">
+                                  <div className="space-y-0.5 max-w-xs">
+                                    {item.bakItem?.deptName && (
+                                      <div className="truncate text-slate-300">
+                                        <span className="text-[10px] text-amber-400 mr-1">.bak:</span>
+                                        {item.bakItem.deptName}
+                                      </div>
+                                    )}
+                                    {item.excelItem?.deptName && (
+                                      <div className="truncate text-slate-300">
+                                        <span className="text-[10px] text-emerald-400 mr-1">Excel:</span>
+                                        {item.excelItem.deptName}
+                                      </div>
+                                    )}
+                                    {!item.bakItem?.deptName && !item.excelItem?.deptName && (
+                                      <span className="text-slate-600">-</span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3 text-center text-[11px]">
+                                  <div className="space-y-0.5">
+                                    <div>
+                                      <span className="text-[10px] text-amber-400 mr-1">.bak:</span>
+                                      <span className="text-slate-300 font-medium">
+                                        {item.bakItem?.statusName || '-'}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-emerald-400 mr-1">Excel:</span>
+                                      <span className="text-slate-300 font-medium">
+                                        {item.excelItem?.statusName || '-'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3 text-[11px]">
+                                  {item.discrepancies.length > 0 ? (
+                                    <div className="space-y-1">
+                                      {item.discrepancies.map((d, dIdx) => (
+                                        <span
+                                          key={dIdx}
+                                          className="inline-block bg-amber-950/60 border border-amber-600/40 text-amber-300 text-[10px] px-2 py-0.5 rounded-lg mr-1 mb-1"
+                                        >
+                                          {d.fieldLabel}: .bak [{d.bakValue}] ≠ Excel [{d.excelValue}]
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : isMatched ? (
+                                    <span className="text-emerald-400 text-[10px]">✓ ข้อมูลตรงกัน</span>
+                                  ) : (
+                                    <span className="text-slate-500 text-[10px]">-</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination Footer */}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs text-slate-400 mt-4">
+                    <span>
+                      แสดงรายการ {Math.min(filteredReconciliationItems.length, (reconcilePage - 1) * reconcilePageSize + 1)} ถึง{' '}
+                      {Math.min(filteredReconciliationItems.length, reconcilePage * reconcilePageSize)} จากทั้งหมด{' '}
+                      {filteredReconciliationItems.length} รายการ
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setReconcilePage((p) => Math.max(1, p - 1))}
+                        disabled={reconcilePage === 1}
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 transition"
+                      >
+                        ก่อนหน้า
+                      </button>
+                      <button
+                        onClick={() => setReconcilePage((p) => Math.min(reconcileTotalPages, p + 1))}
+                        disabled={reconcilePage === reconcileTotalPages}
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 transition"
+                      >
+                        ถัดไป
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Printable A4 View for Reconciliation (Visible only during printing) */}
+                <div className="hidden print:block print-report-container text-slate-900 bg-white">
+                  <div className="text-center pb-4 mb-4 border-b-2 border-slate-900">
+                    <h2 className="text-lg font-bold">
+                      รายงานผลการตรวจสอบความสอดคล้องและกระทบยอดบัญชีครุภัณฑ์คอมพิวเตอร์และสารสนเทศ
+                    </h2>
+                    <h3 className="text-sm font-semibold text-slate-700">
+                      เปรียบเทียบระหว่างฐานข้อมูลสำรองระบบ DFDEquipment (.bak) และ ทะเบียนพัสดุ Excel
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      ประจำปีงบประมาณ พ.ศ. 2569 • ข้อมูล ณ วันที่ {new Date().toLocaleDateString('th-TH')}
+                    </p>
+                  </div>
+
+                  {/* Summary Box */}
+                  <div className="grid grid-cols-5 gap-3 p-3 bg-slate-100 rounded border border-slate-300 mb-4 text-center text-xs">
+                    <div>
+                      <p className="text-slate-600 font-medium">รหัสทั้งหมด</p>
+                      <p className="text-base font-bold font-mono">{reconciliationResult.totalUnique} รายการ</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-600 font-medium">ตรงกันทั้ง 2 แหล่ง 🟢</p>
+                      <p className="text-base font-bold font-mono text-emerald-800">{reconciliationResult.matchedCount} รายการ</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-600 font-medium">ข้อมูลขัดแย้ง 🟡</p>
+                      <p className="text-base font-bold font-mono text-amber-800">{reconciliationResult.discrepancyCount} รายการ</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-600 font-medium">มีเฉพาะใน .bak 🔵</p>
+                      <p className="text-base font-bold font-mono text-blue-800">{reconciliationResult.onlyBakCount} รายการ</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-600 font-medium">มีเฉพาะใน Excel 🟣</p>
+                      <p className="text-base font-bold font-mono text-purple-800">{reconciliationResult.onlyExcelCount} รายการ</p>
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <table className="w-full text-left text-[10px] border-collapse border border-slate-300">
+                    <thead>
+                      <tr className="bg-slate-200 text-slate-800 font-bold">
+                        <th className="border border-slate-300 p-1.5 text-center w-8">ลำดับ</th>
+                        <th className="border border-slate-300 p-1.5 min-w-36">หมายเลขครุภัณฑ์</th>
+                        <th className="border border-slate-300 p-1.5 min-w-44">ชื่อครุภัณฑ์</th>
+                        <th className="border border-slate-300 p-1.5 text-center min-w-28">ผลการตรวจ</th>
+                        <th className="border border-slate-300 p-1.5 text-center min-w-24">ปีงบ (.bak vs Excel)</th>
+                        <th className="border border-slate-300 p-1.5 min-w-40">ที่ตั้ง (.bak vs Excel)</th>
+                        <th className="border border-slate-300 p-1.5 text-center min-w-24">สถานะ (.bak vs Excel)</th>
+                        <th className="border border-slate-300 p-1.5">ข้อแตกต่าง</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredReconciliationItems.slice(0, 100).map((item, idx) => (
+                        <tr key={item.id} className={idx % 2 === 1 ? 'bg-slate-50' : ''}>
+                          <td className="border border-slate-300 p-1 text-center font-mono">{idx + 1}</td>
+                          <td className="border border-slate-300 p-1 font-mono font-medium">{item.code}</td>
+                          <td className="border border-slate-300 p-1">{item.name}</td>
+                          <td className="border border-slate-300 p-1 text-center font-semibold">
+                            {item.status === 'matched'
+                              ? 'ตรงกัน 🟢'
+                              : item.status === 'discrepancy'
+                              ? 'ขัดแย้ง 🟡'
+                              : item.status === 'only_bak'
+                              ? 'เฉพาะ .bak 🔵'
+                              : 'เฉพาะ Excel 🟣'}
+                          </td>
+                          <td className="border border-slate-300 p-1 text-center font-mono text-[9px]">
+                            {item.bakItem?.year || '-'} / {item.excelItem?.year || '-'}
+                          </td>
+                          <td className="border border-slate-300 p-1 text-[9px]">
+                            {item.bakItem?.deptName || item.excelItem?.deptName || '-'}
+                          </td>
+                          <td className="border border-slate-300 p-1 text-center text-[9px]">
+                            {item.bakItem?.statusName || '-'} / {item.excelItem?.statusName || '-'}
+                          </td>
+                          <td className="border border-slate-300 p-1 text-[9px]">
+                            {item.discrepancies.map((d) => `${d.fieldLabel}: [${d.bakValue}] ≠ [${d.excelValue}]`).join(', ') || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Signatures */}
+                  <div className="grid grid-cols-2 gap-8 pt-8 border-t-2 border-slate-900 text-center text-xs mt-8 break-inside-avoid">
+                    <div className="space-y-2">
+                      <p className="text-slate-600">ลงชื่อ..............................................................</p>
+                      <p className="font-bold text-slate-900">({prepName})</p>
+                      <p className="text-slate-500 text-[11px]">{prepPos}</p>
+                      <p className="text-[11px] text-slate-400">วันที่: {new Date().toLocaleDateString('th-TH')}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-slate-600">ลงชื่อ..............................................................</p>
+                      <p className="font-bold text-slate-900">({apprName})</p>
+                      <p className="text-slate-500 text-[11px]">{apprPos}</p>
+                      <p className="text-[11px] text-slate-400">วันที่: ......................................................</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* KPI 4: 🟢 อายุ 1 - 7 ปี (ใช้งานปกติ) */}
-              <div
-                onClick={() => {
-                  setSelectedAgeBracket('1-7');
-                  setActiveTab('table');
-                }}
-                className="bg-emerald-950/20 border border-emerald-500/30 hover:border-emerald-500/60 transition cursor-pointer rounded-2xl p-4 group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    1 - 7 ปี
-                  </span>
-                </div>
-                <p className="text-xs text-emerald-300/80 mb-1">ใช้งานปกติ (🟢)</p>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-bold text-emerald-400">
-                    {(parseResult.summary?.age1To7Count ?? 0).toLocaleString()}
-                  </span>
-                  <span className="text-[11px] text-emerald-400/80 font-mono">
-                    {(parseResult.summary?.totalCount ?? 0) > 0
-                      ? `${Math.round(((parseResult.summary?.age1To7Count ?? 0) / parseResult.summary.totalCount) * 100)}%`
-                      : '0%'}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 mt-1 truncate">
-                  ฿{(parseResult.summary?.age1To7Value ?? 0).toLocaleString('th-TH')}
-                </p>
-              </div>
-
-              {/* KPI 5: 🟡 อายุ 7 - 14 ปี (เริ่มเสื่อมสภาพ) */}
-              <div
-                onClick={() => {
-                  setSelectedAgeBracket('7-14');
-                  setActiveTab('table');
-                }}
-                className="bg-amber-950/20 border border-amber-500/30 hover:border-amber-500/60 transition cursor-pointer rounded-2xl p-4 group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                    <AlertTriangle className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    7 - 14 ปี
-                  </span>
-                </div>
-                <p className="text-xs text-amber-300/80 mb-1">เริ่มเสื่อมสภาพ (🟡)</p>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-bold text-amber-400">
-                    {(parseResult.summary?.age7To14Count ?? 0).toLocaleString()}
-                  </span>
-                  <span className="text-[11px] text-amber-400/80 font-mono">
-                    {(parseResult.summary?.totalCount ?? 0) > 0
-                      ? `${Math.round(((parseResult.summary?.age7To14Count ?? 0) / parseResult.summary.totalCount) * 100)}%`
-                      : '0%'}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 mt-1 truncate">
-                  ฿{(parseResult.summary?.age7To14Value ?? 0).toLocaleString('th-TH')}
-                </p>
-              </div>
-
-              {/* KPI 6: 🔴 อายุ 14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย) */}
-              <div
-                onClick={() => {
-                  setSelectedAgeBracket('14+');
-                  setActiveTab('table');
-                }}
-                className="bg-red-950/20 border border-red-500/30 hover:border-red-500/60 transition cursor-pointer rounded-2xl p-4 group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center">
-                    <AlertCircle className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
-                    14+ ปี
-                  </span>
-                </div>
-                <p className="text-xs text-red-300/80 mb-1">เกินเกณฑ์/รอจำหน่าย (🔴)</p>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-bold text-red-400">
-                    {(parseResult.summary?.age14PlusCount ?? 0).toLocaleString()}
-                  </span>
-                  <span className="text-[11px] text-red-400/80 font-mono">
-                    {(parseResult.summary?.totalCount ?? 0) > 0
-                      ? `${Math.round(((parseResult.summary?.age14PlusCount ?? 0) / parseResult.summary.totalCount) * 100)}%`
-                      : '0%'}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 mt-1 truncate">
-                  ฿{(parseResult.summary?.age14PlusValue ?? 0).toLocaleString('th-TH')}
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Age Filter Pills Bar (Hidden in print) */}
-            <div className="mb-6 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center justify-between gap-3 no-print">
+            ) : (
+              <>
+                {/* Quick Age Filter Pills Bar (Hidden in print) */}
+                <div className="mb-6 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center justify-between gap-3 no-print">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5 mr-1">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -1173,9 +2219,81 @@ export default function BakAnalysisPage() {
               </button>
             </div>
 
-            {/* TAB 1: DASHBOARD (จำแนกตามประเภท, หมวดหมู่, ปีงบประมาณ, อายุใช้งาน) */}
+            {/* TAB 1: DASHBOARD (จำแนกตามประเภท, หมวดหมู่, ปีงบประมาณ, อายุใช้งาน - Synchronized 100% with Report Filters) */}
             {activeTab === 'dashboard' && (
               <div className="space-y-8 no-print">
+                {/* Dashboard Filter Sync Banner */}
+                <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+                      <SlidersHorizontal className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs sm:text-sm font-bold text-white">
+                          แดชบอร์ดซิงค์ข้อมูลตามตัวกรองรายงานสรุป 100%
+                        </h4>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-mono">
+                          {reportSummary.totalCount} รายการ
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        ตัวเลขและแผนภูมิในแดชบอร์ดคำนวณจากชุดข้อมูลที่ผ่านการกรองตรงตามเงื่อนไขเดียวกับรายงานพิมพ์ A4
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap text-xs">
+                    {isExcelSource ? (
+                      <button
+                        type="button"
+                        onClick={() => setReportExcludeWarehouse12(!reportExcludeWarehouse12)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border ${
+                          reportExcludeWarehouse12
+                            ? 'bg-rose-950/60 border-rose-700/80 text-rose-300 hover:bg-rose-900/60'
+                            : 'bg-emerald-950/60 border-emerald-700/80 text-emerald-300 hover:bg-emerald-900/60'
+                        }`}
+                        title="คลิกเพื่อสลับให้มีหรือไม่มีรายการคลัง 12 ในแดชบอร์ดและรายงาน"
+                      >
+                        <span className={`w-2 h-2 rounded-full ${reportExcludeWarehouse12 ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+                        <span>{reportExcludeWarehouse12 ? `คลัง 12: ไม่รวม (${warehouse12ExcludedCount})` : 'คลัง 12: รวมในแดชบอร์ด'}</span>
+                      </button>
+                    ) : (
+                      <>
+                        {/* Status Dropdown */}
+                        <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                          <span className="text-slate-400 text-[11px]">สถานะ:</span>
+                          <select
+                            value={reportBakStatus}
+                            onChange={(e) => setReportBakStatus(e.target.value)}
+                            className="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer"
+                          >
+                            <option value="ปกติ" className="bg-slate-900">ปกติ 🟢</option>
+                            <option value="ส่งซ่อม" className="bg-slate-900">ส่งซ่อม 🟡</option>
+                            <option value="ส่งคืน" className="bg-slate-900">ส่งคืน 🔴</option>
+                            <option value="all" className="bg-slate-900">ทุกสถานะ</option>
+                          </select>
+                        </div>
+
+                        {/* Procurement Dropdown */}
+                        <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                          <span className="text-slate-400 text-[11px]">หน่วยจัดซื้อ:</span>
+                          <select
+                            value={reportBakProcurement}
+                            onChange={(e) => setReportBakProcurement(e.target.value)}
+                            className="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer"
+                          >
+                            <option value="all" className="bg-slate-900">ทั้งหมด</option>
+                            <option value="ทสอ." className="bg-slate-900">ทสอ.</option>
+                            <option value="กง.กห." className="bg-slate-900">กง.กห.</option>
+                            <option value="สม." className="bg-slate-900">สม.</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
                 {/* 2-Column Analytics Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   
@@ -1188,16 +2306,16 @@ export default function BakAnalysisPage() {
                         </div>
                         <div>
                           <h3 className="text-base font-bold text-white">จำแนกตามประเภทครุภัณฑ์</h3>
-                          <p className="text-xs text-slate-400">สัดส่วนจำนวนและมูลค่ารวมตามประเภท</p>
+                          <p className="text-xs text-slate-400">สัดส่วนจำนวนและมูลค่ารวมตามประเภท (กรองตามเงื่อนไข)</p>
                         </div>
                       </div>
                       <span className="text-xs text-slate-400 font-mono">
-                        {parseResult.byType.length} ประเภท
+                        {dashboardByType.length} ประเภท
                       </span>
                     </div>
 
                     <div className="space-y-4">
-                      {(parseResult.byType || []).map((t, idx) => (
+                      {(dashboardByType || []).map((t, idx) => (
                         <div
                           key={t.type}
                           onClick={() => {
@@ -1242,7 +2360,7 @@ export default function BakAnalysisPage() {
                         </div>
                         <div>
                           <h3 className="text-base font-bold text-white">สถานะอายุการใช้งานครุภัณฑ์</h3>
-                          <p className="text-xs text-slate-400">เกณฑ์การประเมินสภาพและวางแผนจัดซื้อทดแทน</p>
+                          <p className="text-xs text-slate-400">เกณฑ์การประเมินสภาพและวางแผนจัดซื้อทดแทน (กรองตามเงื่อนไข)</p>
                         </div>
                       </div>
                       <span className="text-xs text-emerald-400 font-mono">
@@ -1251,7 +2369,7 @@ export default function BakAnalysisPage() {
                     </div>
 
                     <div className="space-y-4">
-                      {(parseResult.byAge || []).map((a) => {
+                      {(reportSummary.ageBreakdown || []).map((a) => {
                         const is1To7 = a.bracket === '1-7';
                         const is7To14 = a.bracket === '7-14';
                         const is14Plus = a.bracket === '14+';
@@ -1315,17 +2433,17 @@ export default function BakAnalysisPage() {
                       </div>
                       <div>
                         <h3 className="text-base font-bold text-white">การกระจายตัวตามปีงบประมาณ (Yearly Timeline)</h3>
-                        <p className="text-xs text-slate-400">จำนวนครุภัณฑ์ที่ขึ้นทะเบียนในแต่ละปีงบประมาณ (คลิกเพื่อดูรายการย่อย)</p>
+                        <p className="text-xs text-slate-400">จำนวนครุภัณฑ์ที่ขึ้นทะเบียนในแต่ละปีงบประมาณ (กรองตามเงื่อนไข)</p>
                       </div>
                     </div>
                     <span className="text-xs text-amber-400 bg-amber-950/60 border border-amber-500/30 px-3 py-1 rounded-xl self-start sm:self-auto font-medium">
-                      ครอบคลุม {parseResult.byYear.length} ปีงบประมาณ
+                      ครอบคลุม {dashboardByYear.length} ปีงบประมาณ
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {parseResult.byYear.map((y) => {
-                      const maxYearCount = Math.max(...parseResult.byYear.map((item) => item.count));
+                    {dashboardByYear.map((y) => {
+                      const maxYearCount = Math.max(...dashboardByYear.map((item) => item.count), 1);
                       const barPercent = Math.round((y.count / maxYearCount) * 100);
                       const isHighVolume = y.count >= 30;
 
@@ -1673,7 +2791,7 @@ export default function BakAnalysisPage() {
                           className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
                         >
                           <option value="all">ทุกสถานะ</option>
-                          <option value="ใช้งานปกติ">ใช้งานปกติ 🟢</option>
+                          <option value="ปกติ">ปกติ 🟢</option>
                           <option value="ส่งซ่อม">ส่งซ่อม 🟡</option>
                           <option value="ส่งคืน">ส่งคืน 🔴</option>
                         </select>
@@ -1693,8 +2811,8 @@ export default function BakAnalysisPage() {
                           className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
                         >
                           <option value="all">ทุกหน่วยจัดซื้อ</option>
+                          <option value="ทสอ.">ทสอ.</option>
                           <option value="กง.กห.">กง.กห.</option>
-                          <option value="ทสอ.ฯ">ทสอ.ฯ</option>
                           <option value="สม.">สม.</option>
                         </select>
                       </div>
@@ -1832,14 +2950,14 @@ export default function BakAnalysisPage() {
                                   <td className="py-2.5 px-3 text-center">
                                     <span
                                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                        item.statusName === 'ใช้งานปกติ'
+                                        item.statusName === 'ปกติ' || item.statusName === 'ใช้งานปกติ'
                                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                           : item.statusName === 'ส่งซ่อม'
                                           ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                                           : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                                       }`}
                                     >
-                                      {item.statusName || 'ใช้งานปกติ'}
+                                      {item.statusName || 'ปกติ'}
                                     </span>
                                   </td>
                                 </>
@@ -2042,7 +3160,7 @@ export default function BakAnalysisPage() {
                           onChange={(e) => setReportBakStatus(e.target.value)}
                           className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition font-medium"
                         >
-                          <option value="ใช้งานปกติ">ใช้งานปกติ (ค่าเริ่มต้น 🟢)</option>
+                          <option value="ปกติ">ปกติ (ค่าเริ่มต้น 🟢)</option>
                           <option value="ส่งซ่อม">ส่งซ่อม 🟡</option>
                           <option value="ส่งคืน">ส่งคืน 🔴</option>
                           <option value="all">ทุกสถานะ</option>
@@ -2062,10 +3180,10 @@ export default function BakAnalysisPage() {
                           onChange={(e) => setReportBakProcurement(e.target.value)}
                           className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition font-medium"
                         >
+                          <option value="all">ทุกหน่วยจัดซื้อ (ค่าเริ่มต้น)</option>
+                          <option value="ทสอ.">ทสอ. (ศูนย์เทคโนโลยีฯ)</option>
                           <option value="กง.กห.">กง.กห. (กรมการเงินกลาโหม)</option>
-                          <option value="ทสอ.ฯ">ทสอ.ฯ (ศูนย์เทคโนโลยีฯ)</option>
                           <option value="สม.">สม. (สำนักรัฐมนตรี)</option>
-                          <option value="all">ทุกหน่วยจัดซื้อ</option>
                         </select>
                       </div>
                     )}
@@ -2132,7 +3250,7 @@ export default function BakAnalysisPage() {
                           reportYearStart ||
                           reportYearEnd ||
                           reportRowLimit !== 'all' ||
-                          (!isExcelSource && (reportBakStatus !== 'ใช้งานปกติ' || reportBakProcurement !== 'กง.กห.'))) && (
+                          (!isExcelSource && (reportBakStatus !== 'ปกติ' || reportBakProcurement !== 'all'))) && (
                           <button
                             type="button"
                             onClick={() => {
@@ -2142,8 +3260,8 @@ export default function BakAnalysisPage() {
                               setReportYearStart('');
                               setReportYearEnd('');
                               setReportRowLimit('all');
-                              setReportBakStatus('ใช้งานปกติ');
-                              setReportBakProcurement('กง.กห.');
+                              setReportBakStatus('ปกติ');
+                              setReportBakProcurement('all');
                             }}
                             className="text-[10px] text-amber-400 hover:text-amber-300"
                           >
@@ -2436,14 +3554,14 @@ export default function BakAnalysisPage() {
                                     <td className="border border-slate-300 p-1.5 text-center text-[11px]">
                                       <span
                                         className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                                          item.statusName === 'ใช้งานปกติ'
+                                          item.statusName === 'ปกติ' || item.statusName === 'ใช้งานปกติ'
                                             ? 'bg-emerald-100 text-emerald-800'
                                             : item.statusName === 'ส่งซ่อม'
                                             ? 'bg-amber-100 text-amber-800'
                                             : 'bg-rose-100 text-rose-800'
                                         }`}
                                       >
-                                        {item.statusName || 'ใช้งานปกติ'}
+                                        {item.statusName || 'ปกติ'}
                                       </span>
                                     </td>
                                   </>
@@ -2509,6 +3627,8 @@ export default function BakAnalysisPage() {
 
                 </div>
               </div>
+            )}
+              </>
             )}
           </>
         )}

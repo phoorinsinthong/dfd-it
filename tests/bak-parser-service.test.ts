@@ -9,7 +9,11 @@ import {
   isWarehouse12,
   filterReportItems,
   countWarehouse12Excluded,
+  normalizeEquipmentCode,
+  reconcileEquipmentData,
+  generateReconciliationCsv,
 } from '../src/lib/services/bak-parser-service';
+import { BakEquipmentItem } from '../src/types/bak-equipment';
 
 describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Extraction', () => {
   const sampleBakPath = '/Users/superman/Desktop/DFDEquipment-20261109.bak';
@@ -65,10 +69,10 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     expect(result.items.length).toBe(905);
 
     // Status and Procurement extraction checks
-    expect(result.items.some((i) => i.statusId === 1 && i.statusName === 'ใช้งานปกติ')).toBe(true);
+    expect(result.items.some((i) => i.statusId === 1 && i.statusName === 'ปกติ')).toBe(true);
     expect(result.items.some((i) => i.statusId === 2 && i.statusName === 'ส่งซ่อม')).toBe(true);
     expect(result.items.some((i) => i.procurementName === 'กง.กห.')).toBe(true);
-    expect(result.items.some((i) => i.procurementName === 'ทสอ.ฯ')).toBe(true);
+    expect(result.items.some((i) => i.procurementName === 'ทสอ.')).toBe(true);
     expect(result.items.some((i) => i.procurementName === 'สม.')).toBe(true);
 
     // Summary checks
@@ -363,11 +367,11 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
       },
     ];
 
-    // Filter with default .bak options: status 'ใช้งานปกติ', procurement 'กง.กห.'
+    // Filter with .bak options: status 'ปกติ', procurement 'กง.กห.'
     // When bakIncludeDeptMatch is true: Item 1 and Item 3 match
     const resultWithDept = filterReportItems(mockBakItems, {
       isExcelSource: false,
-      bakStatusFilter: 'ใช้งานปกติ',
+      bakStatusFilter: 'ปกติ',
       bakProcurementFilter: 'กง.กห.',
       bakIncludeDeptMatch: true,
     });
@@ -377,34 +381,275 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     // When bakIncludeDeptMatch is false: ONLY Item 1 matches (strict procurementId = 2)
     const resultStrict = filterReportItems(mockBakItems, {
       isExcelSource: false,
-      bakStatusFilter: 'ใช้งานปกติ',
+      bakStatusFilter: 'ปกติ',
       bakProcurementFilter: 'กง.กห.',
       bakIncludeDeptMatch: false,
     });
     expect(resultStrict.length).toBe(1);
     expect(resultStrict[0].code).toBe('7440.001.0001');
 
+    // Filter with status 'ส่งซ่อม' (statusId = 2)
+    const resultRepair = filterReportItems(mockBakItems, {
+      isExcelSource: false,
+      bakStatusFilter: 'ส่งซ่อม',
+      bakProcurementFilter: 'all',
+    });
+    expect(resultRepair.length).toBe(1);
+    expect(resultRepair[0].code).toBe('7440.001.0002');
+
+    // Filter with procurement 'ทสอ.' (procurementId = 1)
+    const resultThaSorOr = filterReportItems(mockBakItems, {
+      isExcelSource: false,
+      bakStatusFilter: 'all',
+      bakProcurementFilter: 'ทสอ.',
+      bakIncludeDeptMatch: false,
+    });
+    expect(resultThaSorOr.length).toBe(1);
+    expect(resultThaSorOr[0].code).toBe('7440.001.0003');
+
+    // Filter with procurement 'สม.' (procurementId = 3)
+    const resultSorMor = filterReportItems(mockBakItems, {
+      isExcelSource: false,
+      bakStatusFilter: 'all',
+      bakProcurementFilter: 'สม.',
+      bakIncludeDeptMatch: false,
+    });
+    expect(resultSorMor.length).toBe(1);
+    expect(resultSorMor[0].code).toBe('7440.001.0004');
+
     // 2. Live .bak file testing
     if (fs.existsSync(sampleBakPath)) {
       const buffer = fs.readFileSync(sampleBakPath);
       const parsed = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', 2569);
 
-      // Filter live .bak with default options
+      // Filter live .bak with status: ปกติ
       const liveFiltered = filterReportItems(parsed.items, {
         isExcelSource: false,
-        bakStatusFilter: 'ใช้งานปกติ',
+        bakStatusFilter: 'ปกติ',
         bakProcurementFilter: 'กง.กห.',
         bakIncludeDeptMatch: true,
       });
 
       expect(liveFiltered.length).toBe(35);
-      expect(liveFiltered.every((i) => i.statusId === 1 && i.statusName === 'ใช้งานปกติ')).toBe(true);
+      expect(liveFiltered.every((i) => i.statusId === 1 && (i.statusName === 'ปกติ' || i.statusName === 'ใช้งานปกติ'))).toBe(true);
       expect(
         liveFiltered.every(
           (i) => i.procurementName === 'กง.กห.' || i.procurementId === 2 || i.deptName?.includes('กง.กห.')
         )
       ).toBe(true);
+
+      // Verify statusid = 2 (ส่งซ่อม) count in live .bak
+      const repairItems = parsed.items.filter((i) => i.statusId === 2 && i.statusName === 'ส่งซ่อม');
+      expect(repairItems.length).toBe(857);
+
+      // Verify resourceid = 1 (ทสอ.) count in live .bak
+      const thaSorOrItems = parsed.items.filter((i) => i.procurementId === 1 && i.procurementName === 'ทสอ.');
+      expect(thaSorOrItems.length).toBe(792);
+
+      // Verify resourceid = 3 (สม.) count in live .bak
+      const sorMorItems = parsed.items.filter((i) => i.procurementId === 3 && i.procurementName === 'สม.');
+      expect(sorMorItems.length).toBe(110);
     }
+  });
+
+  it('normalizes equipment codes by removing dots, hyphens, slashes, and spaces', () => {
+    expect(normalizeEquipmentCode('7440.001.0002.0139.1')).toBe('7440001000201391');
+    expect(normalizeEquipmentCode('7440-001-0002-0139-1')).toBe('7440001000201391');
+    expect(normalizeEquipmentCode('7440/001/0002/0139/1')).toBe('7440001000201391');
+    expect(normalizeEquipmentCode('  7440 001 0002 0139 1  ')).toBe('7440001000201391');
+    expect(normalizeEquipmentCode('7440.001.0002.0147')).toBe('744000100020147');
+    expect(normalizeEquipmentCode('')).toBe('');
+  });
+
+  it('reconciles equipment data between .bak and Excel accurately into 4 categories', () => {
+    const mockBak: BakEquipmentItem[] = [
+      // 1. Matched with identical details
+      {
+        id: 1,
+        code: '7440.001.0001',
+        name: 'คอมพิวเตอร์ A',
+        serial: 'SN01',
+        year: '2560',
+        docNo: '1/60',
+        remark: '',
+        deptName: 'การเงิน กง.กห.',
+        unit: 'เครื่อง',
+        price: 25000,
+        statusId: 1,
+        statusName: 'ปกติ',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        deptId: 1,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        ageYears: 9,
+        ageBracket: '7-14',
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        sourceType: 'bak',
+      },
+      // 2. Discrepancy (same code, different year & status)
+      {
+        id: 2,
+        code: '7440.001.0002',
+        name: 'คอมพิวเตอร์ B',
+        serial: 'SN02',
+        year: '2559',
+        docNo: '2/59',
+        remark: '',
+        deptName: 'การเงิน กง.กห.',
+        unit: 'เครื่อง',
+        price: 22000,
+        statusId: 2,
+        statusName: 'ส่งซ่อม',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        deptId: 1,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        ageYears: 10,
+        ageBracket: '7-14',
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        sourceType: 'bak',
+      },
+      // 3. Only in .bak
+      {
+        id: 3,
+        code: '7440.001.0003',
+        name: 'คอมพิวเตอร์ C (เฉพาะ .bak)',
+        serial: 'SN03',
+        year: '2562',
+        docNo: '3/62',
+        remark: '',
+        deptName: 'สารบรรณ',
+        unit: 'เครื่อง',
+        price: 28000,
+        statusId: 1,
+        statusName: 'ปกติ',
+        procurementId: 1,
+        procurementName: 'ทสอ.',
+        deptId: 2,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        ageYears: 7,
+        ageBracket: '1-7',
+        ageStatusLabel: 'ปกติ',
+        sourceType: 'bak',
+      },
+    ];
+
+    const mockExcel: BakEquipmentItem[] = [
+      // 1. Matches mockBak[0] with hyphen format
+      {
+        id: 101,
+        code: '7440-001-0001',
+        name: 'คอมพิวเตอร์ A',
+        serial: 'SN01',
+        year: '2560',
+        docNo: '1/60',
+        remark: '',
+        deptName: 'การเงิน กง.กห.',
+        unit: 'เครื่อง',
+        price: 25000,
+        statusId: 1,
+        statusName: 'ปกติ',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        deptId: 0,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        ageYears: 9,
+        ageBracket: '7-14',
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        sourceType: 'excel',
+      },
+      // 2. Matches mockBak[1] with slash format but year 2560 & status ปกติ (discrepancy)
+      {
+        id: 102,
+        code: '7440/001/0002',
+        name: 'คอมพิวเตอร์ B',
+        serial: 'SN02',
+        year: '2560',
+        docNo: '2/60',
+        remark: '',
+        deptName: 'การเงิน กง.กห.',
+        unit: 'เครื่อง',
+        price: 22000,
+        statusId: 1,
+        statusName: 'ปกติ',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        deptId: 0,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        ageYears: 9,
+        ageBracket: '7-14',
+        ageStatusLabel: 'เริ่มเสื่อมสภาพ',
+        sourceType: 'excel',
+      },
+      // 4. Only in Excel
+      {
+        id: 104,
+        code: '7440.001.0004',
+        name: 'คอมพิวเตอร์ D (เฉพาะ Excel)',
+        serial: 'SN04',
+        year: '2564',
+        docNo: '4/64',
+        remark: '',
+        deptName: 'คลัง 12',
+        unit: 'เครื่อง',
+        price: 30000,
+        statusId: 1,
+        statusName: 'ปกติ',
+        procurementId: 2,
+        procurementName: 'กง.กห.',
+        deptId: 0,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        ageYears: 5,
+        ageBracket: '1-7',
+        ageStatusLabel: 'ปกติ',
+        sourceType: 'excel',
+      },
+    ];
+
+    const result = reconcileEquipmentData(mockBak, mockExcel);
+
+    expect(result.totalUnique).toBe(4);
+    expect(result.matchedCount).toBe(1);
+    expect(result.discrepancyCount).toBe(1);
+    expect(result.onlyBakCount).toBe(1);
+    expect(result.onlyExcelCount).toBe(1);
+    expect(result.reconciliationRate).toBe(25); // 1 / 4 * 100 = 25%
+
+    const matchedItem = result.items.find((i) => i.status === 'matched');
+    expect(matchedItem).toBeDefined();
+    expect(matchedItem?.normalizedCode).toBe('74400010001');
+
+    const discrepancyItem = result.items.find((i) => i.status === 'discrepancy');
+    expect(discrepancyItem).toBeDefined();
+    expect(discrepancyItem?.normalizedCode).toBe('74400010002');
+    expect(discrepancyItem?.discrepancies.length).toBeGreaterThan(0);
+    expect(discrepancyItem?.discrepancies.some((d) => d.field === 'year')).toBe(true);
+    expect(discrepancyItem?.discrepancies.some((d) => d.field === 'status')).toBe(true);
+
+    const onlyBakItem = result.items.find((i) => i.status === 'only_bak');
+    expect(onlyBakItem).toBeDefined();
+    expect(onlyBakItem?.normalizedCode).toBe('74400010003');
+
+    const onlyExcelItem = result.items.find((i) => i.status === 'only_excel');
+    expect(onlyExcelItem).toBeDefined();
+    expect(onlyExcelItem?.normalizedCode).toBe('74400010004');
+
+    // CSV generation test
+    const csv = generateReconciliationCsv(result);
+    expect(csv.startsWith('\uFEFF')).toBe(true);
+    expect(csv).toContain('รหัสครุภัณฑ์ (จับคู่)');
+    expect(csv).toContain('74400010001');
+    expect(csv).toContain('74400010002');
+    expect(csv).toContain('ตรงกันทั้ง 2 แหล่ง 🟢');
+    expect(csv).toContain('ข้อมูลขัดแย้ง 🟡');
+    expect(csv).toContain('มีเฉพาะใน .bak 🔵');
+    expect(csv).toContain('มีเฉพาะใน Excel 🟣');
   });
 });
 

@@ -10,6 +10,10 @@ import {
   BakAgeBreakdown,
   BakCrossTabEntry,
   BakCrossTabAgeEntry,
+  ReconciliationStatus,
+  ReconciliationDiscrepancy,
+  ReconciliationItem,
+  ReconciliationResult,
 } from '@/types/bak-equipment';
 
 const PAGE_SIZE = 8192;
@@ -644,14 +648,14 @@ export function parseBakBuffer(
       const procId = readInt32LE(bytes, recOffset + 57);
 
       const statusMap: Record<number, string> = {
-        1: 'ใช้งานปกติ',
+        1: 'ปกติ',
         2: 'ส่งซ่อม',
         3: 'ส่งคืน',
       };
       const statusName = statusMap[statusId] || `สถานะ ${statusId}`;
 
       const procMap: Record<number, string> = {
-        1: 'ทสอ.ฯ',
+        1: 'ทสอ.',
         2: 'กง.กห.',
         3: 'สม.',
       };
@@ -868,7 +872,7 @@ export function parseExcelFiles(
               unit: 'เครื่อง',
               price,
               statusId: 1,
-              statusName: 'ใช้งานปกติ',
+              statusName: 'ปกติ',
               procurementId: 2,
               procurementName: 'กง.กห.',
               deptId: 0,
@@ -936,7 +940,7 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
       `"${(item.year || '').replace(/"/g, '""')}"`,
       item.ageYears > 0 ? item.ageYears : '-',
       `"${item.ageStatusLabel}"`,
-      `"${item.statusName || 'ใช้งานปกติ'}"`,
+      `"${item.statusName || 'ปกติ'}"`,
       `"${item.procurementName || 'กง.กห.'}"`,
       `"${(item.deptName || '').replace(/"/g, '""')}"`,
       `"${(item.serial || '').replace(/"/g, '""')}"`,
@@ -969,15 +973,15 @@ export interface ReportFilterOptions {
   excludeWarehouse12ForExcel?: boolean;
   isExcelSource?: boolean;
   // Specific filters for Microsoft SQL Server .bak data source
-  bakStatusFilter?: string; // e.g. 'ใช้งานปกติ' (default for .bak) or 'all'
-  bakProcurementFilter?: string; // e.g. 'กง.กห.' (default for .bak) or 'all'
-  bakIncludeDeptMatch?: boolean; // default: true (when filtering กง.กห., also matches if deptName includes กง.กห.)
+  bakStatusFilter?: string; // e.g. 'ปกติ' (default for .bak) or 'all'
+  bakProcurementFilter?: string; // e.g. 'ทั้งหมด' / 'all' (default for .bak) or 'กง.กห.', 'ทสอ.', 'สม.'
+  bakIncludeDeptMatch?: boolean; // default: true (when filtering by unit, also matches if deptName includes unit keyword)
 }
 
 /**
  * Filter items for the official printable report.
  * - If source is Excel, items located in "คลัง 12" are excluded by default (toggleable).
- * - If source is .bak, filter items by status (default: 'ใช้งานปกติ') and procurement unit (default: 'กง.กห.').
+ * - If source is .bak, filter items by status (statusid 1:ปกติ, 2:ส่งซ่อม, 3:ส่งคืน) and procurement unit (resourceid 1:ทสอ., 2:กง.กห., 3:สม.).
  * - Also sorts items by oldest-first (descending by ageYears).
  */
 export function filterReportItems(
@@ -993,30 +997,36 @@ export function filterReportItems(
       return false;
     }
 
-    // 2. Filter for .bak source: สถานะ ใช้งานปกติ และ หน่วยจัดซื้อ กง.กห.
+    // 2. Filter for .bak source: สถานะ และ หน่วยจัดซื้อ
     if (!isExcel && (item.sourceType === 'bak' || !item.sourceType)) {
-      // 2.1 Status Filter (default: 'ใช้งานปกติ' / statusId: 1)
+      // 2.1 Status Filter (statusid = 1:ปกติ, 2:ส่งซ่อม, 3:ส่งคืน)
       if (options?.bakStatusFilter && options.bakStatusFilter !== 'all') {
         const targetStatus = options.bakStatusFilter;
         const matchesStatus =
           item.statusName === targetStatus ||
-          (targetStatus === 'ใช้งานปกติ' && (item.statusId === 1 || !item.statusId)) ||
-          (targetStatus === 'ส่งซ่อม' && item.statusId === 2) ||
-          (targetStatus === 'ส่งคืน' && item.statusId === 3);
+          ((targetStatus === 'ปกติ' || targetStatus === 'ใช้งานปกติ') &&
+            (item.statusId === 1 || !item.statusId || item.statusName === 'ปกติ' || item.statusName === 'ใช้งานปกติ')) ||
+          (targetStatus === 'ส่งซ่อม' && (item.statusId === 2 || item.statusName === 'ส่งซ่อม')) ||
+          (targetStatus === 'ส่งคืน' && (item.statusId === 3 || item.statusName === 'ส่งคืน'));
         if (!matchesStatus) return false;
       }
 
-      // 2.2 Procurement Filter (default: 'กง.กห.')
+      // 2.2 Procurement Filter (resourceid = 1:ทสอ., 2:กง.กห., 3:สม.)
       if (options?.bakProcurementFilter && options.bakProcurementFilter !== 'all') {
         const targetProc = options.bakProcurementFilter;
-        if (targetProc === 'กง.กห.') {
-          const isProcKongKoh = item.procurementName === 'กง.กห.' || item.procurementId === 2;
-          const isDeptKongKoh = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('กง.กห.') ?? false);
-          if (!isProcKongKoh && !isDeptKongKoh) {
-            return false;
-          }
+        if (targetProc === 'ทสอ.' || targetProc === 'ทสอ.ฯ') {
+          const isProc = item.procurementId === 1 || item.procurementName === 'ทสอ.' || item.procurementName === 'ทสอ.ฯ';
+          const isDept = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('ทสอ') ?? false);
+          if (!isProc && !isDept) return false;
+        } else if (targetProc === 'กง.กห.') {
+          const isProc = item.procurementId === 2 || item.procurementName === 'กง.กห.';
+          const isDept = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('กง.กห.') ?? false);
+          if (!isProc && !isDept) return false;
+        } else if (targetProc === 'สม.') {
+          const isProc = item.procurementId === 3 || item.procurementName === 'สม.';
+          const isDept = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('สม.') ?? false);
+          if (!isProc && !isDept) return false;
         } else {
-          // If specific procurement like 'ทสอ.ฯ' or 'สม.'
           if (item.procurementName !== targetProc && item.procurementId?.toString() !== targetProc) {
             return false;
           }
@@ -1103,4 +1113,234 @@ export function countWarehouse12Excluded(
 
     return true;
   }).length;
+}
+
+/**
+ * Normalizes an equipment code for robust cross-data matching.
+ * Removes '.', '-', '/', spaces, and invisible zero-width chars, then converts to uppercase.
+ * Example: "7440.001.0002.0139.1" -> "7440001000201391"
+ * Example: "7440-001-0002-0139/1" -> "7440001000201391"
+ */
+export function normalizeEquipmentCode(code: string): string {
+  if (!code) return '';
+  return code.replace(/[\.\-\/\s\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
+}
+
+/**
+ * Reconciles equipment data between .bak (database) and Excel (inventory registers).
+ * Matches by normalized EquipmentCode.
+ * Classifies items into 4 categories:
+ * - matched: Present in both, key attributes align.
+ * - discrepancy: Present in both, but key attributes differ (e.g. year, dept, status, serial).
+ * - only_bak: Present in .bak, but missing from Excel.
+ * - only_excel: Present in Excel, but missing from .bak.
+ */
+export function reconcileEquipmentData(
+  bakItems: BakEquipmentItem[],
+  excelItems: BakEquipmentItem[]
+): ReconciliationResult {
+  const bakMap = new Map<string, BakEquipmentItem>();
+  for (const item of bakItems) {
+    const norm = normalizeEquipmentCode(item.code);
+    if (norm && !bakMap.has(norm)) {
+      bakMap.set(norm, item);
+    }
+  }
+
+  const excelMap = new Map<string, BakEquipmentItem>();
+  for (const item of excelItems) {
+    const norm = normalizeEquipmentCode(item.code);
+    if (norm && !excelMap.has(norm)) {
+      excelMap.set(norm, item);
+    }
+  }
+
+  const allNormCodes = Array.from(new Set([...bakMap.keys(), ...excelMap.keys()]));
+  const items: ReconciliationItem[] = [];
+
+  for (const norm of allNormCodes) {
+    const bak = bakMap.get(norm);
+    const excel = excelMap.get(norm);
+
+    if (bak && excel) {
+      const discrepancies: ReconciliationDiscrepancy[] = [];
+
+      // Check year
+      const bakYear = (bak.year || '').trim();
+      const excelYear = (excel.year || '').trim();
+      if (bakYear && excelYear && bakYear !== 'ไม่ระบุปี' && excelYear !== 'ไม่ระบุปี' && bakYear !== excelYear) {
+        discrepancies.push({
+          field: 'year',
+          fieldLabel: 'ปีงบประมาณ',
+          bakValue: bakYear,
+          excelValue: excelYear,
+        });
+      }
+
+      // Check serial (if both have meaningful serials)
+      const bakSerial = (bak.serial || '').trim();
+      const excelSerial = (excel.serial || '').trim();
+      if (bakSerial && excelSerial && bakSerial !== '-' && excelSerial !== '-' && bakSerial !== excelSerial) {
+        discrepancies.push({
+          field: 'serial',
+          fieldLabel: 'หมายเลขเครื่อง (S/N)',
+          bakValue: bakSerial,
+          excelValue: excelSerial,
+        });
+      }
+
+      // Check status
+      const bakStatus = (bak.statusName || '').trim();
+      const excelStatus = (excel.statusName || '').trim();
+      if (bakStatus && excelStatus && bakStatus !== excelStatus) {
+        discrepancies.push({
+          field: 'status',
+          fieldLabel: 'สถานะการใช้งาน',
+          bakValue: bakStatus,
+          excelValue: excelStatus,
+        });
+      }
+
+      // Check location / department (if significantly different)
+      const bakDept = (bak.deptName || '').trim();
+      const excelDept = (excel.deptName || '').trim();
+      if (bakDept && excelDept && bakDept !== excelDept) {
+        discrepancies.push({
+          field: 'dept',
+          fieldLabel: 'หน่วยงาน / ที่ตั้ง',
+          bakValue: bakDept,
+          excelValue: excelDept,
+        });
+      }
+
+      const status: ReconciliationStatus = discrepancies.length > 0 ? 'discrepancy' : 'matched';
+
+      items.push({
+        id: norm,
+        normalizedCode: norm,
+        code: bak.code || excel.code,
+        name: bak.name || excel.name,
+        type: bak.type || excel.type,
+        category: bak.category || excel.category,
+        status,
+        discrepancies,
+        bakItem: bak,
+        excelItem: excel,
+      });
+    } else if (bak && !excel) {
+      items.push({
+        id: norm,
+        normalizedCode: norm,
+        code: bak.code,
+        name: bak.name,
+        type: bak.type,
+        category: bak.category,
+        status: 'only_bak',
+        discrepancies: [],
+        bakItem: bak,
+      });
+    } else if (!bak && excel) {
+      items.push({
+        id: norm,
+        normalizedCode: norm,
+        code: excel.code,
+        name: excel.name,
+        type: excel.type,
+        category: excel.category,
+        status: 'only_excel',
+        discrepancies: [],
+        excelItem: excel,
+      });
+    }
+  }
+
+  // Sort items: discrepancy first, then matched, then only_bak, then only_excel
+  const statusPriority: Record<ReconciliationStatus, number> = {
+    discrepancy: 1,
+    matched: 2,
+    only_bak: 3,
+    only_excel: 4,
+  };
+
+  items.sort((a, b) => {
+    const pDiff = statusPriority[a.status] - statusPriority[b.status];
+    if (pDiff !== 0) return pDiff;
+    return a.code.localeCompare(b.code);
+  });
+
+  const totalUnique = items.length;
+  const matchedCount = items.filter((i) => i.status === 'matched').length;
+  const discrepancyCount = items.filter((i) => i.status === 'discrepancy').length;
+  const onlyBakCount = items.filter((i) => i.status === 'only_bak').length;
+  const onlyExcelCount = items.filter((i) => i.status === 'only_excel').length;
+  const reconciliationRate =
+    totalUnique > 0 ? Math.round((matchedCount / totalUnique) * 1000) / 10 : 0;
+
+  return {
+    totalUnique,
+    matchedCount,
+    discrepancyCount,
+    onlyBakCount,
+    onlyExcelCount,
+    reconciliationRate,
+    items,
+  };
+}
+
+/**
+ * Generates CSV content with UTF-8 BOM for equipment reconciliation results (.bak vs Excel)
+ */
+export function generateReconciliationCsv(result: ReconciliationResult): string {
+  const headers = [
+    'ลำดับ',
+    'รหัสครุภัณฑ์ (จับคู่)',
+    'รหัสใน .bak',
+    'รหัสใน Excel',
+    'ชื่อครุภัณฑ์',
+    'ประเภท',
+    'สถานะการตรวจกระทบยอด',
+    'ข้อแตกต่างที่พบ',
+    'ปีงบ (.bak)',
+    'ปีงบ (Excel)',
+    'สถานะ (.bak)',
+    'สถานะ (Excel)',
+    'ที่ตั้ง (.bak)',
+    'ที่ตั้ง (Excel)',
+    'S/N (.bak)',
+    'S/N (Excel)',
+  ];
+
+  const statusLabels: Record<ReconciliationStatus, string> = {
+    matched: 'ตรงกันทั้ง 2 แหล่ง 🟢',
+    discrepancy: 'ข้อมูลขัดแย้ง 🟡',
+    only_bak: 'มีเฉพาะใน .bak 🔵',
+    only_excel: 'มีเฉพาะใน Excel 🟣',
+  };
+
+  const rows = result.items.map((item, idx) => {
+    const diffText = item.discrepancies
+      .map((d) => `${d.fieldLabel}: .bak[${d.bakValue}] vs Excel[${d.excelValue}]`)
+      .join('; ');
+
+    return [
+      idx + 1,
+      `"${item.normalizedCode}"`,
+      `"${item.bakItem?.code || '-'}"`,
+      `"${item.excelItem?.code || '-'}"`,
+      `"${(item.name || '').replace(/"/g, '""')}"`,
+      `"${item.type || '-'}"`,
+      `"${statusLabels[item.status] || item.status}"`,
+      `"${diffText.replace(/"/g, '""')}"`,
+      `"${item.bakItem?.year || '-'}"`,
+      `"${item.excelItem?.year || '-'}"`,
+      `"${item.bakItem?.statusName || '-'}"`,
+      `"${item.excelItem?.statusName || '-'}"`,
+      `"${(item.bakItem?.deptName || '-').replace(/"/g, '""')}"`,
+      `"${(item.excelItem?.deptName || '-').replace(/"/g, '""')}"`,
+      `"${item.bakItem?.serial || '-'}"`,
+      `"${item.excelItem?.serial || '-'}"`,
+    ].join(',');
+  });
+
+  return '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
 }

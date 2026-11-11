@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { parseBakBuffer, parseExcelFiles } from '@/lib/services/bak-parser-service';
 import sampleBakData from '@/lib/data/sample-bak-data.json';
+import { BakParseResult } from '@/types/bak-equipment';
 
 const SAMPLE_EXCEL_PATHS = [
   '/Users/superman/Downloads/คอมพิวเตอร์ ๑.xls',
@@ -19,6 +20,49 @@ export async function GET(req: NextRequest) {
   const fiscalYearParam = parseInt(searchParams.get('year') || '2569', 10);
   const currentYear = isNaN(fiscalYearParam) ? 2569 : fiscalYearParam;
 
+  if (sampleParam === 'compare' || sampleParam === 'both') {
+    try {
+      // 1. Load BAK
+      let bakResult: BakParseResult = sampleBakData as unknown as BakParseResult;
+      const desktopPath = '/Users/superman/Desktop/DFDEquipment-20261109.bak';
+      if (fs.existsSync(/*turbopackIgnore: true*/ desktopPath)) {
+        try {
+          const buffer = fs.readFileSync(/*turbopackIgnore: true*/ desktopPath);
+          bakResult = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', currentYear);
+        } catch (err: unknown) {
+          console.warn('Failed to parse desktop .bak in compare, using sample data:', err);
+        }
+      }
+
+      // 2. Load Excel
+      let excelResult: BakParseResult | null = null;
+      const existingFiles = SAMPLE_EXCEL_PATHS.filter((p) =>
+        fs.existsSync(/*turbopackIgnore: true*/ p)
+      );
+      if (existingFiles.length > 0) {
+        const filePayloads = existingFiles.map((p) => ({
+          name: path.basename(p),
+          buffer: fs.readFileSync(/*turbopackIgnore: true*/ p),
+        }));
+        excelResult = parseExcelFiles(filePayloads, currentYear);
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          bak: bakResult,
+          excel: excelResult,
+        },
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return NextResponse.json(
+        { success: false, error: 'เกิดข้อผิดพลาดในการโหลดข้อมูลตัวอย่างทั้งสองแหล่ง: ' + message },
+        { status: 500 }
+      );
+    }
+  }
+
   if (sampleParam === 'excel') {
     try {
       const existingFiles = SAMPLE_EXCEL_PATHS.filter((p) =>
@@ -32,7 +76,7 @@ export async function GET(req: NextRequest) {
         const result = parseExcelFiles(filePayloads, currentYear);
         return NextResponse.json({ success: true, data: result });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('Failed to load sample Excel files:', err);
     }
 
@@ -49,7 +93,7 @@ export async function GET(req: NextRequest) {
         const buffer = fs.readFileSync(/*turbopackIgnore: true*/ desktopPath);
         const result = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', currentYear);
         return NextResponse.json({ success: true, data: result });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.warn('Failed to parse desktop .bak, falling back to cached sample JSON:', err);
       }
     }
@@ -146,10 +190,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in POST /api/bak-parser:', error);
+    const message = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการประมวลผลไฟล์';
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

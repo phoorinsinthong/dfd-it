@@ -12,18 +12,51 @@ export interface BakEquipmentItem {
   unit: string;
   price: number;
   statusId: number;
-  statusName?: string; // 'ใช้งานปกติ' | 'ส่งซ่อม' | 'ส่งคืน'
-  procurementId?: number; // 1 (ทสอ.ฯ) | 2 (กง.กห.) | 3 (สม.)
-  procurementName?: string; // 'ทสอ.ฯ' | 'กง.กห.' | 'สม.'
+  statusName?: string; // 'ปกติ' | 'ส่งซ่อม' | 'ส่งคืน'
+  procurementId?: number; // 1 (ทสอ.) | 2 (กง.กห.) | 3 (สม.)
+  procurementName?: string; // 'ทสอ.' | 'กง.กห.' | 'สม.'
   deptId: number;
   type: string;
   category: string;
   // Lifecycle & Age analysis
   ageYears: number; // e.g. 10 (2569 - 2559)
   ageBracket: AgeBracket; // '1-7' | '7-14' | '14+' | 'unknown'
-  ageStatusLabel: string; // 'ใช้งานปกติ' | 'เริ่มเสื่อมสภาพ' | 'เกินเกณฑ์/รอจำหน่าย'
+  ageStatusLabel: string; // 'ปกติ' | 'เริ่มเสื่อมสภาพ' | 'เกินเกณฑ์/รอจำหน่าย'
   sourceFile?: string; // e.g. 'คอมพิวเตอร์ ๑.xls' or 'DFDEquipment-20261109.bak'
   sourceType: 'bak' | 'excel';
+}
+
+// Reconciliation / Audit Types (.bak vs Excel)
+export type ReconciliationStatus = 'matched' | 'discrepancy' | 'only_bak' | 'only_excel';
+
+export interface ReconciliationDiscrepancy {
+  field: string;
+  fieldLabel: string;
+  bakValue: string;
+  excelValue: string;
+}
+
+export interface ReconciliationItem {
+  id: string;
+  normalizedCode: string;
+  code: string;
+  name: string;
+  type: string;
+  category: string;
+  status: ReconciliationStatus;
+  discrepancies: ReconciliationDiscrepancy[];
+  bakItem?: BakEquipmentItem;
+  excelItem?: BakEquipmentItem;
+}
+
+export interface ReconciliationResult {
+  totalUnique: number;
+  matchedCount: number;
+  discrepancyCount: number;
+  onlyBakCount: number;
+  onlyExcelCount: number;
+  reconciliationRate: number; // e.g. 85.5 (%)
+  items: ReconciliationItem[];
 }
 
 export interface BakAgeBreakdown {
