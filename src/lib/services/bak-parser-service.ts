@@ -566,6 +566,71 @@ function buildAggregatedResult(
   };
 }
 
+export const STATUS_MAP: Record<number, string> = {
+  1: 'ใช้งานปกติ',
+  2: 'ส่งซ่อม',
+  3: 'ส่งคืน',
+};
+
+export const RESOURCE_MAP: Record<number, string> = {
+  1: 'ทสอ.ฯ',
+  2: 'กง.กห.',
+  3: 'สม.',
+};
+
+export const DIVISION_MAP: Record<number, string> = {
+  1: 'กลาง. ฯ',
+  2: 'กวก. ฯ',
+  3: 'กจก. ฯ',
+  4: 'กบง. ฯ',
+  5: 'กคจ. ฯ',
+  6: 'กบน. ฯ',
+  7: 'กกมง. ฯ',
+  8: 'สกง. ฯ',
+  9: 'ธุรการ',
+  10: 'สง.งป. ฯ',
+  11: 'นปก. ฯ',
+  12: 'สารบรรณ',
+  13: 'สำนักงานผู้บังคับบัญชา',
+  14: 'นธน. ฯ',
+  15: 'นตส. ฯ',
+  16: 'กบจพ. ฯ',
+  17: 'กงดพ. ฯ',
+  18: 'นถปภ.รอ.',
+  19: 'ห้องซ่อมบำรุงด้านใน กกมง.ฯ',
+  20: 'ห้องเก็บของด้านนอก',
+  21: 'โครงการ นถปภ.รอ. ตู้ A12 ชั้น 11',
+  22: 'เครื่องคอมพิวเตอร์แม่ข่าย (SERVER)',
+  23: 'เครื่องประมวลผลเงินเดือน',
+  24: 'ทดสอบระบบ',
+  27: 'กกงพ.กง.กห.',
+  28: 'กกงพ. ฯ',
+  29: 'ส่งคืน กลาง.กง.กห. รอจำหน่าย',
+  30: 'ส่งคืน กลาง.กง.กห. รอจำหน่าย',
+  31: 'ส่งคืน กลาง.กง.กห.',
+};
+
+export const OS_MAP: Record<number, string> = {
+  1: 'Windows XP',
+  2: 'Windows 8',
+  3: 'Windows 10',
+  4: 'Windows Server2012',
+  6: 'Windows 7',
+};
+
+export const PROJECT_MAP: Record<number, string> = {
+  1: 'บัญชี',
+  2: 'เบี้ยหวัด/บำเหน็จบำนาญ',
+  3: 'ระบบควบคุมฯ',
+  4: 'ระบบเงินเดือน',
+  5: 'ระบบ เงินนอก/เงินใน',
+  6: 'ระบบ นถปภ.รอ.',
+  7: 'ระบบการจัดการฐานข้อมูล',
+  9: 'ระบบสารบรรณอิเล็กทรอนิกส์',
+  10: 'ระบบใบจ่ายเงินเดือนอิเล็กทรอนิกส์',
+  11: 'โปรแกรมครุภัณฑ์',
+};
+
 /**
  * Parse Microsoft SQL Server Tape Format (.bak) file containing equipment data
  */
@@ -578,7 +643,7 @@ export function parseBakBuffer(
   const totalPages = Math.floor(bytes.length / PAGE_SIZE);
   const decoder = getDecoder();
 
-  const uniqueMap = new Map<number, BakEquipmentItem>();
+  const uniqueMap = new Map<string, BakEquipmentItem>();
   let dataPagesCount = 0;
 
   for (let p = 0; p < totalPages; p++) {
@@ -606,16 +671,20 @@ export function parseBakBuffer(
       const statusA = bytes[recOffset];
       if (statusA !== 0x30) continue;
 
-      // Fixed length portion size
+      // Fixed length portion size (supports both 81 and 85)
       const fixedLen = readUInt16LE(bytes, recOffset + 2);
-      if (fixedLen !== 85) continue;
+      if (fixedLen !== 81 && fixedLen !== 85) continue;
 
-      // Column count
+      // Column count (supports both 27 and 31)
       const numCols = readUInt16LE(bytes, recOffset + fixedLen);
-      if (numCols !== 31) continue;
+      if (numCols !== 27 && numCols !== 31) continue;
+
+      // Soft-delete flag: byte 32 & 0x01 === 1 means IsDelete = true (skip soft-deleted records)
+      const isDelete = (bytes[recOffset + 32] & 0x01) === 1;
+      if (isDelete) continue;
 
       // Null bitmap length
-      const nullBytes = Math.ceil(31 / 8);
+      const nullBytes = Math.ceil(numCols / 8);
       const varOff = recOffset + fixedLen + 2 + nullBytes;
       const numVar = readUInt16LE(bytes, varOff);
       if (numVar < 4) continue;
@@ -643,23 +712,26 @@ export function parseBakBuffer(
       const eqId = readInt32LE(bytes, recOffset + 4);
       const rawPrice = readDoubleLE(bytes, recOffset + 16);
       const price = rawPrice >= 0 && rawPrice < 10000000 ? Math.round(rawPrice * 100) / 100 : 0;
-      const statusId = readInt32LE(bytes, recOffset + 24);
+      
+      // Offset 24 = ResourceId (หน่วยจัดซื้อ: 1: ทสอ.ฯ, 2: กง.กห., 3: สม.)
+      const procId = readInt32LE(bytes, recOffset + 24);
+      const procurementName = RESOURCE_MAP[procId] || (procId > 0 ? `หน่วย ${procId}` : 'ไม่ระบุ');
+
+      // Offset 28 = DepartmentId (กอง: เช่น กบน.ฯ, กคจ.ฯ, กลาง.ฯ, ส่งคืน กลาง.กง.กห. รอจำหน่าย)
       const deptId = readInt32LE(bytes, recOffset + 28);
-      const procId = readInt32LE(bytes, recOffset + 57);
+      const division = DIVISION_MAP[deptId] || (deptId > 0 ? `กอง ${deptId}` : '');
 
-      const statusMap: Record<number, string> = {
-        1: 'ปกติ',
-        2: 'ส่งซ่อม',
-        3: 'ส่งคืน',
-      };
-      const statusName = statusMap[statusId] || `สถานะ ${statusId}`;
+      // Offset 57 = StatusId (สถานะ: 1: ใช้งานปกติ, 2: ส่งซ่อม, 3: ส่งคืน)
+      const statusId = readInt32LE(bytes, recOffset + 57);
+      const statusName = STATUS_MAP[statusId] || (statusId > 0 ? `สถานะ ${statusId}` : 'ไม่ระบุ');
 
-      const procMap: Record<number, string> = {
-        1: 'ทสอ.',
-        2: 'กง.กห.',
-        3: 'สม.',
-      };
-      const procurementName = procMap[procId] || (procId > 0 ? `หน่วย ${procId}` : 'ไม่ระบุ');
+      // Offset 61 = OsId (ระบบปฏิบัติการ)
+      const osId = readInt32LE(bytes, recOffset + 61);
+      const osName = OS_MAP[osId] || '';
+
+      // Offset 65 = ProjectId (ระบบงาน)
+      const projectId = readInt32LE(bytes, recOffset + 65);
+      const projectName = PROJECT_MAP[projectId] || '';
 
       const code = (varVals[0] || '').trim();
       const name = (varVals[1] || '').trim();
@@ -669,37 +741,52 @@ export function parseBakBuffer(
 
       const docNo = (varVals[4] || '').trim();
       const remark = (varVals[7] || '').trim();
-      const deptName = (varVals[8] || '').trim();
+      const deptName = (varVals[8] || '').trim(); // แผนก
+      const cpu = (varVals[9] || '').trim();
+      const ram = (varVals[10] || '').trim();
       const unit = (varVals[12] || '').trim() || 'เครื่อง';
 
-      if (!uniqueMap.has(eqId)) {
-        const { type, category } = classifyEquipment(code, name);
-        const { ageYears, ageBracket, ageStatusLabel } = calculateEquipmentAge(year, currentYear);
+      if (!code) continue;
 
-        uniqueMap.set(eqId, {
-          id: eqId,
-          code,
-          name,
-          serial,
-          year,
-          docNo,
-          remark,
-          deptName,
-          unit,
-          price,
-          statusId,
-          statusName,
-          procurementId: procId,
-          procurementName,
-          deptId,
-          type,
-          category,
-          ageYears,
-          ageBracket,
-          ageStatusLabel,
-          sourceFile: fileName,
-          sourceType: 'bak',
-        });
+      const { type, category } = classifyEquipment(code, name);
+      const { ageYears, ageBracket, ageStatusLabel } = calculateEquipmentAge(year, currentYear);
+
+      const equipmentItem: BakEquipmentItem = {
+        id: eqId,
+        code,
+        name,
+        serial,
+        year,
+        docNo,
+        remark,
+        deptName,
+        division,
+        unit,
+        price,
+        statusId,
+        statusName,
+        procurementId: procId,
+        procurementName,
+        deptId,
+        osId,
+        osName,
+        projectId,
+        projectName,
+        cpu,
+        ram,
+        type,
+        category,
+        ageYears,
+        ageBracket,
+        ageStatusLabel,
+        sourceFile: fileName,
+        sourceType: 'bak',
+      };
+
+      // Deduplicate by code: keep the active item with higher id / latest in stream
+      const existing = uniqueMap.get(code);
+      if (!existing || eqId >= existing.id) {
+        uniqueMap.set(code, equipmentItem);
       }
     }
   }
@@ -914,14 +1001,19 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
     'ลำดับ',
     'รหัสครุภัณฑ์',
     'ชื่อครุภัณฑ์',
-    'ประเภท',
-    'หมวดหมู่',
-    'ปีงบประมาณ',
+    'หน่วยจัดซื้อ',
+    'กอง',
+    'แผนก',
+    'ระบบงาน',
+    'ระบบปฏิบัติการ',
+    'สถานะการใช้งาน',
+    'ปีที่จัดซื้อ',
     'อายุใช้งาน (ปี)',
     'สถานะอายุ',
-    'สถานะการใช้งาน',
-    'หน่วยจัดซื้อ',
-    'หน่วยงาน/แผนกที่ครอบครอง',
+    'CPU',
+    'RAM',
+    'ประเภท',
+    'หมวดหมู่',
     'หมายเลขเครื่อง/Serial',
     'ราคาต่อหน่วย (บาท)',
     'หน่วยนับ',
@@ -935,14 +1027,19 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
       idx + 1,
       `"${(item.code || '').replace(/"/g, '""')}"`,
       `"${(item.name || '').replace(/"/g, '""')}"`,
-      `"${(item.type || '').replace(/"/g, '""')}"`,
-      `"${(item.category || '').replace(/"/g, '""')}"`,
+      `"${item.procurementName || 'ทสอ.ฯ'}"`,
+      `"${(item.division || '').replace(/"/g, '""')}"`,
+      `"${(item.deptName || '').replace(/"/g, '""')}"`,
+      `"${(item.projectName || '').replace(/"/g, '""')}"`,
+      `"${(item.osName || '').replace(/"/g, '""')}"`,
+      `"${item.statusName || 'ใช้งานปกติ'}"`,
       `"${(item.year || '').replace(/"/g, '""')}"`,
       item.ageYears > 0 ? item.ageYears : '-',
       `"${item.ageStatusLabel}"`,
-      `"${item.statusName || 'ปกติ'}"`,
-      `"${item.procurementName || 'กง.กห.'}"`,
-      `"${(item.deptName || '').replace(/"/g, '""')}"`,
+      `"${(item.cpu || '').replace(/"/g, '""')}"`,
+      `"${(item.ram || '').replace(/"/g, '""')}"`,
+      `"${(item.type || '').replace(/"/g, '""')}"`,
+      `"${(item.category || '').replace(/"/g, '""')}"`,
       `"${(item.serial || '').replace(/"/g, '""')}"`,
       item.price.toFixed(2),
       `"${(item.unit || 'เครื่อง').replace(/"/g, '""')}"`,
@@ -1189,10 +1286,12 @@ export function reconcileEquipmentData(
         });
       }
 
-      // Check status
+      // Check status (normalize 'ใช้งานปกติ' and 'ปกติ' to avoid false discrepancy)
       const bakStatus = (bak.statusName || '').trim();
       const excelStatus = (excel.statusName || '').trim();
-      if (bakStatus && excelStatus && bakStatus !== excelStatus) {
+      const normBakStatus = bakStatus.replace(/^ใช้งานปกติ$/, 'ปกติ');
+      const normExcelStatus = excelStatus.replace(/^ใช้งานปกติ$/, 'ปกติ');
+      if (normBakStatus && normExcelStatus && normBakStatus !== normExcelStatus) {
         discrepancies.push({
           field: 'status',
           fieldLabel: 'สถานะการใช้งาน',

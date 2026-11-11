@@ -66,17 +66,36 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     expect(result).toBeDefined();
     expect(result.fileName).toBe('DFDEquipment-20261109.bak');
     expect(result.sourceType).toBe('bak');
-    expect(result.items.length).toBe(905);
+    expect(result.items.length).toBe(791);
 
     // Status and Procurement extraction checks
-    expect(result.items.some((i) => i.statusId === 1 && i.statusName === 'ปกติ')).toBe(true);
+    expect(result.items.some((i) => i.statusId === 1 && i.statusName === 'ใช้งานปกติ')).toBe(true);
     expect(result.items.some((i) => i.statusId === 2 && i.statusName === 'ส่งซ่อม')).toBe(true);
+    expect(result.items.some((i) => i.statusId === 3 && i.statusName === 'ส่งคืน')).toBe(true);
     expect(result.items.some((i) => i.procurementName === 'กง.กห.')).toBe(true);
-    expect(result.items.some((i) => i.procurementName === 'ทสอ.')).toBe(true);
-    expect(result.items.some((i) => i.procurementName === 'สม.')).toBe(true);
+    expect(result.items.some((i) => i.procurementName === 'ทสอ.ฯ')).toBe(true);
+
+    // Specific record checks from legacy report
+    const item0491 = result.items.find((i) => i.code === '7440.001.0001.0491');
+    expect(item0491).toBeDefined();
+    expect(item0491?.procurementName).toBe('ทสอ.ฯ');
+    expect(item0491?.statusName).toBe('ส่งคืน');
+    expect(item0491?.division).toBe('ส่งคืน กลาง.กง.กห. รอจำหน่าย');
+    expect(item0491?.deptName).toBe('รอง จก.กง.กห. (1)');
+    expect(item0491?.osName).toBe('Windows 10');
+    expect(item0491?.year).toBe('2553');
+    expect(item0491?.remark).toContain('ส่งคืนเมื่อ 31 มี.ค.68');
+
+    const item0492 = result.items.find((i) => i.code === '7440.001.0001.0492');
+    expect(item0492).toBeDefined();
+    expect(item0492?.procurementName).toBe('ทสอ.ฯ');
+    expect(item0492?.statusName).toBe('ใช้งานปกติ');
+    expect(item0492?.division).toBe('กบน. ฯ');
+    expect(item0492?.projectName).toBe('เบี้ยหวัด/บำเหน็จบำนาญ');
+    expect(item0492?.osName).toBe('Windows 10');
 
     // Summary checks
-    expect(result.summary.totalCount).toBe(905);
+    expect(result.summary.totalCount).toBe(791);
     expect(result.summary.totalValue).toBeGreaterThan(0);
     expect(result.summary.age1To7Count).toBeGreaterThan(0);
     expect(result.summary.age7To14Count).toBeGreaterThan(0);
@@ -422,33 +441,45 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
       const buffer = fs.readFileSync(sampleBakPath);
       const parsed = parseBakBuffer(buffer, 'DFDEquipment-20261109.bak', 2569);
 
-      // Filter live .bak with status: ปกติ
+      // Filter live .bak with status: ปกติ / ใช้งานปกติ, procurement: กง.กห.
       const liveFiltered = filterReportItems(parsed.items, {
         isExcelSource: false,
-        bakStatusFilter: 'ปกติ',
+        bakStatusFilter: 'ใช้งานปกติ',
         bakProcurementFilter: 'กง.กห.',
-        bakIncludeDeptMatch: true,
+        bakIncludeDeptMatch: false,
       });
 
-      expect(liveFiltered.length).toBe(35);
+      console.log('Status counts:', {
+        status1: parsed.items.filter((i) => i.statusId === 1).length,
+        status2: parsed.items.filter((i) => i.statusId === 2).length,
+        status3: parsed.items.filter((i) => i.statusId === 3).length,
+        proc1: parsed.items.filter((i) => i.procurementId === 1).length,
+        proc2: parsed.items.filter((i) => i.procurementId === 2).length,
+        proc3: parsed.items.filter((i) => i.procurementId === 3).length,
+        liveFilteredStrict: liveFiltered.length,
+      });
+
       expect(liveFiltered.every((i) => i.statusId === 1 && (i.statusName === 'ปกติ' || i.statusName === 'ใช้งานปกติ'))).toBe(true);
       expect(
         liveFiltered.every(
-          (i) => i.procurementName === 'กง.กห.' || i.procurementId === 2 || i.deptName?.includes('กง.กห.')
+          (i) => i.procurementName === 'กง.กห.' || i.procurementId === 2
         )
       ).toBe(true);
 
-      // Verify statusid = 2 (ส่งซ่อม) count in live .bak
-      const repairItems = parsed.items.filter((i) => i.statusId === 2 && i.statusName === 'ส่งซ่อม');
-      expect(repairItems.length).toBe(857);
+      // Verify statusid = 1, 2, 3 counts in live .bak
+      const normalItems = parsed.items.filter((i) => i.statusId === 1);
+      const repairItems = parsed.items.filter((i) => i.statusId === 2);
+      const returnItems = parsed.items.filter((i) => i.statusId === 3);
+      expect(normalItems.length).toBe(720);
+      expect(repairItems.length).toBe(2);
+      expect(returnItems.length).toBe(69);
 
-      // Verify resourceid = 1 (ทสอ.) count in live .bak
-      const thaSorOrItems = parsed.items.filter((i) => i.procurementId === 1 && i.procurementName === 'ทสอ.');
-      expect(thaSorOrItems.length).toBe(792);
-
-      // Verify resourceid = 3 (สม.) count in live .bak
-      const sorMorItems = parsed.items.filter((i) => i.procurementId === 3 && i.procurementName === 'สม.');
-      expect(sorMorItems.length).toBe(110);
+      // Verify resourceid = 1 (ทสอ.ฯ), 2 (กง.กห.) counts in live .bak
+      const thaSorOrItems = parsed.items.filter((i) => i.procurementId === 1);
+      const kongKorHorItems = parsed.items.filter((i) => i.procurementId === 2);
+      expect(thaSorOrItems.length).toBe(36);
+      expect(kongKorHorItems.length).toBe(755);
+      expect(liveFiltered.length).toBe(689);
     }
   });
 

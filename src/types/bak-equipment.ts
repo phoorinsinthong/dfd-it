@@ -9,13 +9,20 @@ export interface BakEquipmentItem {
   docNo: string;
   remark: string;
   deptName: string;
+  division?: string; // กอง เช่น 'กบน. ฯ', 'กคจ. ฯ', 'กลาง. ฯ', 'ส่งคืน กลาง.กง.กห. รอจำหน่าย'
   unit: string;
   price: number;
   statusId: number;
-  statusName?: string; // 'ปกติ' | 'ส่งซ่อม' | 'ส่งคืน'
-  procurementId?: number; // 1 (ทสอ.) | 2 (กง.กห.) | 3 (สม.)
-  procurementName?: string; // 'ทสอ.' | 'กง.กห.' | 'สม.'
+  statusName?: string; // 'ใช้งานปกติ' | 'ปกติ' | 'ส่งซ่อม' | 'ส่งคืน'
+  procurementId?: number; // 1 (ทสอ.ฯ) | 2 (กง.กห.) | 3 (สม.)
+  procurementName?: string; // 'ทสอ.ฯ' | 'ทสอ.' | 'กง.กห.' | 'สม.'
   deptId: number;
+  osId?: number;
+  osName?: string; // 'Windows 10' | 'Windows 7' | 'Windows XP' | etc.
+  projectId?: number;
+  projectName?: string; // 'เบี้ยหวัด/บำเหน็จบำนาญ' | 'ระบบเงินเดือน' | 'บัญชี' | etc.
+  cpu?: string;
+  ram?: string;
   type: string;
   category: string;
   // Lifecycle & Age analysis

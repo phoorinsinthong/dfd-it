@@ -103,8 +103,8 @@ export default function BakAnalysisPage() {
   const [reportYearEnd, setReportYearEnd] = useState<string>('');
   const [reportRowLimit, setReportRowLimit] = useState<string>('all');
   const [reportExcludeWarehouse12, setReportExcludeWarehouse12] = useState<boolean>(true);
-  // .bak Specific Report Filters: Status = "ปกติ", Procurement = "all" (Default)
-  const [reportBakStatus, setReportBakStatus] = useState<string>('ปกติ');
+  // .bak Specific Report Filters: Status = "ใช้งานปกติ", Procurement = "all" (Default)
+  const [reportBakStatus, setReportBakStatus] = useState<string>('ใช้งานปกติ');
   const [reportBakProcurement, setReportBakProcurement] = useState<string>('all');
   const [reportBakIncludeDeptMatch, setReportBakIncludeDeptMatch] = useState<boolean>(true);
 
@@ -405,9 +405,10 @@ export default function BakAnalysisPage() {
       if (selectedStatus !== 'all') {
         const matchesStatus =
           item.statusName === selectedStatus ||
-          (selectedStatus === 'ปกติ' && (item.statusId === 1 || item.statusName === 'ใช้งานปกติ')) ||
-          (selectedStatus === 'ส่งซ่อม' && item.statusId === 2) ||
-          (selectedStatus === 'ส่งคืน' && item.statusId === 3);
+          ((selectedStatus === 'ปกติ' || selectedStatus === 'ใช้งานปกติ') &&
+            (item.statusId === 1 || item.statusName === 'ใช้งานปกติ' || item.statusName === 'ปกติ')) ||
+          (selectedStatus === 'ส่งซ่อม' && (item.statusId === 2 || item.statusName === 'ส่งซ่อม')) ||
+          (selectedStatus === 'ส่งคืน' && (item.statusId === 3 || item.statusName === 'ส่งคืน'));
         if (!matchesStatus) return false;
       }
 
@@ -415,9 +416,12 @@ export default function BakAnalysisPage() {
       if (selectedProcurement !== 'all') {
         const matchesProc =
           item.procurementName === selectedProcurement ||
-          (selectedProcurement === 'ทสอ.' && (item.procurementId === 1 || item.procurementName?.startsWith('ทสอ'))) ||
-          (selectedProcurement === 'กง.กห.' && (item.procurementId === 2 || item.procurementName === 'กง.กห.' || item.deptName?.includes('กง.กห.'))) ||
-          (selectedProcurement === 'สม.' && (item.procurementId === 3 || item.procurementName === 'สม.'));
+          ((selectedProcurement === 'ทสอ.' || selectedProcurement === 'ทสอ.ฯ') &&
+            (item.procurementId === 1 || item.procurementName?.startsWith('ทสอ'))) ||
+          (selectedProcurement === 'กง.กห.' &&
+            (item.procurementId === 2 || item.procurementName === 'กง.กห.')) ||
+          (selectedProcurement === 'สม.' &&
+            (item.procurementId === 3 || item.procurementName === 'สม.'));
         if (!matchesProc) return false;
       }
 
@@ -439,11 +443,29 @@ export default function BakAnalysisPage() {
         const matchCode = item.code.toLowerCase().includes(q);
         const matchName = item.name.toLowerCase().includes(q);
         const matchDept = item.deptName.toLowerCase().includes(q);
+        const matchDivision = (item.division || '').toLowerCase().includes(q);
+        const matchProject = (item.projectName || '').toLowerCase().includes(q);
+        const matchOs = (item.osName || '').toLowerCase().includes(q);
+        const matchProc = (item.procurementName || '').toLowerCase().includes(q);
+        const matchStatus = (item.statusName || '').toLowerCase().includes(q);
         const matchSerial = item.serial.toLowerCase().includes(q);
         const matchDoc = item.docNo.toLowerCase().includes(q);
         const matchRemark = item.remark.toLowerCase().includes(q);
         const matchFile = (item.sourceFile || '').toLowerCase().includes(q);
-        return matchCode || matchName || matchDept || matchSerial || matchDoc || matchRemark || matchFile;
+        return (
+          matchCode ||
+          matchName ||
+          matchDept ||
+          matchDivision ||
+          matchProject ||
+          matchOs ||
+          matchProc ||
+          matchStatus ||
+          matchSerial ||
+          matchDoc ||
+          matchRemark ||
+          matchFile
+        );
       }
       return true;
     });
@@ -1865,10 +1887,14 @@ export default function BakAnalysisPage() {
                                 </td>
                                 <td className="py-3 px-3 text-[11px]">
                                   <div className="space-y-0.5 max-w-xs">
-                                    {item.bakItem?.deptName && (
-                                      <div className="truncate text-slate-300">
+                                    {(item.bakItem?.deptName || item.bakItem?.division) && (
+                                      <div
+                                        className="truncate text-slate-300"
+                                        title={`${item.bakItem.division ? `[${item.bakItem.division}] ` : ''}${item.bakItem.deptName || ''}`}
+                                      >
                                         <span className="text-[10px] text-amber-400 mr-1">.bak:</span>
-                                        {item.bakItem.deptName}
+                                        {item.bakItem.division ? `[${item.bakItem.division}] ` : ''}
+                                        {item.bakItem.deptName || ''}
                                       </div>
                                     )}
                                     {item.excelItem?.deptName && (
@@ -2268,7 +2294,7 @@ export default function BakAnalysisPage() {
                             onChange={(e) => setReportBakStatus(e.target.value)}
                             className="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer"
                           >
-                            <option value="ปกติ" className="bg-slate-900">ปกติ 🟢</option>
+                            <option value="ใช้งานปกติ" className="bg-slate-900">ใช้งานปกติ 🟢</option>
                             <option value="ส่งซ่อม" className="bg-slate-900">ส่งซ่อม 🟡</option>
                             <option value="ส่งคืน" className="bg-slate-900">ส่งคืน 🔴</option>
                             <option value="all" className="bg-slate-900">ทุกสถานะ</option>
@@ -2283,8 +2309,8 @@ export default function BakAnalysisPage() {
                             onChange={(e) => setReportBakProcurement(e.target.value)}
                             className="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer"
                           >
-                            <option value="all" className="bg-slate-900">ทั้งหมด</option>
-                            <option value="ทสอ." className="bg-slate-900">ทสอ.</option>
+                            <option value="all" className="bg-slate-900">ทุกหน่วยจัดซื้อ</option>
+                            <option value="ทสอ.ฯ" className="bg-slate-900">ทสอ.ฯ</option>
                             <option value="กง.กห." className="bg-slate-900">กง.กห.</option>
                             <option value="สม." className="bg-slate-900">สม.</option>
                           </select>
@@ -2791,7 +2817,7 @@ export default function BakAnalysisPage() {
                           className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
                         >
                           <option value="all">ทุกสถานะ</option>
-                          <option value="ปกติ">ปกติ 🟢</option>
+                          <option value="ใช้งานปกติ">ใช้งานปกติ 🟢</option>
                           <option value="ส่งซ่อม">ส่งซ่อม 🟡</option>
                           <option value="ส่งคืน">ส่งคืน 🔴</option>
                         </select>
@@ -2811,7 +2837,7 @@ export default function BakAnalysisPage() {
                           className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
                         >
                           <option value="all">ทุกหน่วยจัดซื้อ</option>
-                          <option value="ทสอ.">ทสอ.</option>
+                          <option value="ทสอ.ฯ">ทสอ.ฯ</option>
                           <option value="กง.กห.">กง.กห.</option>
                           <option value="สม.">สม.</option>
                         </select>
@@ -2880,10 +2906,16 @@ export default function BakAnalysisPage() {
                         {parseResult.sourceType === 'bak' && (
                           <>
                             <th className="py-3 px-3 text-center">หน่วยจัดซื้อ</th>
+                            <th className="py-3 px-3 min-w-28">กอง</th>
+                            <th className="py-3 px-3 min-w-36">แผนก / ฝ่าย</th>
+                            <th className="py-3 px-3 min-w-28">ระบบงาน</th>
+                            <th className="py-3 px-3 min-w-28">ระบบปฏิบัติการ</th>
                             <th className="py-3 px-3 text-center">สถานะ</th>
                           </>
                         )}
-                        <th className="py-3 px-3 min-w-36">หน่วยงาน</th>
+                        {parseResult.sourceType === 'excel' && (
+                          <th className="py-3 px-3 min-w-36">หน่วยงาน</th>
+                        )}
                         <th className="py-3 px-3 text-right">ราคา/หน่วย</th>
                         <th className="py-3 px-3 min-w-28">เอกสาร</th>
                         {parseResult.sourceType === 'excel' && (
@@ -2895,7 +2927,7 @@ export default function BakAnalysisPage() {
                     <tbody className="divide-y divide-slate-800/60">
                       {paginatedItems.length === 0 ? (
                         <tr>
-                          <td colSpan={parseResult.sourceType === 'bak' ? 14 : 12} className="py-12 text-center text-slate-500">
+                          <td colSpan={parseResult.sourceType === 'bak' ? 18 : 12} className="py-12 text-center text-slate-500">
                             ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา
                           </td>
                         </tr>
@@ -2947,6 +2979,18 @@ export default function BakAnalysisPage() {
                                   <td className="py-2.5 px-3 text-center text-slate-300 font-medium">
                                     {item.procurementName || '-'}
                                   </td>
+                                  <td className="py-2.5 px-3 text-slate-300 text-[11px]">
+                                    {item.division || '-'}
+                                  </td>
+                                  <td className="py-2.5 px-3 text-slate-300 text-[11px]">
+                                    {item.deptName || '-'}
+                                  </td>
+                                  <td className="py-2.5 px-3 text-slate-300 text-[11px]">
+                                    {item.projectName || '-'}
+                                  </td>
+                                  <td className="py-2.5 px-3 text-slate-300 text-[11px]">
+                                    {item.osName || '-'}
+                                  </td>
                                   <td className="py-2.5 px-3 text-center">
                                     <span
                                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -2957,14 +3001,16 @@ export default function BakAnalysisPage() {
                                           : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                                       }`}
                                     >
-                                      {item.statusName || 'ปกติ'}
+                                      {item.statusName || 'ใช้งานปกติ'}
                                     </span>
                                   </td>
                                 </>
                               )}
-                              <td className="py-2.5 px-3 text-slate-300 text-[11px]">
-                                {item.deptName || '-'}
-                              </td>
+                              {parseResult.sourceType === 'excel' && (
+                                <td className="py-2.5 px-3 text-slate-300 text-[11px]">
+                                  {item.deptName || '-'}
+                                </td>
+                              )}
                               <td className="py-2.5 px-3 text-right font-mono text-emerald-400">
                                 {(item.price ?? 0) > 0 ? `฿${(item.price ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
                               </td>
@@ -3160,7 +3206,7 @@ export default function BakAnalysisPage() {
                           onChange={(e) => setReportBakStatus(e.target.value)}
                           className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition font-medium"
                         >
-                          <option value="ปกติ">ปกติ (ค่าเริ่มต้น 🟢)</option>
+                          <option value="ใช้งานปกติ">ใช้งานปกติ (ค่าเริ่มต้น 🟢)</option>
                           <option value="ส่งซ่อม">ส่งซ่อม 🟡</option>
                           <option value="ส่งคืน">ส่งคืน 🔴</option>
                           <option value="all">ทุกสถานะ</option>
@@ -3181,7 +3227,7 @@ export default function BakAnalysisPage() {
                           className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition font-medium"
                         >
                           <option value="all">ทุกหน่วยจัดซื้อ (ค่าเริ่มต้น)</option>
-                          <option value="ทสอ.">ทสอ. (ศูนย์เทคโนโลยีฯ)</option>
+                          <option value="ทสอ.ฯ">ทสอ.ฯ (ศูนย์เทคโนโลยีฯ)</option>
                           <option value="กง.กห.">กง.กห. (กรมการเงินกลาโหม)</option>
                           <option value="สม.">สม. (สำนักรัฐมนตรี)</option>
                         </select>
@@ -3250,7 +3296,7 @@ export default function BakAnalysisPage() {
                           reportYearStart ||
                           reportYearEnd ||
                           reportRowLimit !== 'all' ||
-                          (!isExcelSource && (reportBakStatus !== 'ปกติ' || reportBakProcurement !== 'all'))) && (
+                          (!isExcelSource && (reportBakStatus !== 'ใช้งานปกติ' || reportBakProcurement !== 'all'))) && (
                           <button
                             type="button"
                             onClick={() => {
@@ -3260,7 +3306,7 @@ export default function BakAnalysisPage() {
                               setReportYearStart('');
                               setReportYearEnd('');
                               setReportRowLimit('all');
-                              setReportBakStatus('ปกติ');
+                              setReportBakStatus('ใช้งานปกติ');
                               setReportBakProcurement('all');
                             }}
                             className="text-[10px] text-amber-400 hover:text-amber-300"
@@ -3497,13 +3543,18 @@ export default function BakAnalysisPage() {
                               <th className="border border-slate-300 p-2 text-left w-28">ประเภท</th>
                               <th className="border border-slate-300 p-2 text-center w-20">ปีงบฯ</th>
                               <th className="border border-slate-300 p-2 text-center w-24">อายุใช้งาน</th>
-                              {!isExcelSource && (
+                              {!isExcelSource ? (
                                 <>
-                                  <th className="border border-slate-300 p-2 text-center w-24">หน่วยจัดซื้อ</th>
-                                  <th className="border border-slate-300 p-2 text-center w-24">สถานะ</th>
+                                  <th className="border border-slate-300 p-2 text-center w-20">หน่วยจัดซื้อ</th>
+                                  <th className="border border-slate-300 p-2 text-left w-28">กอง</th>
+                                  <th className="border border-slate-300 p-2 text-left w-32">แผนก</th>
+                                  <th className="border border-slate-300 p-2 text-left w-24">ระบบงาน</th>
+                                  <th className="border border-slate-300 p-2 text-left w-24">ระบบปฏิบัติการ</th>
+                                  <th className="border border-slate-300 p-2 text-center w-20">สถานะ</th>
                                 </>
+                              ) : (
+                                <th className="border border-slate-300 p-2 text-left w-44">หน่วยงาน / ที่ตั้ง</th>
                               )}
-                              <th className="border border-slate-300 p-2 text-left w-44">หน่วยงาน / ที่ตั้ง</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -3546,10 +3597,22 @@ export default function BakAnalysisPage() {
                                     <span className="text-slate-400 text-[10px]">-</span>
                                   )}
                                 </td>
-                                {!isExcelSource && (
+                                {!isExcelSource ? (
                                   <>
                                     <td className="border border-slate-300 p-1.5 text-center text-[11px] font-medium text-slate-700">
                                       {item.procurementName || '-'}
+                                    </td>
+                                    <td className="border border-slate-300 p-1.5 text-slate-700 text-[11px]">
+                                      {item.division || '-'}
+                                    </td>
+                                    <td className="border border-slate-300 p-1.5 text-slate-700 text-[11px]">
+                                      {item.deptName || '-'}
+                                    </td>
+                                    <td className="border border-slate-300 p-1.5 text-slate-700 text-[11px]">
+                                      {item.projectName || '-'}
+                                    </td>
+                                    <td className="border border-slate-300 p-1.5 text-slate-700 text-[11px]">
+                                      {item.osName || '-'}
                                     </td>
                                     <td className="border border-slate-300 p-1.5 text-center text-[11px]">
                                       <span
@@ -3561,20 +3624,21 @@ export default function BakAnalysisPage() {
                                             : 'bg-rose-100 text-rose-800'
                                         }`}
                                       >
-                                        {item.statusName || 'ปกติ'}
+                                        {item.statusName || 'ใช้งานปกติ'}
                                       </span>
                                     </td>
                                   </>
+                                ) : (
+                                  <td className="border border-slate-300 p-1.5 text-slate-600 text-[11px]">
+                                    {item.deptName || '-'}
+                                  </td>
                                 )}
-                                <td className="border border-slate-300 p-1.5 text-slate-600 text-[11px]">
-                                  {item.deptName || '-'}
-                                </td>
                               </tr>
                             ))}
                           </tbody>
                           <tfoot>
                             <tr className="bg-slate-100 font-bold">
-                              <td colSpan={!isExcelSource ? 9 : 7} className="border border-slate-300 p-2 text-center">
+                              <td colSpan={!isExcelSource ? 12 : 7} className="border border-slate-300 p-2 text-center">
                                 รวมรายการที่แสดง ({reportDisplayItems.length.toLocaleString()} รายการ)
                               </td>
                             </tr>
