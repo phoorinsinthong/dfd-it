@@ -103,14 +103,15 @@ export default function BakAnalysisPage() {
   const [reportYearEnd, setReportYearEnd] = useState<string>('');
   const [reportRowLimit, setReportRowLimit] = useState<string>('all');
   const [reportExcludeWarehouse12, setReportExcludeWarehouse12] = useState<boolean>(true);
-  // .bak Specific Report Filters: Status = "ใช้งานปกติ", Procurement = "all" (Default)
+  // .bak Specific Report Filters: Status = "ใช้งานปกติ", Procurement = "all" (Default), Division = "all"
   const [reportBakStatus, setReportBakStatus] = useState<string>('ใช้งานปกติ');
   const [reportBakProcurement, setReportBakProcurement] = useState<string>('all');
-  const [reportBakIncludeDeptMatch, setReportBakIncludeDeptMatch] = useState<boolean>(true);
+  const [reportDivision, setReportDivision] = useState<string>('all');
 
-  // Search Table Filters for Status & Procurement (.bak)
+  // Search Table Filters for Status, Procurement, & Division (.bak)
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedProcurement, setSelectedProcurement] = useState<string>('all');
+  const [selectedDivision, setSelectedDivision] = useState<string>('all');
 
   // Pagination for Table
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -425,6 +426,9 @@ export default function BakAnalysisPage() {
         if (!matchesProc) return false;
       }
 
+      // Division Filter (.bak)
+      if (selectedDivision !== 'all' && item.division !== selectedDivision) return false;
+
       // Age Bracket Filter
       if (selectedAgeBracket === '1-7' && item.ageBracket !== '1-7') return false;
       if (selectedAgeBracket === '7-14' && item.ageBracket !== '7-14') return false;
@@ -480,6 +484,7 @@ export default function BakAnalysisPage() {
     customAgeMax,
     selectedStatus,
     selectedProcurement,
+    selectedDivision,
     searchQuery,
   ]);
 
@@ -556,6 +561,7 @@ export default function BakAnalysisPage() {
     return filterReportItems(parseResult.items, {
       category: reportCategory,
       type: reportType,
+      division: reportDivision,
       ageBracket: reportAgeFilterMode === 'bracket' ? reportAgeBracket : undefined,
       yearStart: reportAgeFilterMode === 'yearRange' ? reportYearStart : undefined,
       yearEnd: reportAgeFilterMode === 'yearRange' ? reportYearEnd : undefined,
@@ -563,13 +569,13 @@ export default function BakAnalysisPage() {
       excludeWarehouse12ForExcel: reportExcludeWarehouse12,
       bakStatusFilter: reportBakStatus,
       bakProcurementFilter: reportBakProcurement,
-      bakIncludeDeptMatch: reportBakIncludeDeptMatch,
     });
   }, [
     parseResult,
     isExcelSource,
     reportCategory,
     reportType,
+    reportDivision,
     reportAgeFilterMode,
     reportAgeBracket,
     reportYearStart,
@@ -577,7 +583,6 @@ export default function BakAnalysisPage() {
     reportExcludeWarehouse12,
     reportBakStatus,
     reportBakProcurement,
-    reportBakIncludeDeptMatch,
   ]);
 
   // Display items considering print row limit
@@ -2315,6 +2320,25 @@ export default function BakAnalysisPage() {
                             <option value="สม." className="bg-slate-900">สม.</option>
                           </select>
                         </div>
+
+                        {/* Division Dropdown */}
+                        {parseResult.availableDivisions && parseResult.availableDivisions.length > 0 && (
+                          <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <span className="text-slate-400 text-[11px]">กอง:</span>
+                            <select
+                              value={reportDivision}
+                              onChange={(e) => setReportDivision(e.target.value)}
+                              className="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer"
+                            >
+                              <option value="all" className="bg-slate-900">ทุกกอง</option>
+                              {parseResult.availableDivisions.map((div) => (
+                                <option key={div} value={div} className="bg-slate-900">
+                                  {div}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -2844,6 +2868,28 @@ export default function BakAnalysisPage() {
                       </div>
                     )}
 
+                    {/* Division Filter (.bak) */}
+                    {parseResult.sourceType === 'bak' && parseResult.availableDivisions && parseResult.availableDivisions.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">กอง:</span>
+                        <select
+                          value={selectedDivision}
+                          onChange={(e) => {
+                            setSelectedDivision(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                        >
+                          <option value="all">ทุกกอง</option>
+                          {parseResult.availableDivisions.map((div) => (
+                            <option key={div} value={div}>
+                              {div}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
                     {/* Reset button */}
                     {(selectedYear !== 'all' ||
                       selectedType !== 'all' ||
@@ -2852,6 +2898,7 @@ export default function BakAnalysisPage() {
                       selectedSourceFile !== 'all' ||
                       selectedStatus !== 'all' ||
                       selectedProcurement !== 'all' ||
+                      selectedDivision !== 'all' ||
                       searchQuery) && (
                       <button
                         onClick={() => {
@@ -2862,6 +2909,7 @@ export default function BakAnalysisPage() {
                           setSelectedSourceFile('all');
                           setSelectedStatus('all');
                           setSelectedProcurement('all');
+                          setSelectedDivision('all');
                           setSearchQuery('');
                           setCurrentPage(1);
                         }}
@@ -3085,7 +3133,7 @@ export default function BakAnalysisPage() {
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      {isExcelSource ? (
+                      {isExcelSource && (
                         <button
                           type="button"
                           onClick={() => setReportExcludeWarehouse12(!reportExcludeWarehouse12)}
@@ -3107,30 +3155,6 @@ export default function BakAnalysisPage() {
                               : 'คลัง 12: รวมในรายงาน'}
                           </span>
                         </button>
-                      ) : (
-                        reportBakProcurement === 'กง.กห.' && (
-                          <button
-                            type="button"
-                            onClick={() => setReportBakIncludeDeptMatch(!reportBakIncludeDeptMatch)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition border ${
-                              reportBakIncludeDeptMatch
-                                ? 'bg-blue-950/60 border-blue-700/80 text-blue-300 hover:bg-blue-900/60'
-                                : 'bg-amber-950/60 border-amber-700/80 text-amber-300 hover:bg-amber-900/60'
-                            }`}
-                            title="สลับโหมดการจับคู่ กง.กห. ระหว่างรวมหน่วยงาน กง.กห. กับเฉพาะรหัสจัดซื้อ"
-                          >
-                            <span
-                              className={`w-2 h-2 rounded-full ${
-                                reportBakIncludeDeptMatch ? 'bg-blue-400' : 'bg-amber-400'
-                              }`}
-                            />
-                            <span>
-                              {reportBakIncludeDeptMatch
-                                ? 'จัดซื้อ/หน่วยงาน: รวม กง.กห.'
-                                : 'จัดซื้อ: เฉพาะรหัสจัดซื้อ'}
-                            </span>
-                          </button>
-                        )
                       )}
                       <button
                         onClick={handleDownloadReportCsv}
@@ -3153,7 +3177,7 @@ export default function BakAnalysisPage() {
                   </div>
 
                   {/* Filter Toolbar Controls */}
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 ${isExcelSource ? 'lg:grid-cols-4' : 'lg:grid-cols-3 xl:grid-cols-6'} gap-3 text-xs`}>
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 ${isExcelSource ? 'lg:grid-cols-4' : 'lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7'} gap-3 text-xs`}>
                     {/* 1. หมวดหมู่ (Category) */}
                     <div>
                       <label className="block text-slate-400 font-medium mb-1.5 flex items-center gap-1">
@@ -3234,6 +3258,28 @@ export default function BakAnalysisPage() {
                       </div>
                     )}
 
+                    {/* 2.3 For .bak: กองที่ได้รับ (Division) */}
+                    {!isExcelSource && parseResult.availableDivisions && parseResult.availableDivisions.length > 0 && (
+                      <div>
+                        <label className="block text-slate-400 font-medium mb-1.5 flex items-center gap-1">
+                          <Building className="w-3.5 h-3.5 text-purple-400" />
+                          <span>กองที่ได้รับ (.bak)</span>
+                        </label>
+                        <select
+                          value={reportDivision}
+                          onChange={(e) => setReportDivision(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 transition font-medium"
+                        >
+                          <option value="all">ทุกกอง (ทั้งหมด)</option>
+                          {parseResult.availableDivisions.map((div) => (
+                            <option key={div} value={div}>
+                              {div}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
                     {/* 3. โหมดช่วงอายุ/ช่วงปี พ.ศ. */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
@@ -3296,7 +3342,10 @@ export default function BakAnalysisPage() {
                           reportYearStart ||
                           reportYearEnd ||
                           reportRowLimit !== 'all' ||
-                          (!isExcelSource && (reportBakStatus !== 'ใช้งานปกติ' || reportBakProcurement !== 'all'))) && (
+                          (!isExcelSource &&
+                            (reportBakStatus !== 'ใช้งานปกติ' ||
+                              reportBakProcurement !== 'all' ||
+                              reportDivision !== 'all'))) && (
                           <button
                             type="button"
                             onClick={() => {
@@ -3308,6 +3357,7 @@ export default function BakAnalysisPage() {
                               setReportRowLimit('all');
                               setReportBakStatus('ใช้งานปกติ');
                               setReportBakProcurement('all');
+                              setReportDivision('all');
                             }}
                             className="text-[10px] text-amber-400 hover:text-amber-300"
                           >
@@ -3348,8 +3398,12 @@ export default function BakAnalysisPage() {
                           </span>
                           <span className="px-2 py-0.5 rounded-md bg-blue-950/80 text-blue-300 font-medium border border-blue-800">
                             หน่วยจัดซื้อ: {reportBakProcurement === 'all' ? 'ทุกหน่วยจัดซื้อ' : reportBakProcurement}
-                            {reportBakProcurement === 'กง.กห.' && reportBakIncludeDeptMatch && ' (รวมหน่วยงาน กง.กห.)'}
                           </span>
+                          {reportDivision !== 'all' && (
+                            <span className="px-2 py-0.5 rounded-md bg-purple-950/80 text-purple-300 font-medium border border-purple-800">
+                              กอง: {reportDivision}
+                            </span>
+                          )}
                         </>
                       )}
                       {isExcelSource && (
@@ -3407,8 +3461,15 @@ export default function BakAnalysisPage() {
                           <span>•</span>
                           <span className="text-blue-700 font-semibold">
                             หน่วยจัดซื้อ: {reportBakProcurement === 'all' ? 'ทุกหน่วยจัดซื้อ' : reportBakProcurement}
-                            {reportBakProcurement === 'กง.กห.' && reportBakIncludeDeptMatch && ' (รวมหน่วยงาน กง.กห.)'}
                           </span>
+                          {reportDivision !== 'all' && (
+                            <>
+                              <span>•</span>
+                              <span className="text-purple-700 font-semibold">
+                                กอง: {reportDivision}
+                              </span>
+                            </>
+                          )}
                         </>
                       ) : (
                         isExcelSource && (
@@ -3524,11 +3585,7 @@ export default function BakAnalysisPage() {
                         {!isExcelSource && (
                           <p className="text-[11px] text-slate-500 max-w-lg mx-auto">
                             เงื่อนไขปัจจุบัน: สถานะ "{reportBakStatus}" • หน่วยจัดซื้อ "{reportBakProcurement}"
-                            {reportBakProcurement === 'กง.กห.' && !reportBakIncludeDeptMatch && (
-                              <span className="block mt-1 text-blue-600 font-medium">
-                                แนะนำ: กดปุ่ม "จัดซื้อ/หน่วยงาน: รวม กง.กห." ด้านบนเพื่อดึงครุภัณฑ์ที่หน่วยงานในสังกัด กง.กห. ครอบครองอยู่
-                              </span>
-                            )}
+                            {reportDivision !== 'all' && ` • กอง "${reportDivision}"`}
                           </p>
                         )}
                       </div>

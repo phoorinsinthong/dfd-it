@@ -563,6 +563,7 @@ function buildAggregatedResult(
     availableFiles,
     availableStatuses: Array.from(new Set(items.map((i) => i.statusName).filter(Boolean) as string[])),
     availableProcurements: Array.from(new Set(items.map((i) => i.procurementName).filter(Boolean) as string[])),
+    availableDivisions: Array.from(new Set(items.map((i) => i.division).filter(Boolean) as string[])).sort(),
   };
 }
 
@@ -1064,21 +1065,22 @@ export function isWarehouse12(deptName?: string | null): boolean {
 export interface ReportFilterOptions {
   category?: string;
   type?: string;
+  division?: string; // กอง เช่น 'กบน. ฯ', 'กคจ. ฯ', 'กลาง. ฯ'
   ageBracket?: string;
   yearStart?: string | number;
   yearEnd?: string | number;
   excludeWarehouse12ForExcel?: boolean;
   isExcelSource?: boolean;
   // Specific filters for Microsoft SQL Server .bak data source
-  bakStatusFilter?: string; // e.g. 'ปกติ' (default for .bak) or 'all'
-  bakProcurementFilter?: string; // e.g. 'ทั้งหมด' / 'all' (default for .bak) or 'กง.กห.', 'ทสอ.', 'สม.'
-  bakIncludeDeptMatch?: boolean; // default: true (when filtering by unit, also matches if deptName includes unit keyword)
+  bakStatusFilter?: string; // e.g. 'ใช้งานปกติ' (default for .bak) or 'all'
+  bakProcurementFilter?: string; // e.g. 'all' (default for .bak) or 'กง.กห.', 'ทสอ.ฯ', 'สม.'
+  bakIncludeDeptMatch?: boolean; // legacy compatibility: strict procurement matching is now enforced
 }
 
 /**
  * Filter items for the official printable report.
  * - If source is Excel, items located in "คลัง 12" are excluded by default (toggleable).
- * - If source is .bak, filter items by status (statusid 1:ปกติ, 2:ส่งซ่อม, 3:ส่งคืน) and procurement unit (resourceid 1:ทสอ., 2:กง.กห., 3:สม.).
+ * - If source is .bak, filter items by status (statusid 1:ปกติ/ใช้งานปกติ, 2:ส่งซ่อม, 3:ส่งคืน), strict procurement unit (resourceid 1:ทสอ.ฯ, 2:กง.กห., 3:สม.), and division (กอง).
  * - Also sorts items by oldest-first (descending by ageYears).
  */
 export function filterReportItems(
@@ -1108,26 +1110,31 @@ export function filterReportItems(
         if (!matchesStatus) return false;
       }
 
-      // 2.2 Procurement Filter (resourceid = 1:ทสอ., 2:กง.กห., 3:สม.)
+      // 2.2 Strict Procurement Filter (resourceid = 1:ทสอ.ฯ, 2:กง.กห., 3:สม.)
       if (options?.bakProcurementFilter && options.bakProcurementFilter !== 'all') {
         const targetProc = options.bakProcurementFilter;
         if (targetProc === 'ทสอ.' || targetProc === 'ทสอ.ฯ') {
-          const isProc = item.procurementId === 1 || item.procurementName === 'ทสอ.' || item.procurementName === 'ทสอ.ฯ';
-          const isDept = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('ทสอ') ?? false);
-          if (!isProc && !isDept) return false;
+          const isProc =
+            item.procurementId === 1 ||
+            item.procurementName === 'ทสอ.' ||
+            item.procurementName === 'ทสอ.ฯ';
+          if (!isProc) return false;
         } else if (targetProc === 'กง.กห.') {
           const isProc = item.procurementId === 2 || item.procurementName === 'กง.กห.';
-          const isDept = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('กง.กห.') ?? false);
-          if (!isProc && !isDept) return false;
+          if (!isProc) return false;
         } else if (targetProc === 'สม.') {
           const isProc = item.procurementId === 3 || item.procurementName === 'สม.';
-          const isDept = (options?.bakIncludeDeptMatch !== false) && (item.deptName?.includes('สม.') ?? false);
-          if (!isProc && !isDept) return false;
+          if (!isProc) return false;
         } else {
           if (item.procurementName !== targetProc && item.procurementId?.toString() !== targetProc) {
             return false;
           }
         }
+      }
+
+      // 2.3 Division Filter (กอง)
+      if (options?.division && options.division !== 'all') {
+        if (item.division !== options.division) return false;
       }
     }
 

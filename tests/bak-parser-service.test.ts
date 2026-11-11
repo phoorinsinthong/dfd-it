@@ -386,23 +386,12 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
       },
     ];
 
-    // Filter with .bak options: status 'ปกติ', procurement 'กง.กห.'
-    // When bakIncludeDeptMatch is true: Item 1 and Item 3 match
-    const resultWithDept = filterReportItems(mockBakItems, {
-      isExcelSource: false,
-      bakStatusFilter: 'ปกติ',
-      bakProcurementFilter: 'กง.กห.',
-      bakIncludeDeptMatch: true,
-    });
-    expect(resultWithDept.length).toBe(2);
-    expect(resultWithDept.map((i) => i.code)).toEqual(['7440.001.0001', '7440.001.0003']);
-
-    // When bakIncludeDeptMatch is false: ONLY Item 1 matches (strict procurementId = 2)
+    // Filter with .bak options: status 'ปกติ/ใช้งานปกติ', procurement 'กง.กห.'
+    // Strict Procurement Match: ONLY Item 1 matches (strict procurementId = 2)
     const resultStrict = filterReportItems(mockBakItems, {
       isExcelSource: false,
       bakStatusFilter: 'ปกติ',
       bakProcurementFilter: 'กง.กห.',
-      bakIncludeDeptMatch: false,
     });
     expect(resultStrict.length).toBe(1);
     expect(resultStrict[0].code).toBe('7440.001.0001');
@@ -446,25 +435,48 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
         isExcelSource: false,
         bakStatusFilter: 'ใช้งานปกติ',
         bakProcurementFilter: 'กง.กห.',
-        bakIncludeDeptMatch: false,
-      });
-
-      console.log('Status counts:', {
-        status1: parsed.items.filter((i) => i.statusId === 1).length,
-        status2: parsed.items.filter((i) => i.statusId === 2).length,
-        status3: parsed.items.filter((i) => i.statusId === 3).length,
-        proc1: parsed.items.filter((i) => i.procurementId === 1).length,
-        proc2: parsed.items.filter((i) => i.procurementId === 2).length,
-        proc3: parsed.items.filter((i) => i.procurementId === 3).length,
-        liveFilteredStrict: liveFiltered.length,
       });
 
       expect(liveFiltered.every((i) => i.statusId === 1 && (i.statusName === 'ปกติ' || i.statusName === 'ใช้งานปกติ'))).toBe(true);
       expect(
         liveFiltered.every(
-          (i) => i.procurementName === 'กง.กห.' || i.procurementId === 2
+          (i) => i.procurementName === 'กง.กห.' && i.procurementId === 2
         )
       ).toBe(true);
+      expect(liveFiltered.length).toBe(689);
+
+      // Verify computer filtering with strict procurement
+      const liveComputersKongKorHor = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'กง.กห.',
+      });
+      // Exactly 237 computers purchased by กง.กห.
+      expect(liveComputersKongKorHor.length).toBe(237);
+      expect(liveComputersKongKorHor.every((i) => i.procurementName === 'กง.กห.')).toBe(true);
+
+      const liveComputersThaSorOr = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        type: 'คอมพิวเตอร์ (PC / All-in-one)',
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'ทสอ.ฯ',
+      });
+      // Exactly 18 active computers purchased by ทสอ.ฯ (e.g. 0492)
+      expect(liveComputersThaSorOr.length).toBe(18);
+      expect(liveComputersThaSorOr.every((i) => i.procurementName === 'ทสอ.ฯ')).toBe(true);
+
+      // Verify item 0492 is in ทสอ.ฯ list and NOT in กง.กห. list
+      expect(liveComputersKongKorHor.some((i) => i.code === '7440.001.0001.0492')).toBe(false);
+      expect(liveComputersThaSorOr.some((i) => i.code === '7440.001.0001.0492')).toBe(true);
+
+      // Verify division filtering works
+      const liveDivisionKorborNor = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        division: 'กบน. ฯ',
+      });
+      expect(liveDivisionKorborNor.length).toBeGreaterThan(0);
+      expect(liveDivisionKorborNor.every((i) => i.division === 'กบน. ฯ')).toBe(true);
 
       // Verify statusid = 1, 2, 3 counts in live .bak
       const normalItems = parsed.items.filter((i) => i.statusId === 1);
@@ -479,7 +491,6 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
       const kongKorHorItems = parsed.items.filter((i) => i.procurementId === 2);
       expect(thaSorOrItems.length).toBe(36);
       expect(kongKorHorItems.length).toBe(755);
-      expect(liveFiltered.length).toBe(689);
     }
   });
 

@@ -153,4 +153,5 @@ export interface BakParseResult {
   availableFiles?: string[];
   availableStatuses?: string[];
   availableProcurements?: string[];
+  availableDivisions?: string[];
 }
