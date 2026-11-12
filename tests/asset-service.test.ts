@@ -24,6 +24,32 @@ describe('Ticket 06: IT Asset Inventory & Walk-in Loan Management Seam', () => {
       expect(laptops[0].status).toBe('available');
     });
 
+    it('contains the 19 active notebooks from .bak with 11 available in IT support and 8 borrowed in other departments', async () => {
+      const assets = await getAssets();
+      const dfdNotebooks = assets.filter((a) => a.id.startsWith('asset-nb-'));
+      expect(dfdNotebooks.length).toBe(19);
+
+      const availableLaptops = dfdNotebooks.filter((a) => a.status === 'available');
+      const borrowedLaptops = dfdNotebooks.filter((a) => a.status === 'borrowed');
+
+      expect(availableLaptops.length).toBe(11);
+      expect(borrowedLaptops.length).toBe(8);
+
+      // Verify ROG Strix G614J in IT support pool
+      const rog = availableLaptops.find((a) => a.asset_code === '7440.001.0003.0034');
+      expect(rog).toBeDefined();
+      expect(rog?.name).toContain('Asus ROG Strix');
+
+      // Verify Lenovo L430 is borrowed by ผอ.กกมง.กง.กห.
+      const l430 = borrowedLaptops.find((a) => a.asset_code === '7440.001.0003.0012.7');
+      expect(l430).toBeDefined();
+
+      const activeLoans = await getActiveLoans();
+      const l430Loan = activeLoans.find((l) => l.asset_code === '7440.001.0003.0012.7');
+      expect(l430Loan).toBeDefined();
+      expect(l430Loan?.borrower_name).toBe('ผอ.กกมง.กง.กห.');
+    });
+
     it('creates new asset and prevents duplicate asset_code', async () => {
       const res = await createAsset({
         assetCode: 'NB-IT-999',

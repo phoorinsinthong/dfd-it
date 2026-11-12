@@ -40,6 +40,29 @@ describe('Server Management & 3D Rack Seam', () => {
       expect(firstServer.username).toBeDefined();
       expect(firstServer.password).toBeDefined();
     });
+
+    it('contains the 7 real DFD enterprise servers parsed from .bak in Rack 2', async () => {
+      const servers = await getServers();
+      const dfdServers = servers.filter((s) => s.id.startsWith('srv-dfd-'));
+      expect(dfdServers.length).toBe(7);
+
+      expect(dfdServers.every((s) => s.rack_id === 'rack-2')).toBe(true);
+      expect(dfdServers.every((s) => s.status === 'online')).toBe(true);
+
+      const eslipServer = dfdServers.find((s) => s.id === 'srv-dfd-eslip');
+      expect(eslipServer).toBeDefined();
+      expect(eslipServer?.role_purpose).toContain('e-Slip');
+      expect(eslipServer?.specs.brand_model).toContain('SUPERMICRO');
+
+      const budgetServer = dfdServers.find((s) => s.id === 'srv-dfd-budget-p7');
+      expect(budgetServer).toBeDefined();
+      expect(budgetServer?.role_purpose).toContain('เบิกจ่ายงบประมาณ');
+      expect(budgetServer?.specs.os).toContain('AIX');
+
+      const fileShareServer = dfdServers.find((s) => s.id === 'srv-dfd-fileshare-x32');
+      expect(fileShareServer).toBeDefined();
+      expect(fileShareServer?.role_purpose).toContain('ไดรฟ์ Z, Y');
+    });
   });
 
   describe('Rack Occupancy & Collision Prevention', () => {
