@@ -445,15 +445,15 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
       ).toBe(true);
       expect(liveFiltered.length).toBe(689);
 
-      // Verify computer filtering with strict procurement
+      // Verify computer (PC) filtering with strict procurement
       const liveComputersKongKorHor = filterReportItems(parsed.items, {
         isExcelSource: false,
         type: 'คอมพิวเตอร์ (PC / All-in-one)',
         bakStatusFilter: 'ใช้งานปกติ',
         bakProcurementFilter: 'กง.กห.',
       });
-      // Exactly 237 computers purchased by กง.กห.
-      expect(liveComputersKongKorHor.length).toBe(237);
+      // Exactly 219 desktop PCs purchased by กง.กห. (excluding notebooks)
+      expect(liveComputersKongKorHor.length).toBe(219);
       expect(liveComputersKongKorHor.every((i) => i.procurementName === 'กง.กห.')).toBe(true);
 
       const liveComputersThaSorOr = filterReportItems(parsed.items, {
@@ -462,11 +462,32 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
         bakStatusFilter: 'ใช้งานปกติ',
         bakProcurementFilter: 'ทสอ.ฯ',
       });
-      // Exactly 18 active computers purchased by ทสอ.ฯ (e.g. 0492)
-      expect(liveComputersThaSorOr.length).toBe(18);
+      // Exactly 17 active desktop PCs purchased by ทสอ.ฯ (e.g. 0492)
+      expect(liveComputersThaSorOr.length).toBe(17);
       expect(liveComputersThaSorOr.every((i) => i.procurementName === 'ทสอ.ฯ')).toBe(true);
 
-      // Verify item 0492 is in ทสอ.ฯ list and NOT in กง.กห. list
+      // Verify separated notebooks filtering
+      const liveNotebooksKongKorHor = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        type: 'คอมพิวเตอร์โน้ตบุ๊ก (Notebook)',
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'กง.กห.',
+      });
+      // Exactly 18 active notebooks purchased by กง.กห.
+      expect(liveNotebooksKongKorHor.length).toBe(18);
+      expect(liveNotebooksKongKorHor.every((i) => i.procurementName === 'กง.กห.')).toBe(true);
+
+      const liveNotebooksThaSorOr = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        type: 'คอมพิวเตอร์โน้ตบุ๊ก (Notebook)',
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'ทสอ.ฯ',
+      });
+      // Exactly 1 active notebook purchased by ทสอ.ฯ (Lenovo L430: 7440.001.0003.0012.7)
+      expect(liveNotebooksThaSorOr.length).toBe(1);
+      expect(liveNotebooksThaSorOr[0].code).toBe('7440.001.0003.0012.7');
+
+      // Verify item 0492 is in ทสอ.ฯ PC list and NOT in กง.กห. list
       expect(liveComputersKongKorHor.some((i) => i.code === '7440.001.0001.0492')).toBe(false);
       expect(liveComputersThaSorOr.some((i) => i.code === '7440.001.0001.0492')).toBe(true);
 

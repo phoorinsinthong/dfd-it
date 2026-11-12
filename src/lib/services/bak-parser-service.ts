@@ -147,7 +147,32 @@ export function classifyEquipment(
     return { type: 'เครื่องพิมพ์เลเซอร์ (Laser Printer)', category: 'ครุภัณฑ์คอมพิวเตอร์' };
   }
 
-  // 1. Computers & Laptops
+  // 1. Notebooks & Laptops (รหัส 7440.001.0003 หรือระบุโน้ตบุ๊ก - ตรวจสอบก่อนเพื่อแยกออกจาก PC)
+  if (
+    c.startsWith('7440.001.0003') ||
+    c.startsWith('7440.002') ||
+    n.includes('โน้ตบุ๊ก') ||
+    n.includes('โน๊ตบุ๊ค') ||
+    n.includes('notebook') ||
+    n.includes('laptop') ||
+    n.includes('latitude') ||
+    n.includes('vivobook') ||
+    n.includes('vostro') ||
+    n.includes('travelmate') ||
+    n.includes('thinkpad') ||
+    n.includes('porteg') ||
+    n.includes('elitebook') ||
+    n.includes('probook') ||
+    n.includes('macbook') ||
+    n.includes('asus g')
+  ) {
+    return {
+      type: 'คอมพิวเตอร์โน้ตบุ๊ก (Notebook)',
+      category: 'ครุภัณฑ์คอมพิวเตอร์',
+    };
+  }
+
+  // 2. Computers (PC / All-in-one) & Servers
   if (
     c.startsWith('7440.001') ||
     n.includes('think centre') ||
@@ -170,21 +195,6 @@ export function classifyEquipment(
     }
     return {
       type: 'คอมพิวเตอร์ (PC / All-in-one)',
-      category: 'ครุภัณฑ์คอมพิวเตอร์',
-    };
-  }
-
-  // 2. Notebooks & Laptops
-  if (
-    c.startsWith('7440.002') ||
-    n.includes('โน้ตบุ๊ก') ||
-    n.includes('โน๊ตบุ๊ค') ||
-    n.includes('notebook') ||
-    n.includes('laptop') ||
-    n.includes('asus g')
-  ) {
-    return {
-      type: 'คอมพิวเตอร์พกพา (Notebook)',
       category: 'ครุภัณฑ์คอมพิวเตอร์',
     };
   }
