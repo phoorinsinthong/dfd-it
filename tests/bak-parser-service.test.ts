@@ -180,6 +180,89 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
     expect(csv).toContain('ไฟล์ต้นทาง');
   });
 
+  it('generates a valid 2-sheet Microsoft Excel (.xlsx) workbook for official government reports', async () => {
+    const { generateBakReportExcel } = await import('../src/lib/services/bak-parser-service');
+    const XLSX = await import('xlsx');
+
+    const sampleItems = [
+      {
+        id: 1,
+        code: '7440.001.0001.0005.7',
+        name: 'IBM SYSTEM รุ่น x3200-M3',
+        type: 'คอมพิวเตอร์แม่ข่าย (Server)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2553',
+        ageYears: 16,
+        ageBracket: '14+' as const,
+        ageStatusLabel: 'เกินเกณฑ์/รอจำหน่าย',
+        procurementName: 'กง.กห.',
+        division: 'กกมง. ฯ',
+        deptName: 'ห้องคอมพิวเตอร์  แม่ข่าย',
+        statusName: 'ใช้งานปกติ',
+        price: 85000,
+        serial: 'SN-X3200',
+        unit: 'เครื่อง',
+        statusId: 1,
+        deptId: 0,
+        docNo: '',
+        remark: '',
+        sourceType: 'bak' as const,
+      },
+      {
+        id: 2,
+        code: '7440.001.0003.0034',
+        name: 'Asus ROG Strix G614J',
+        type: 'คอมพิวเตอร์โน้ตบุ๊ก (Notebook)',
+        category: 'ครุภัณฑ์คอมพิวเตอร์',
+        year: '2566',
+        ageYears: 3,
+        ageBracket: '1-7' as const,
+        ageStatusLabel: 'ใช้งานปกติ',
+        procurementName: 'กง.กห.',
+        division: 'กกมง. ฯ',
+        deptName: 'แผนกสนับสนุนทางเทคนิค กกมง.กง.กห.',
+        statusName: 'ใช้งานปกติ',
+        price: 49900,
+        serial: 'SN-G614J',
+        unit: 'เครื่อง',
+        statusId: 1,
+        deptId: 0,
+        docNo: '',
+        remark: '',
+        sourceType: 'bak' as const,
+      },
+    ];
+
+    const excelBytes = generateBakReportExcel(sampleItems, {
+      reportTitle: 'รายงานสรุปการสำรวจครุภัณฑ์คอมพิวเตอร์ กง.กห.',
+      filterSubtitle: 'หน่วยจัดซื้อ: กง.กห.',
+      fiscalYear: 2569,
+    });
+
+    expect(excelBytes).toBeInstanceOf(Uint8Array);
+    expect(excelBytes.length).toBeGreaterThan(1000);
+
+    // Parse back with XLSX to verify internal structure
+    const workbook = XLSX.read(excelBytes, { type: 'buffer' });
+    expect(workbook.SheetNames).toEqual(['สรุปภาพรวมและอายุครุภัณฑ์', 'รายละเอียดครุภัณฑ์']);
+
+    // Check Sheet 1 (Summary)
+    const sheet1 = workbook.Sheets['สรุปภาพรวมและอายุครุภัณฑ์'];
+    expect(sheet1).toBeDefined();
+    const sheet1Csv = XLSX.utils.sheet_to_csv(sheet1);
+    expect(sheet1Csv).toContain('รายงานสรุปการสำรวจครุภัณฑ์คอมพิวเตอร์ กง.กห.');
+    expect(sheet1Csv).toContain('ช่วงอายุการใช้งาน');
+    expect(sheet1Csv).toContain('14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย)');
+
+    // Check Sheet 2 (Itemized Details)
+    const sheet2 = workbook.Sheets['รายละเอียดครุภัณฑ์'];
+    expect(sheet2).toBeDefined();
+    const sheet2Csv = XLSX.utils.sheet_to_csv(sheet2);
+    expect(sheet2Csv).toContain('7440.001.0001.0005.7');
+    expect(sheet2Csv).toContain('IBM SYSTEM รุ่น x3200-M3');
+    expect(sheet2Csv).toContain('Asus ROG Strix G614J');
+  });
+
   it('correctly detects "คลัง 12" and excludes it when filtering reports for Excel sources', () => {
     // 1. isWarehouse12 unit check
     expect(isWarehouse12('คลัง 12')).toBe(true);

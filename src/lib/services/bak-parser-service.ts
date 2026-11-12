@@ -1087,6 +1087,153 @@ export function generateBakCsvReport(items: BakEquipmentItem[]): string {
 }
 
 /**
+ * Generate real Microsoft Excel (.xlsx) workbook with 2 sheets:
+ * 1. สรุปภาพรวมและสัดส่วนอายุครุภัณฑ์ (Lifecycle Age Summary)
+ * 2. รายละเอียดครุภัณฑ์ (Itemized Details with auto column widths)
+ */
+export function generateBakReportExcel(
+  items: BakEquipmentItem[],
+  options?: {
+    reportTitle?: string;
+    filterSubtitle?: string;
+    fiscalYear?: number;
+  }
+): Uint8Array {
+  const wb = XLSX.utils.book_new();
+  const currentYear = options?.fiscalYear || CURRENT_FISCAL_YEAR;
+
+  // 1. Sheet 1: สรุปภาพรวมและสัดส่วนอายุครุภัณฑ์
+  let c1to7 = 0;
+  let c7to14 = 0;
+  let c14plus = 0;
+  let cUnknown = 0;
+  let maxAge = 0;
+  let totalAge = 0;
+  let validAgeCount = 0;
+
+  for (const item of items) {
+    if (item.ageBracket === '1-7') c1to7++;
+    else if (item.ageBracket === '7-14') c7to14++;
+    else if (item.ageBracket === '14+') c14plus++;
+    else cUnknown++;
+
+    if (item.ageYears > 0) {
+      if (item.ageYears > maxAge) maxAge = item.ageYears;
+      totalAge += item.ageYears;
+      validAgeCount++;
+    }
+  }
+
+  const totalCount = items.length;
+  const avgAge = validAgeCount > 0 ? (totalAge / validAgeCount).toFixed(1) : '0';
+  const pct1to7 = totalCount > 0 ? ((c1to7 / totalCount) * 100).toFixed(1) : '0.0';
+  const pct7to14 = totalCount > 0 ? ((c7to14 / totalCount) * 100).toFixed(1) : '0.0';
+  const pct14plus = totalCount > 0 ? ((c14plus / totalCount) * 100).toFixed(1) : '0.0';
+  const pctUnknown = totalCount > 0 ? ((cUnknown / totalCount) * 100).toFixed(1) : '0.0';
+
+  const sheet1Data: (string | number)[][] = [
+    [options?.reportTitle || 'รายงานสรุปการสำรวจและวิเคราะห์อายุครุภัณฑ์คอมพิวเตอร์และสารสนเทศ'],
+    [options?.filterSubtitle || `เกณฑ์ปีงบประมาณ ${currentYear} • ข้อมูล ณ วันที่ ${new Date().toLocaleDateString('th-TH')}`],
+    [],
+    ['สถิติภาพรวมสำคัญ', 'ค่าที่ประเมินได้'],
+    ['จำนวนครุภัณฑ์ในกลุ่มที่เลือกทั้งหมด', `${totalCount.toLocaleString()} รายการ`],
+    ['อายุการใช้งานสูงสุด', `${maxAge} ปี`],
+    ['อายุการใช้งานเฉลี่ย', `${avgAge} ปี`],
+    ['สัดส่วนเกินเกณฑ์มาตรฐานราชการ (14 ปีขึ้นไป)', `${c14plus.toLocaleString()} รายการ (${pct14plus}%)`],
+    [],
+    ['ลำดับ', 'ช่วงอายุการใช้งาน', 'เกณฑ์การประเมินสภาพ', 'จำนวน (รายการ)', 'สัดส่วน (%)'],
+    [1, '1 - 7 ปี (ใช้งานปกติ)', 'อุปกรณ์อยู่ในเกณฑ์ปกติ มีประสิทธิภาพพร้อมใช้งาน', c1to7, `${pct1to7}%`],
+    [2, '7 - 14 ปี (เริ่มเสื่อมสภาพ)', 'อุปกรณ์เริ่มเสื่อมสภาพ ควรตรวจสอบและเตรียมแผนทดแทน', c7to14, `${pct7to14}%`],
+    [3, '14 ปีขึ้นไป (เกินเกณฑ์/รอจำหน่าย)', 'เกินอายุมาตรฐานราชการ ควรพิจารณาจำหน่ายและจัดหาใหม่', c14plus, `${pct14plus}%`],
+  ];
+
+  if (cUnknown > 0) {
+    sheet1Data.push([4, 'ไม่ระบุปีงบประมาณ', 'ไม่พบข้อมูลปีที่จัดซื้อในฐานข้อมูล', cUnknown, `${pctUnknown}%`]);
+  }
+
+  sheet1Data.push(['', 'รวมทั้งสิ้น', '', totalCount, '100.0%']);
+
+  const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+  ws1['!cols'] = [
+    { wch: 8 },
+    { wch: 34 },
+    { wch: 58 },
+    { wch: 18 },
+    { wch: 15 },
+  ];
+  XLSX.utils.book_append_sheet(wb, ws1, 'สรุปภาพรวมและอายุครุภัณฑ์');
+
+  // 2. Sheet 2: รายละเอียดครุภัณฑ์
+  const sheet2Headers = [
+    'ลำดับ',
+    'รหัสครุภัณฑ์',
+    'ชื่อรายการครุภัณฑ์ / รุ่น',
+    'หมายเลขเครื่อง (S/N)',
+    'ประเภท',
+    'หมวดหมู่',
+    'ปีงบประมาณ',
+    'อายุใช้งาน (ปี)',
+    'สถานะอายุ',
+    'หน่วยจัดซื้อ',
+    'กอง',
+    'แผนก / ฝ่าย',
+    'ระบบงาน',
+    'ระบบปฏิบัติการ (OS)',
+    'สถานะการใช้งาน',
+    'ราคาต่อหน่วย (บาท)',
+    'หมายเหตุ',
+    'ไฟล์ต้นทาง',
+  ];
+
+  const sheet2Rows = items.map((item, idx) => [
+    idx + 1,
+    item.code || '',
+    item.name || '',
+    item.serial || '',
+    item.type || '',
+    item.category || '',
+    item.year || '',
+    item.ageYears > 0 ? item.ageYears : '',
+    item.ageStatusLabel || '',
+    item.procurementName || '',
+    item.division || '',
+    item.deptName || '',
+    item.projectName || '',
+    item.osName || '',
+    item.statusName || 'ใช้งานปกติ',
+    item.price > 0 ? item.price : 0,
+    item.remark || '',
+    item.sourceFile || '',
+  ]);
+
+  const ws2 = XLSX.utils.aoa_to_sheet([sheet2Headers, ...sheet2Rows]);
+  ws2['!cols'] = [
+    { wch: 8 },  // ลำดับ
+    { wch: 24 }, // รหัสครุภัณฑ์
+    { wch: 38 }, // ชื่อรายการ
+    { wch: 18 }, // S/N
+    { wch: 28 }, // ประเภท
+    { wch: 22 }, // หมวดหมู่
+    { wch: 12 }, // ปีงบฯ
+    { wch: 14 }, // อายุใช้งาน
+    { wch: 22 }, // สถานะอายุ
+    { wch: 14 }, // หน่วยจัดซื้อ
+    { wch: 18 }, // กอง
+    { wch: 32 }, // แผนก
+    { wch: 24 }, // ระบบงาน
+    { wch: 20 }, // OS
+    { wch: 16 }, // สถานะ
+    { wch: 16 }, // ราคา
+    { wch: 42 }, // หมายเหตุ
+    { wch: 26 }, // ไฟล์ต้นทาง
+  ];
+  XLSX.utils.book_append_sheet(wb, ws2, 'รายละเอียดครุภัณฑ์');
+
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  return new Uint8Array(buf);
+}
+
+/**
  * Checks if a department / location name corresponds to "คลัง 12" (Warehouse 12)
  */
 export function isWarehouse12(deptName?: string | null): boolean {

@@ -322,3 +322,4 @@ ON CONFLICT (id) DO UPDATE SET
   staff_name = EXCLUDED.staff_name,
   condition_out = EXCLUDED.condition_out,
   notes = EXCLUDED.notes;
+

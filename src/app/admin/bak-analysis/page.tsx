@@ -50,6 +50,7 @@ import {
   parseBakBuffer,
   parseExcelFiles,
   generateBakCsvReport,
+  generateBakReportExcel,
   isWarehouse12,
   filterReportItems,
   countWarehouse12Excluded,
@@ -117,11 +118,13 @@ export default function BakAnalysisPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 25;
 
-  // Signatures for A4 Report
+  // Signatures for A4 Official Report (3-Level Government Standard)
   const [prepName, setPrepName] = useState<string>('นายช่างเทคนิค ฝ่ายสนับสนุนระบบ');
-  const [prepPos, setPrepPos] = useState<string>('เจ้าหน้าที่ผู้จัดทำรายงาน');
-  const [apprName, setApprName] = useState<string>('ผู้อำนวยการกองเทคโนโลยีสารสนเทศ');
-  const [apprPos, setApprPos] = useState<string>('ผู้ตรวจรับรองรายงาน');
+  const [prepPos, setPrepPos] = useState<string>('เจ้าหน้าที่แผนกสนับสนุนทางเทคนิค กกมง.กง.กห.');
+  const [verifierName, setVerifierName] = useState<string>('');
+  const [verifierPos, setVerifierPos] = useState<string>('หน.แผนกสนับสนุนทางเทคนิค กกมง.กง.กห.');
+  const [apprName, setApprName] = useState<string>('');
+  const [apprPos, setApprPos] = useState<string>('ผอ.กกมง.กง.กห.');
 
   const bakFileInputRef = useRef<HTMLInputElement | null>(null);
   const excelFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -810,6 +813,41 @@ export default function BakAnalysisPage() {
     const catSuffix = reportCategory !== 'all' ? `_${reportCategory}` : '';
     const typeSuffix = reportType !== 'all' ? `_${reportType}` : '';
     link.setAttribute('download', `DFD_Equipment_Report${catSuffix}${typeSuffix}_OldestFirst.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Export Microsoft Excel (.xlsx) 2-Sheet Workbook for Report Tab
+  const handleDownloadReportExcel = () => {
+    if (!reportFilteredItems || reportFilteredItems.length === 0) return;
+    const catSuffix = reportCategory !== 'all' ? `_${reportCategory}` : '';
+    const typeSuffix = reportType !== 'all' ? `_${reportType}` : '';
+
+    const filterSubtitle = [
+      `หมวดหมู่: ${reportCategory === 'all' ? 'ทุกหมวดหมู่' : reportCategory}`,
+      `ประเภท: ${reportType === 'all' ? 'ทุกประเภท' : reportType}`,
+      `สถานะ: ${reportBakStatus}`,
+      `หน่วยจัดซื้อ: ${reportBakProcurement === 'all' ? 'ทุกหน่วยจัดซื้อ' : reportBakProcurement}`,
+      reportDivision !== 'all' ? `กอง: ${reportDivision}` : '',
+      `เกณฑ์อายุ: ${reportAgeFilterDescription}`,
+    ]
+      .filter(Boolean)
+      .join(' • ');
+
+    const excelBytes = generateBakReportExcel(reportFilteredItems, {
+      reportTitle: 'รายงานสรุปการสำรวจและวิเคราะห์อายุครุภัณฑ์คอมพิวเตอร์และสารสนเทศ กรมการเงินกลาโหม',
+      filterSubtitle,
+      fiscalYear: 2569,
+    });
+
+    const blob = new Blob([excelBytes as any], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `DFD_Equipment_Report${catSuffix}${typeSuffix}_2Sheets.xlsx`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2066,18 +2104,27 @@ export default function BakAnalysisPage() {
                   </table>
 
                   {/* Signatures */}
-                  <div className="grid grid-cols-2 gap-8 pt-8 border-t-2 border-slate-900 text-center text-xs mt-8 break-inside-avoid">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t-2 border-slate-900 text-center text-xs mt-8 break-inside-avoid">
                     <div className="space-y-2">
+                      <p className="font-semibold text-slate-800 text-[11px] mb-1">ผู้สำรวจ / ตรวจสอบข้อมูล</p>
                       <p className="text-slate-600">ลงชื่อ..............................................................</p>
-                      <p className="font-bold text-slate-900">({prepName})</p>
-                      <p className="text-slate-500 text-[11px]">{prepPos}</p>
-                      <p className="text-[11px] text-slate-400">วันที่: {new Date().toLocaleDateString('th-TH')}</p>
+                      <p className="font-bold text-slate-900">({prepName || '..............................................................'})</p>
+                      <p className="text-slate-600 text-[11px]">{prepPos}</p>
+                      <p className="text-[11px] text-slate-500">วันที่: {new Date().toLocaleDateString('th-TH')}</p>
                     </div>
                     <div className="space-y-2">
+                      <p className="font-semibold text-slate-800 text-[11px] mb-1">ผู้ตรวจรับรอง</p>
                       <p className="text-slate-600">ลงชื่อ..............................................................</p>
-                      <p className="font-bold text-slate-900">({apprName})</p>
-                      <p className="text-slate-500 text-[11px]">{apprPos}</p>
-                      <p className="text-[11px] text-slate-400">วันที่: ......................................................</p>
+                      <p className="font-bold text-slate-900">({verifierName || '..............................................................'})</p>
+                      <p className="text-slate-600 text-[11px]">{verifierPos}</p>
+                      <p className="text-[11px] text-slate-500">วันที่: ......................................................</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-semibold text-slate-800 text-[11px] mb-1">ผู้อนุมัติ / ผู้บังคับบัญชา</p>
+                      <p className="text-slate-600">ลงชื่อ..............................................................</p>
+                      <p className="font-bold text-slate-900">({apprName || '..............................................................'})</p>
+                      <p className="text-slate-600 text-[11px]">{apprPos}</p>
+                      <p className="text-[11px] text-slate-500">วันที่: ......................................................</p>
                     </div>
                   </div>
                 </div>
@@ -3163,7 +3210,16 @@ export default function BakAnalysisPage() {
                         title="ดาวน์โหลดไฟล์ CSV เฉพาะข้อมูลที่ผ่านการกรองและจัดเรียงอายุใช้งานมากสุดแล้ว"
                       >
                         <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                        <span>ส่งออก CSV ตามตัวกรอง ({reportFilteredItems.length})</span>
+                        <span>ส่งออก CSV ({reportFilteredItems.length})</span>
+                      </button>
+                      <button
+                        onClick={handleDownloadReportExcel}
+                        disabled={reportFilteredItems.length === 0}
+                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-emerald-950/40"
+                        title="ดาวน์โหลดไฟล์ Excel (.xlsx) คุณภาพสูง 2 เวิร์กชีต (สรุปสัดส่วนเกณฑ์อายุ + รายละเอียดครุภัณฑ์)"
+                      >
+                        <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
+                        <span>ส่งออก Excel (.xlsx) 2 Sheets</span>
                       </button>
                       <button
                         onClick={handlePrint}
@@ -3705,44 +3761,75 @@ export default function BakAnalysisPage() {
                     )}
                   </div>
 
-                  {/* Signatures Block */}
-                  <div className="grid grid-cols-2 gap-8 pt-8 border-t-2 border-slate-900 text-center text-xs mt-8 break-inside-avoid">
+                  {/* Official 3-Level Signatures Block */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t-2 border-slate-900 text-center text-xs mt-8 break-inside-avoid">
+                    {/* Level 1: ผู้สำรวจ / ผู้ตรวจสอบข้อมูล */}
                     <div className="space-y-2">
+                      <p className="font-semibold text-slate-800 text-[11px] mb-1">ผู้สำรวจ / ตรวจสอบข้อมูล</p>
                       <p className="text-slate-600">ลงชื่อ..............................................................</p>
                       <input
                         type="text"
                         value={prepName}
                         onChange={(e) => setPrepName(e.target.value)}
-                        className="text-center font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
+                        placeholder="(พิมพ์ชื่อ-นามสกุล ผู้สำรวจ)"
+                        className="text-center font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print text-xs"
                       />
-                      <p className="font-bold text-slate-900 hidden print:block">({prepName})</p>
+                      <p className="font-bold text-slate-900 hidden print:block">({prepName || '..............................................................'})</p>
                       <input
                         type="text"
                         value={prepPos}
                         onChange={(e) => setPrepPos(e.target.value)}
-                        className="text-center text-slate-500 text-[11px] border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
+                        placeholder="ตำแหน่ง"
+                        className="text-center text-slate-600 text-[11px] border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
                       />
-                      <p className="text-slate-500 text-[11px] hidden print:block">{prepPos}</p>
-                      <p className="text-[11px] text-slate-400">วันที่: {new Date().toLocaleDateString('th-TH')}</p>
+                      <p className="text-slate-600 text-[11px] hidden print:block">{prepPos}</p>
+                      <p className="text-[11px] text-slate-500">วันที่: {new Date().toLocaleDateString('th-TH')}</p>
                     </div>
 
+                    {/* Level 2: ผู้ตรวจรับรอง (หน.แผนกสนับสนุนทางเทคนิค) */}
                     <div className="space-y-2">
+                      <p className="font-semibold text-slate-800 text-[11px] mb-1">ผู้ตรวจรับรอง</p>
+                      <p className="text-slate-600">ลงชื่อ..............................................................</p>
+                      <input
+                        type="text"
+                        value={verifierName}
+                        onChange={(e) => setVerifierName(e.target.value)}
+                        placeholder="(พิมพ์ชื่อ-นามสกุล หน.แผนก)"
+                        className="text-center font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print text-xs"
+                      />
+                      <p className="font-bold text-slate-900 hidden print:block">({verifierName || '..............................................................'})</p>
+                      <input
+                        type="text"
+                        value={verifierPos}
+                        onChange={(e) => setVerifierPos(e.target.value)}
+                        placeholder="ตำแหน่ง"
+                        className="text-center text-slate-600 text-[11px] border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
+                      />
+                      <p className="text-slate-600 text-[11px] hidden print:block">{verifierPos}</p>
+                      <p className="text-[11px] text-slate-500">วันที่: ......................................................</p>
+                    </div>
+
+                    {/* Level 3: ผู้อนุมัติ / ผู้บังคับบัญชา (ผอ.กกมง.กง.กห.) */}
+                    <div className="space-y-2">
+                      <p className="font-semibold text-slate-800 text-[11px] mb-1">ผู้อนุมัติ / ผู้บังคับบัญชา</p>
                       <p className="text-slate-600">ลงชื่อ..............................................................</p>
                       <input
                         type="text"
                         value={apprName}
                         onChange={(e) => setApprName(e.target.value)}
-                        className="text-center font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
+                        placeholder="(พิมพ์ชื่อ-นามสกุล ผู้อนุมัติ)"
+                        className="text-center font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print text-xs"
                       />
-                      <p className="font-bold text-slate-900 hidden print:block">({apprName})</p>
+                      <p className="font-bold text-slate-900 hidden print:block">({apprName || '..............................................................'})</p>
                       <input
                         type="text"
                         value={apprPos}
                         onChange={(e) => setApprPos(e.target.value)}
-                        className="text-center text-slate-500 text-[11px] border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
+                        placeholder="ตำแหน่ง"
+                        className="text-center text-slate-600 text-[11px] border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none w-full bg-transparent no-print"
                       />
-                      <p className="text-slate-500 text-[11px] hidden print:block">{apprPos}</p>
-                      <p className="text-[11px] text-slate-400">วันที่: ......................................................</p>
+                      <p className="text-slate-600 text-[11px] hidden print:block">{apprPos}</p>
+                      <p className="text-[11px] text-slate-500">วันที่: ......................................................</p>
                     </div>
                   </div>
 
