@@ -147,7 +147,35 @@ export function classifyEquipment(
     return { type: 'เครื่องพิมพ์เลเซอร์ (Laser Printer)', category: 'ครุภัณฑ์คอมพิวเตอร์' };
   }
 
-  // 1. Notebooks & Laptops (รหัส 7440.001.0003 หรือระบุโน้ตบุ๊ก - ตรวจสอบก่อนเพื่อแยกออกจาก PC)
+  // 1. Enterprise Servers (คอมพิวเตอร์แม่ข่าย / เครื่องเซิร์ฟเวอร์ - รหัส 7440.001.0001.000, 7440.001.0018 หรือระบุแม่ข่าย/เซิร์ฟเวอร์)
+  if (
+    c.startsWith('7440.001.0001.000') ||
+    c.startsWith('7440.001.0018') ||
+    n.includes('server') ||
+    n.includes('แม่ข่าย') ||
+    n.includes('เซิร์ฟเวอร์') ||
+    n.includes('เซิฟเวอร์') ||
+    n.includes('system x') ||
+    n.includes('sistem รุ่น x') ||
+    n.includes('x3200') ||
+    n.includes('x3550') ||
+    n.includes('x-3650') ||
+    n.includes('x3650') ||
+    n.includes('supermicro') ||
+    n.includes('dell emc') ||
+    n.includes('p7-730') ||
+    n.includes('p5 - p520') ||
+    n.includes('p520') ||
+    n.includes('poweredge') ||
+    n.includes('proliant')
+  ) {
+    return {
+      type: 'คอมพิวเตอร์แม่ข่าย (Server)',
+      category: 'ครุภัณฑ์คอมพิวเตอร์',
+    };
+  }
+
+  // 2. Notebooks & Laptops (รหัส 7440.001.0003 หรือระบุโน้ตบุ๊ก - ตรวจสอบก่อนเพื่อแยกออกจาก PC)
   if (
     c.startsWith('7440.001.0003') ||
     c.startsWith('7440.002') ||
@@ -172,7 +200,7 @@ export function classifyEquipment(
     };
   }
 
-  // 2. Computers (PC / All-in-one) & Servers
+  // 3. Computers (PC / All-in-one)
   if (
     c.startsWith('7440.001') ||
     n.includes('think centre') ||
@@ -187,12 +215,6 @@ export function classifyEquipment(
     n.includes(' all-in-one') ||
     n.includes(' pc')
   ) {
-    if (n.includes('แม่ข่าย') || n.includes('server')) {
-      return {
-        type: 'คอมพิวเตอร์แม่ข่าย (Server)',
-        category: 'ครุภัณฑ์คอมพิวเตอร์',
-      };
-    }
     return {
       type: 'คอมพิวเตอร์ (PC / All-in-one)',
       category: 'ครุภัณฑ์คอมพิวเตอร์',

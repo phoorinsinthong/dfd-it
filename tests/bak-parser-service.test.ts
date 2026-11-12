@@ -445,15 +445,15 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
       ).toBe(true);
       expect(liveFiltered.length).toBe(689);
 
-      // Verify computer (PC) filtering with strict procurement
+      // Verify computer (PC) filtering with strict procurement (excluding notebooks & servers)
       const liveComputersKongKorHor = filterReportItems(parsed.items, {
         isExcelSource: false,
         type: 'คอมพิวเตอร์ (PC / All-in-one)',
         bakStatusFilter: 'ใช้งานปกติ',
         bakProcurementFilter: 'กง.กห.',
       });
-      // Exactly 219 desktop PCs purchased by กง.กห. (excluding notebooks)
-      expect(liveComputersKongKorHor.length).toBe(219);
+      // Exactly 214 pure desktop PCs purchased by กง.กห. (excluding notebooks & enterprise servers)
+      expect(liveComputersKongKorHor.length).toBe(214);
       expect(liveComputersKongKorHor.every((i) => i.procurementName === 'กง.กห.')).toBe(true);
 
       const liveComputersThaSorOr = filterReportItems(parsed.items, {
@@ -462,9 +462,35 @@ describe('BakParserService: Microsoft SQL Server .bak & Multi-Excel Equipment Ex
         bakStatusFilter: 'ใช้งานปกติ',
         bakProcurementFilter: 'ทสอ.ฯ',
       });
-      // Exactly 17 active desktop PCs purchased by ทสอ.ฯ (e.g. 0492)
-      expect(liveComputersThaSorOr.length).toBe(17);
+      // Exactly 16 active desktop PCs purchased by ทสอ.ฯ (e.g. 0492)
+      expect(liveComputersThaSorOr.length).toBe(16);
       expect(liveComputersThaSorOr.every((i) => i.procurementName === 'ทสอ.ฯ')).toBe(true);
+
+      // Verify separated servers filtering
+      const liveServersKongKorHor = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        type: 'คอมพิวเตอร์แม่ข่าย (Server)',
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'กง.กห.',
+      });
+      // Exactly 6 active servers purchased by กง.กห. (x3200-M3, x3550-M4, Supermicro, P7-730, Dell EMC, Lenovo x3650)
+      expect(liveServersKongKorHor.length).toBe(6);
+      expect(liveServersKongKorHor.every((i) => i.procurementName === 'กง.กห.')).toBe(true);
+      expect(liveServersKongKorHor.some((i) => i.code === '7440.001.0001.0005.7')).toBe(true); // IBM System x3200-M3
+      expect(liveServersKongKorHor.some((i) => i.code === '7440.014.0001.0003.7')).toBe(true); // Lenovo x3650 Server
+
+      const liveServersThaSorOr = filterReportItems(parsed.items, {
+        isExcelSource: false,
+        type: 'คอมพิวเตอร์แม่ข่าย (Server)',
+        bakStatusFilter: 'ใช้งานปกติ',
+        bakProcurementFilter: 'ทสอ.ฯ',
+      });
+      // Exactly 1 active server purchased by ทสอ.ฯ (IBM P5-P520)
+      expect(liveServersThaSorOr.length).toBe(1);
+      expect(liveServersThaSorOr[0].code).toBe('7440.001.0018.025');
+
+      // Verify IBM System x3200-M3 is in server list and NOT in PC list
+      expect(liveComputersKongKorHor.some((i) => i.code === '7440.001.0001.0005.7')).toBe(false);
 
       // Verify separated notebooks filtering
       const liveNotebooksKongKorHor = filterReportItems(parsed.items, {
